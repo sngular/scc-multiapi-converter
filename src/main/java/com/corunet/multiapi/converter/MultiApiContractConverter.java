@@ -27,9 +27,9 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
 
   private static final String OPENAPI = "openapi";
 
-  private static AsyncApiContractConverter asyncApiContractConverter;
+  private static final AsyncApiContractConverter asyncApiContractConverter = new AsyncApiContractConverter();
 
-  private static OpenApiContractConverter openApiContractConverter;
+  private static final OpenApiContractConverter openApiContractConverter = new OpenApiContractConverter();
 
   @Override
   public boolean isAccepted(final File file) {
