@@ -34,7 +34,7 @@ import org.springframework.cloud.contract.spec.internal.RegexProperty;
 import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 
 @Slf4j
-public class AsyncApiContractConverter implements ContractConverter<Collection<PathItem>> {
+public class AsyncApiContractConverter  {
 
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
@@ -85,23 +85,7 @@ public class AsyncApiContractConverter implements ContractConverter<Collection<P
 
   private final List<String> processedOperationIds = new ArrayList<>();
 
-  @Override
-  public boolean isAccepted(final File file) {
-    String name = file.getName();
-    boolean isAccepted = name.endsWith(".yml") || name.endsWith(".yaml");
-    if (isAccepted) {
-      JsonNode node;
-      try {
-        node = OBJECT_MAPPER.readTree(file);
-        isAccepted = (node != null && node.size() > 0 && Objects.nonNull(node.get(ASYNCAPI)));
-      } catch (IOException e) {
-        isAccepted = false;
-      }
-    }
-    return isAccepted;
-  }
 
-  @Override
   public Collection<Contract> convertFrom(final File file) {
     Collection<Contract> sccContracts = new ArrayList<>();
 
@@ -163,7 +147,6 @@ public class AsyncApiContractConverter implements ContractConverter<Collection<P
     return sccContracts;
   }
 
-  @Override
   public Collection<PathItem> convertTo(final Collection<Contract> contract) {
     return Collections.emptyList();
   }

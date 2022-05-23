@@ -1,0 +1,214 @@
+---
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Corunet Challenge Game Server
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080/v1
+paths:
+  /games:
+    summary: Hola
+    post:
+      summary: Start a Game
+      operationId: createGame
+      tags:
+      - games
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewGame"
+      responses:
+        '200':
+          description: New game created;
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NewGamePlay"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    get:
+      summary: List all available games
+      operationId: listGames
+      tags:
+      - games
+      responses:
+        '200':
+          description: A paged array of games
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /games/{gameId}:
+    get:
+      summary: Info for a specific game
+      operationId: showGameById
+      tags:
+      - games
+      parameters:
+      - name: gameId
+        in: query
+        required: true
+        description: The id of the game to retrieve
+        schema:
+          type: integer
+          format: int32
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GameInfo"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Game:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+    GameInfo:
+      type: object
+      required:
+        - gameName
+        - players
+        - rooms
+      properties:
+        rooms:
+          type: integer
+          format: int32
+        gameName:
+          type: string
+        players:
+          type: array
+          items:
+            type: string
+    NewGame:
+      type: object
+      required:
+        - gameId
+        - playerName
+      properties:
+        gameId:
+          type: integer
+          format: int32
+        playerName:
+          type: string
+    NewGamePlay:
+      type: object
+      required:
+        - gameId
+        - gameName
+        - roomId
+      properties:
+        gameId:
+          type: integer
+          format: int32
+        gameName:
+          type: string
+        roomId:
+          type: integer
+          format: int32
+    GamePlay:
+      type: object
+      required:
+        - id
+        - name
+        - roomId
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        roomId:
+          type: integer
+          format: int32
+    Games:
+      type: array
+      items:
+        $ref: "#/components/schemas/Game"
+    Movement:
+      type: object
+      required:
+        - movement
+      properties:
+        movement:
+          type: string
+    GamePlayStats:
+      type: array
+      items:
+        $ref: "#/components/schemas/GameStat"
+    GameStat:
+      type: object
+      required:
+        - gameName
+        - roomId
+        - result
+      properties:
+        gameName:
+          type: string
+        roomId:
+          type: integer
+          format: int32
+        result:
+          type: array
+          items:
+            $ref: "#/components/schemas/GamePlayResult"
+        dateTime:
+          type: string
+          format: date-time
+    GamePlayResult:
+      type: object
+      required:
+        - movement
+        - info
+        - result
+      properties:
+        movement:
+          type: string
+        info:
+          type: string
+        result:
+          type: string
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

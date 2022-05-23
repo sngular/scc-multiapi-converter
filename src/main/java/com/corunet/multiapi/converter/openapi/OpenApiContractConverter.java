@@ -43,7 +43,7 @@ import org.springframework.cloud.contract.spec.internal.Url;
 import org.springframework.cloud.contract.spec.internal.UrlPath;
 
 @Slf4j
-public class OpenApiContractConverter implements ContractConverter<Collection<Contract>> {
+public class OpenApiContractConverter  {
 
   private static final RegexProperty STRING_REGEX = RegexPatterns.alphaNumeric();
 
@@ -79,22 +79,7 @@ public class OpenApiContractConverter implements ContractConverter<Collection<Co
 
   private static final String ENUM = "enum";
 
-  @Override
-  public boolean isAccepted(File file) {
-    OpenAPI openAPI = null;
-    try {
-      openAPI = getOpenApi(file);
-    } catch (RuntimeException e) {
-      e.printStackTrace();
-    }
-    if (openAPI == null) {
-      log.error("Code generation failed why .yaml is empty");
-      return false;
-    }
-    return true;
-  }
 
-  @Override
   public Collection<Contract> convertFrom(File file) {
 
     Collection<Contract> contracts = new ArrayList<>();
@@ -579,8 +564,4 @@ public class OpenApiContractConverter implements ContractConverter<Collection<Co
     }
   }
 
-  @Override
-  public Collection<Contract> convertTo(Collection<Contract> contract) {
-    return contract;
-  }
 }
