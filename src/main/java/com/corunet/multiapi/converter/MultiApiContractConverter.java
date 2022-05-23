@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 
+import com.corunet.multiapi.converter.asyncapi.AsyncApiContractConverter;
 import com.corunet.multiapi.converter.exception.MultiApiContractConverterException;
+import com.corunet.multiapi.converter.openapi.OpenApiContractConverter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -22,6 +24,12 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
   private static final String ASYNCAPI = "asyncapi";
+
+  private static final String OPENAPI = "openapi";
+
+  private static AsyncApiContractConverter asyncApiContractConverter;
+
+  private static OpenApiContractConverter openApiContractConverter;
 
   @Override
   public boolean isAccepted(final File file) {
@@ -54,14 +62,24 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
 
   @Override
   public Collection<Contract> convertFrom(final File file) {
+    Collection<Contract> contracts = null;
+    JsonNode node;
+    try {
+      node = OBJECT_MAPPER.readTree(file);
+      if (node != null && node.size() > 0) {
+        if (Objects.nonNull(node.get(ASYNCAPI))) {
+          contracts = asyncApiContractConverter.convertFrom(file);
+        } else if (Objects.nonNull(node.get(OPENAPI))) {
+          contracts = openApiContractConverter.convertFrom(file);
+        }
+      } else {
+        throw new MultiApiContractConverterException("Yaml file is not correct");
+      }
+    } catch (IOException e) {
+      throw new MultiApiContractConverterException(e);
+    }
 
-    //SI es ASYNCAPI: HACEMOS LO DE ASYNCAPI
-
-    //SI es openAPI: HACEMOS LO DE OPENAPI
-
-    //Excepcion, que no debería entrar nunca.
-
-    return null;
+    return contracts;
   }
 
   private OpenAPI getOpenApi(File file) throws MultiApiContractConverterException {
