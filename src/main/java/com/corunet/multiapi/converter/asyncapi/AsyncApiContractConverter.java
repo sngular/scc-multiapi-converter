@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-import com.corunet.multiapi.converter.asyncapi.exception.DuplicatedOperationException;
 import com.corunet.multiapi.converter.asyncapi.exception.ElementNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,7 +25,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cloud.contract.spec.Contract;
-import org.springframework.cloud.contract.spec.ContractConverter;
 import org.springframework.cloud.contract.spec.internal.Input;
 import org.springframework.cloud.contract.spec.internal.OutputMessage;
 import org.springframework.cloud.contract.spec.internal.RegexPatterns;
@@ -37,8 +35,6 @@ import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 public class AsyncApiContractConverter  {
 
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
-
-  private static final String ASYNCAPI = "asyncapi";
 
   private static final String CHANNELS = "channels";
 
@@ -147,17 +143,13 @@ public class AsyncApiContractConverter  {
     return sccContracts;
   }
 
-  public Collection<PathItem> convertTo(final Collection<Contract> contract) {
-    return Collections.emptyList();
-  }
-
   private String getOperationId(JsonNode operationType) {
     String operationId;
 
     operationId = operationType.get("operationId").asText();
 
     if (processedOperationIds.contains(operationId)) {
-      throw new DuplicatedOperationException(operationId);
+      //throw new DuplicatedOperationException(operationId);
     } else {
       processedOperationIds.add(operationId);
     }
