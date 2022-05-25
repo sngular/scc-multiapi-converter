@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
+import com.corunet.multiapi.converter.asyncapi.exception.DuplicatedOperationException;
 import com.corunet.multiapi.converter.asyncapi.exception.ElementNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -112,13 +113,8 @@ public class AsyncApiContractConverter  {
           input.messageFrom(topicName);
           input.messageBody(bodyProcessed);
           input.messageHeaders(headers -> headers.accept("application/json"));
+          input.assertThat(operationId + "()");
           contract.setInput(input);
-
-          OutputMessage outputMessage = new OutputMessage();
-          outputMessage.headers(headers -> headers.accept("application/json"));
-          outputMessage.sentTo(topicName);
-          outputMessage.body(bodyProcessed);
-          contract.setOutputMessage(outputMessage);
 
         } else if (operationType.equals(PUBLISH)) {
           Input input = new Input();
@@ -149,7 +145,7 @@ public class AsyncApiContractConverter  {
     operationId = operationType.get("operationId").asText();
 
     if (processedOperationIds.contains(operationId)) {
-      //throw new DuplicatedOperationException(operationId);
+      throw new DuplicatedOperationException(operationId);
     } else {
       processedOperationIds.add(operationId);
     }

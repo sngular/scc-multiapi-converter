@@ -11,9 +11,6 @@ import com.corunet.multiapi.converter.openapi.OpenApiContractConverter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.swagger.parser.OpenAPIParser;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.contract.spec.Contract;
 import org.springframework.cloud.contract.spec.ContractConverter;
@@ -39,22 +36,9 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
       try {
         JsonNode node;
         node = OBJECT_MAPPER.readTree(file);
-        isAccepted = (node != null && node.size() > 0 && Objects.nonNull(node.get(ASYNCAPI)));
+        isAccepted = (node != null && node.size() > 0 && (Objects.nonNull(node.get(ASYNCAPI)) || Objects.nonNull(node.get(OPENAPI))));
       } catch (IOException e) {
         isAccepted = false;
-      }
-      if (!isAccepted){
-        OpenAPI openAPI = null;
-        try {
-          openAPI = getOpenApi(file);
-        } catch (RuntimeException e) {
-          e.printStackTrace();
-        }
-        if (openAPI == null) {
-          log.error("Code generation failed why .yaml is empty");
-        } else {
-          isAccepted = true;
-        }
       }
     }
     return isAccepted;
@@ -80,20 +64,6 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
     }
 
     return contracts;
-  }
-
-  private OpenAPI getOpenApi(File file) throws MultiApiContractConverterException {
-    OpenAPI openAPI;
-    try {
-      SwaggerParseResult result = new OpenAPIParser().readLocation(file.getPath(), null, null);
-      openAPI = result.getOpenAPI();
-    } catch (Exception e) {
-      throw new MultiApiContractConverterException("Code generation failed when parser the .yaml file ");
-    }
-    if (openAPI == null) {
-      throw new MultiApiContractConverterException("Code generation failed why .yaml is empty");
-    }
-    return openAPI;
   }
 
   @Override
