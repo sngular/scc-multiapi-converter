@@ -10,8 +10,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Random;
 
+import com.corunet.multiapi.converter.BasicTypeConstants;
 import com.corunet.multiapi.converter.openapi.exception.SCCVerifierOpenApiConverterException;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -33,8 +33,6 @@ import org.springframework.cloud.contract.spec.internal.Headers;
 import org.springframework.cloud.contract.spec.internal.MatchingStrategy;
 import org.springframework.cloud.contract.spec.internal.MatchingStrategy.Type;
 import org.springframework.cloud.contract.spec.internal.QueryParameters;
-import org.springframework.cloud.contract.spec.internal.RegexPatterns;
-import org.springframework.cloud.contract.spec.internal.RegexProperty;
 import org.springframework.cloud.contract.spec.internal.Request;
 import org.springframework.cloud.contract.spec.internal.Response;
 import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
@@ -43,41 +41,6 @@ import org.springframework.cloud.contract.spec.internal.UrlPath;
 
 @Slf4j
 public class OpenApiContractConverter  {
-
-  private static final RegexProperty STRING_REGEX = RegexPatterns.alphaNumeric();
-
-  private static final RegexProperty INT_REGEX = RegexPatterns.positiveInt();
-
-  private static final RegexProperty DECIMAL_REGEX = RegexPatterns.number();
-
-  private static final RegexProperty BOOLEAN_REGEX = RegexPatterns.anyBoolean();
-
-  private static final String DEFAULT_REGEX = ".*";
-  
-  private static final Random random = new Random();
-
-  private static final String INT_32 = "int32";
-
-  private static final String STRING = "string";
-
-  private static final String INTEGER = "integer";
-
-  private static final String INT_64 = "int64";
-
-  private static final String NUMBER = "number";
-
-  private static final String FLOAT = "float";
-
-  private static final String DOUBLE = "double";
-
-  private static final String BOOLEAN = "boolean";
-
-  private static final String OBJECT = "object";
-
-  private static final String ARRAY = "array";
-
-  private static final String ENUM = "enum";
-
 
   public Collection<Contract> convertFrom(File file) {
 
@@ -238,7 +201,7 @@ public class OpenApiContractConverter  {
         } else {
           String refType;
           if (Objects.nonNull(property.getValue().getEnum())) {
-            refType = "enum";
+            refType = BasicTypeConstants.ENUM;
           } else {
             refType = property.getValue().getType();
           }
@@ -253,36 +216,36 @@ public class OpenApiContractConverter  {
       bodyMap.put(fieldName, schema.getExample());
     } else {
       switch (type) {
-        case STRING:
-          bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(STRING_REGEX));
+        case BasicTypeConstants.STRING:
+          bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
           bodyMap.put(fieldName, RandomStringUtils.random(5, true, true));
           break;
-        case INTEGER:
-          if (INT_32.equalsIgnoreCase(schema.getFormat()) || !Objects.nonNull(schema.getFormat())) {
-            bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(INT_REGEX));
-            bodyMap.put(fieldName, random.nextInt());
-          } else if (INT_64.equalsIgnoreCase(schema.getFormat())) {
-            bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(DECIMAL_REGEX));
-            bodyMap.put(fieldName, random.nextFloat());
+        case BasicTypeConstants.INTEGER:
+          if (BasicTypeConstants.INT_32.equalsIgnoreCase(schema.getFormat()) || !Objects.nonNull(schema.getFormat())) {
+            bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
+            bodyMap.put(fieldName, BasicTypeConstants.RANDOM.nextInt());
+          } else if (BasicTypeConstants.INT_64.equalsIgnoreCase(schema.getFormat())) {
+            bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
+            bodyMap.put(fieldName, BasicTypeConstants.RANDOM.nextFloat());
           }
           break;
-        case NUMBER:
-          if (FLOAT.equalsIgnoreCase(schema.getFormat())) {
-            bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(DECIMAL_REGEX));
-            bodyMap.put(fieldName, Math.abs(random.nextFloat()));
-          } else if (DOUBLE.equalsIgnoreCase(schema.getFormat())) {
-            bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(DECIMAL_REGEX));
-            bodyMap.put(fieldName, Math.abs(random.nextDouble()));
+        case BasicTypeConstants.NUMBER:
+          if (BasicTypeConstants.FLOAT.equalsIgnoreCase(schema.getFormat())) {
+            bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
+            bodyMap.put(fieldName, Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
+          } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(schema.getFormat())) {
+            bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
+            bodyMap.put(fieldName, Math.abs(BasicTypeConstants.RANDOM.nextDouble()));
           } else if (schema.getFormat().isEmpty()) {
-            bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(INT_REGEX));
-            bodyMap.put(fieldName, random.nextInt());
+            bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
+            bodyMap.put(fieldName, BasicTypeConstants.RANDOM.nextInt());
           }
           break;
-        case BOOLEAN:
-          bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BOOLEAN_REGEX));
-          bodyMap.put(fieldName, random.nextBoolean());
+        case BasicTypeConstants.BOOLEAN:
+          bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
+          bodyMap.put(fieldName, BasicTypeConstants.RANDOM.nextBoolean());
           break;
-        case OBJECT:
+        case BasicTypeConstants.OBJECT:
           if (Objects.nonNull(schema.get$ref())) {
             String subRef = ContractConverterUtils.mapRefName(schema);
             HashMap<String, Schema> subPropertiesWithRef = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
@@ -292,7 +255,7 @@ public class OpenApiContractConverter  {
             bodyMap.put(fieldName, processComplexBodyAndMatchers(fieldName, subProperties, openAPI, bodyMatchers));
           }
           break;
-        case ARRAY:
+        case BasicTypeConstants.ARRAY:
           Schema<?> arraySchema = ((ArraySchema) schema).getItems();
           if (Objects.nonNull(arraySchema.getExample())) {
             bodyMap.put(fieldName, arraySchema.getExample());
@@ -301,11 +264,11 @@ public class OpenApiContractConverter  {
             bodyMap.put(fieldName, processArray(arraySchema, propertyList, fieldName, bodyMatchers, openAPI));
           }
           break;
-        case ENUM:
+        case BasicTypeConstants.ENUM:
           processEnum(bodyMap, bodyMatchers, fieldName, schema);
           break;
         default:
-          bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(DEFAULT_REGEX));
+          bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX));
           bodyMap.put(fieldName, RandomStringUtils.random(5, true, true));
           break;
       }
@@ -324,7 +287,7 @@ public class OpenApiContractConverter  {
       } else {
         String type;
         if (Objects.nonNull(property.getValue().getEnum())) {
-          type = "enum";
+          type = BasicTypeConstants.ENUM;
         } else {
           type = property.getValue().getType();
         }
@@ -332,39 +295,39 @@ public class OpenApiContractConverter  {
           propertyMap.put(property.getKey(), property.getValue().getExample());
         } else {
           switch (type) {
-            case STRING:
-              bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(STRING_REGEX));
+            case BasicTypeConstants.STRING:
+              bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
               propertyMap.put(property.getKey(), RandomStringUtils.random(5, true, true));
               break;
-            case INTEGER:
-              if (INT_32.equalsIgnoreCase(property.getValue().getFormat()) || !Objects.nonNull(property.getValue().getFormat())) {
-                bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(INT_REGEX));
-                propertyMap.put(property.getKey(), random.nextInt());
-              } else if (INT_64.equalsIgnoreCase(property.getValue().getFormat())) {
-                bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(DECIMAL_REGEX));
-                propertyMap.put(property.getKey(), Math.abs(random.nextFloat()));
+            case BasicTypeConstants.INTEGER:
+              if (BasicTypeConstants.INT_32.equalsIgnoreCase(property.getValue().getFormat()) || !Objects.nonNull(property.getValue().getFormat())) {
+                bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
+                propertyMap.put(property.getKey(), BasicTypeConstants.RANDOM.nextInt());
+              } else if (BasicTypeConstants.INT_64.equalsIgnoreCase(property.getValue().getFormat())) {
+                bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
+                propertyMap.put(property.getKey(), Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
               }
               break;
-            case NUMBER:
-              if (FLOAT.equalsIgnoreCase(property.getValue().getFormat())) {
-                bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(DECIMAL_REGEX));
-                propertyMap.put(property.getKey(), random.nextFloat());
-              } else if (DOUBLE.equalsIgnoreCase(property.getValue().getFormat())) {
-                bodyMatchers.jsonPath(property.getKey(), bodyMatchers.byRegex(DECIMAL_REGEX));
-                propertyMap.put(property.getKey(), random.nextDouble());
+            case BasicTypeConstants.NUMBER:
+              if (BasicTypeConstants.FLOAT.equalsIgnoreCase(property.getValue().getFormat())) {
+                bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
+                propertyMap.put(property.getKey(), BasicTypeConstants.RANDOM.nextFloat());
+              } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(property.getValue().getFormat())) {
+                bodyMatchers.jsonPath(property.getKey(), bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
+                propertyMap.put(property.getKey(), BasicTypeConstants.RANDOM.nextDouble());
               } else if (property.getValue().getFormat().isEmpty()) {
-                bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(INT_REGEX));
-                propertyMap.put(property.getKey(), random.nextInt());
+                bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
+                propertyMap.put(property.getKey(), BasicTypeConstants.RANDOM.nextInt());
               }
               break;
-            case BOOLEAN:
-              bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(BOOLEAN_REGEX));
-              propertyMap.put(property.getKey(), random.nextBoolean());
+            case BasicTypeConstants.BOOLEAN:
+              bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
+              propertyMap.put(property.getKey(), BasicTypeConstants.RANDOM.nextBoolean());
               break;
-            case ENUM:
+            case BasicTypeConstants.ENUM:
               processEnum(propertyMap, bodyMatchers, property.getKey(), property.getValue());
               break;
-            case OBJECT:
+            case BasicTypeConstants.OBJECT:
               if (Objects.nonNull(property.getValue().get$ref())) {
                 String subRef = ContractConverterUtils.mapRefName(property.getValue());
                 HashMap<String, Schema> subPropertiesWithRef = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
@@ -374,7 +337,7 @@ public class OpenApiContractConverter  {
                 propertyMap.put(property.getKey(), processComplexBodyAndMatchers(newObjectName, subProperties, openAPI, bodyMatchers));
               }
               break;
-            case ARRAY:
+            case BasicTypeConstants.ARRAY:
               Schema<?> arraySchema = ((ArraySchema) property.getValue()).getItems();
               if (Objects.nonNull(arraySchema.getExample())) {
                 propertyMap.put(property.getKey(), arraySchema.getExample());
@@ -384,7 +347,7 @@ public class OpenApiContractConverter  {
               }
               break;
             default:
-              bodyMatchers.jsonPath(property.getKey(), bodyMatchers.byRegex(DEFAULT_REGEX));
+              bodyMatchers.jsonPath(property.getKey(), bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX));
               propertyMap.put(property.getKey(), RandomStringUtils.random(5, true, true));
               break;
           }
@@ -403,64 +366,64 @@ public class OpenApiContractConverter  {
     } else {
       String type = arraySchema.getType();
       switch (type) {
-        case STRING:
+        case BasicTypeConstants.STRING:
           if (Objects.nonNull(arraySchema.getName())) {
-            bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(STRING_REGEX));
+            bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
           } else {
-            bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(STRING_REGEX));
+            bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
           }
           propertyList.add(RandomStringUtils.random(5, true, true));
           break;
-        case INTEGER:
-          if (INT_32.equalsIgnoreCase(arraySchema.getFormat()) || !Objects.nonNull(arraySchema.getFormat())) {
+        case BasicTypeConstants.INTEGER:
+          if (BasicTypeConstants.INT_32.equalsIgnoreCase(arraySchema.getFormat()) || !Objects.nonNull(arraySchema.getFormat())) {
             if (Objects.nonNull(arraySchema.getName())) {
-              bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(INT_REGEX));
+              bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
             } else {
-              bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(INT_REGEX));
+              bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
             }
-            propertyList.add(random.nextInt());
+            propertyList.add(BasicTypeConstants.RANDOM.nextInt());
           } else {
             if (Objects.nonNull(arraySchema.getName())) {
-              bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(DECIMAL_REGEX));
+              bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
             } else {
-              bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(DECIMAL_REGEX));
+              bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
             }
-            propertyList.add(Math.abs(random.nextFloat()));
+            propertyList.add(Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
           }
           break;
-        case NUMBER:
-          if (FLOAT.equalsIgnoreCase(arraySchema.getFormat())) {
+        case BasicTypeConstants.NUMBER:
+          if (BasicTypeConstants.FLOAT.equalsIgnoreCase(arraySchema.getFormat())) {
             if (Objects.nonNull(arraySchema.getName())) {
-              bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(DECIMAL_REGEX));
+              bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
             } else {
-              bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(DECIMAL_REGEX));
+              bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
             }
-            propertyList.add(random.nextFloat());
-          } else if (DOUBLE.equalsIgnoreCase(arraySchema.getFormat())) {
+            propertyList.add(BasicTypeConstants.RANDOM.nextFloat());
+          } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(arraySchema.getFormat())) {
             if (Objects.nonNull(arraySchema.getName())) {
-              bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(DECIMAL_REGEX));
+              bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
             } else {
-              bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(DECIMAL_REGEX));
+              bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
             }
-            propertyList.add(Math.abs(random.nextDouble()));
+            propertyList.add(Math.abs(BasicTypeConstants.RANDOM.nextDouble()));
           } else {
             if (Objects.nonNull(arraySchema.getName())) {
-              bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(INT_REGEX));
+              bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
             } else {
-              bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(INT_REGEX));
+              bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
             }
-            propertyList.add(random.nextInt());
+            propertyList.add(BasicTypeConstants.RANDOM.nextInt());
           }
           break;
-        case BOOLEAN:
+        case BasicTypeConstants.BOOLEAN:
           if (Objects.nonNull(arraySchema.getName())) {
-            bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BOOLEAN_REGEX));
+            bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
           } else {
-            bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(BOOLEAN_REGEX));
+            bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
           }
-          propertyList.add(random.nextBoolean());
+          propertyList.add(BasicTypeConstants.RANDOM.nextBoolean());
           break;
-        case ARRAY:
+        case BasicTypeConstants.ARRAY:
           Schema<?> subArray = ((ArraySchema) arraySchema).getItems();
           if (Objects.nonNull(subArray.getExample())) {
               propertyList.add(subArray.getExample());
@@ -469,7 +432,7 @@ public class OpenApiContractConverter  {
             propertyList.add(processArray(subArray, subPropertyList, objectName, bodyMatchers, openAPI));
           }
           break;
-        case OBJECT:
+        case BasicTypeConstants.OBJECT:
           HashMap<String, Schema> subObject = (HashMap<String, Schema>) arraySchema.getProperties();
           propertyList.add(processComplexBodyAndMatchers(objectName + "[0]", subObject, openAPI, bodyMatchers));
           break;
@@ -489,30 +452,30 @@ public class OpenApiContractConverter  {
       } else {
         String type = parameter.getSchema().getType();
         switch (type) {
-          case STRING:
-            queryParameters.parameter(parameter.getName(), STRING_REGEX);
+          case BasicTypeConstants.STRING:
+            queryParameters.parameter(parameter.getName(), BasicTypeConstants.STRING_REGEX);
             break;
-          case INTEGER:
-            if (INT_32.equalsIgnoreCase(parameter.getSchema().getFormat()) || !Objects.nonNull(parameter.getSchema().getFormat())) {
-              queryParameters.parameter(parameter.getName(), INT_REGEX);
-            } else if (INT_64.equalsIgnoreCase(parameter.getSchema().getFormat())) {
-              queryParameters.parameter(parameter.getName(), DECIMAL_REGEX);
+          case BasicTypeConstants.INTEGER:
+            if (BasicTypeConstants.INT_32.equalsIgnoreCase(parameter.getSchema().getFormat()) || !Objects.nonNull(parameter.getSchema().getFormat())) {
+              queryParameters.parameter(parameter.getName(), BasicTypeConstants.INT_REGEX);
+            } else if (BasicTypeConstants.INT_64.equalsIgnoreCase(parameter.getSchema().getFormat())) {
+              queryParameters.parameter(parameter.getName(), BasicTypeConstants.DECIMAL_REGEX);
             }
             break;
-          case NUMBER:
-            if (FLOAT.equalsIgnoreCase(parameter.getSchema().getFormat())) {
-              queryParameters.parameter(parameter.getName(), INT_REGEX);
-            } else if (DOUBLE.equalsIgnoreCase(parameter.getSchema().getFormat())) {
-              queryParameters.parameter(parameter.getName(), DECIMAL_REGEX);
+          case BasicTypeConstants.NUMBER:
+            if (BasicTypeConstants.FLOAT.equalsIgnoreCase(parameter.getSchema().getFormat())) {
+              queryParameters.parameter(parameter.getName(), BasicTypeConstants.INT_REGEX);
+            } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(parameter.getSchema().getFormat())) {
+              queryParameters.parameter(parameter.getName(), BasicTypeConstants.DECIMAL_REGEX);
             } else {
-              queryParameters.parameter(parameter.getName(), INT_REGEX);
+              queryParameters.parameter(parameter.getName(), BasicTypeConstants.INT_REGEX);
             }
             break;
-          case BOOLEAN:
-            queryParameters.parameter(parameter.getName(), BOOLEAN_REGEX);
+          case BasicTypeConstants.BOOLEAN:
+            queryParameters.parameter(parameter.getName(), BasicTypeConstants.BOOLEAN_REGEX);
             break;
           default:
-            queryParameters.parameter(parameter.getName(), DEFAULT_REGEX);
+            queryParameters.parameter(parameter.getName(), BasicTypeConstants.DEFAULT_REGEX);
             break;
         }
       }
@@ -531,7 +494,7 @@ public class OpenApiContractConverter  {
       }
     }
     bodyMatchers.jsonPath(enumName, bodyMatchers.byRegex(regex));
-    bodyMap.put(enumName, property.getEnum().get(random.nextInt(property.getEnum().size())));
+    bodyMap.put(enumName, property.getEnum().get(BasicTypeConstants.RANDOM.nextInt(property.getEnum().size())));
   }
 
   private OpenAPI getOpenApi(File file) throws SCCVerifierOpenApiConverterException {
@@ -554,10 +517,10 @@ public class OpenApiContractConverter  {
         processBodyAndMatchers(bodyMap, schema, openAPI, bodyMatchers);
       }
     } else if (Objects.nonNull(composedSchema.getOneOf())) {
-      int oneOfNumber = random.nextInt(composedSchema.getOneOf().size());
+      int oneOfNumber = BasicTypeConstants.RANDOM.nextInt(composedSchema.getOneOf().size());
       processBodyAndMatchers(bodyMap, composedSchema.getOneOf().get(oneOfNumber), openAPI, bodyMatchers);
     } else if (Objects.nonNull(composedSchema.getAnyOf())) {
-      for (int i = 0; i < random.nextInt(composedSchema.getAnyOf().size()) + 1; i++) {
+      for (int i = 0; i < BasicTypeConstants.RANDOM.nextInt(composedSchema.getAnyOf().size()) + 1; i++) {
         processBodyAndMatchers(bodyMap, composedSchema.getAnyOf().get(i), openAPI, bodyMatchers);
       }
     }

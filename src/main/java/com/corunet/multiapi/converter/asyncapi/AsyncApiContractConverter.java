@@ -4,14 +4,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 
+import com.corunet.multiapi.converter.BasicTypeConstants;
 import com.corunet.multiapi.converter.asyncapi.exception.DuplicatedOperationException;
 import com.corunet.multiapi.converter.asyncapi.exception.ElementNotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -19,8 +18,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.swagger.v3.oas.models.PathItem;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -28,57 +25,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cloud.contract.spec.Contract;
 import org.springframework.cloud.contract.spec.internal.Input;
 import org.springframework.cloud.contract.spec.internal.OutputMessage;
-import org.springframework.cloud.contract.spec.internal.RegexPatterns;
-import org.springframework.cloud.contract.spec.internal.RegexProperty;
 import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 
 @Slf4j
 public class AsyncApiContractConverter  {
-
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
-
-  private static final String CHANNELS = "channels";
-
-  private static final String SUBSCRIBE = "subscribe";
-
-  private static final String PUBLISH = "publish";
-
-  private static final String REF = "$ref";
-
-  private static final String PROPERTIES = "properties";
-
-  private static final String SCHEMAS = "schemas";
-
-  private static final String FORMAT = "format";
-
-  private static final String EXAMPLE = "example";
-
-  private static final String STRING_TYPE = "string";
-
-  private static final String NUMBER_TYPE = "number";
-
-  private static final String INT32_TYPE = "int32";
-
-  private static final String INT64_TYPE = "int64";
-
-  private static final String FLOAT_TYPE = "float";
-
-  private static final String DOUBLE_TYPE = "double";
-
-  private static final String BOOLEAN_TYPE = "boolean";
-
-  private static final String TYPE = "type";
-
-  public static final Random RANDOM = new Random();
-
-  public static final RegexProperty STRING_REGEX = RegexPatterns.alphaNumeric();
-
-  public static final RegexProperty INT_REGEX = RegexPatterns.positiveInt();
-
-  public static final RegexProperty DECIMAL_REGEX = RegexPatterns.number();
-
-  public static final RegexProperty BOOLEAN_REGEX = RegexPatterns.anyBoolean();
-
 
   private final List<String> processedOperationIds = new ArrayList<>();
 
@@ -87,8 +37,8 @@ public class AsyncApiContractConverter  {
     Collection<Contract> sccContracts = new ArrayList<>();
 
     try {
-      var node = OBJECT_MAPPER.readTree(file);
-      var channelsNode = node.get(CHANNELS);
+      var node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
+      var channelsNode = node.get(BasicTypeConstants.CHANNELS);
 
       Iterator<JsonNode> it = channelsNode.elements();
       Iterator<String> topicIterator = channelsNode.fieldNames();
@@ -108,7 +58,7 @@ public class AsyncApiContractConverter  {
         contract.label(operationId);
 
         String topicName = topicIterator.next();
-        if (operationType.equals(SUBSCRIBE)) {
+        if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
           Input input = new Input();
           input.messageFrom(topicName);
           input.messageBody(bodyProcessed);
@@ -116,7 +66,7 @@ public class AsyncApiContractConverter  {
           input.assertThat(operationId + "()");
           contract.setInput(input);
 
-        } else if (operationType.equals(PUBLISH)) {
+        } else if (operationType.equals(BasicTypeConstants.PUBLISH)) {
           Input input = new Input();
           input.triggeredBy(operationId + "()");
           contract.setInput(input);
@@ -162,31 +112,31 @@ public class AsyncApiContractConverter  {
 
     message = operationContent.get("message");
 
-    if (message.get(REF) != null && message.get(REF).asText().startsWith("#")) {
-      String[] pathToObject = message.get(REF).asText().split("/");
+    if (message.get(BasicTypeConstants.REF) != null && message.get(BasicTypeConstants.REF).asText().startsWith("#")) {
+      String[] pathToObject = message.get(BasicTypeConstants.REF).asText().split("/");
       body = pathToObject[pathToObject.length - 1];
       component = node.get("components");
       var payload = component.get("messages").get(body).get("payload");
 
-      if (payload.get(REF) != null && payload.get(REF).asText().startsWith("#")) {
-        String[] pathToObject2 = payload.get(REF).asText().split("/");
+      if (payload.get(BasicTypeConstants.REF) != null && payload.get(BasicTypeConstants.REF).asText().startsWith("#")) {
+        String[] pathToObject2 = payload.get(BasicTypeConstants.REF).asText().split("/");
         body = pathToObject2[pathToObject.length - 1];
-        schema = component.get(SCHEMAS).get(body);
-        propertiesJson = schema.get(PROPERTIES);
-        messageBody = fillObjectProperties(responseBodyMatchers, propertiesJson, component.get(SCHEMAS), "", operationType);
-      } else if (payload.get(REF) != null) {
+        schema = component.get(BasicTypeConstants.SCHEMAS).get(body);
+        propertiesJson = schema.get(BasicTypeConstants.PROPERTIES);
+        messageBody = fillObjectProperties(responseBodyMatchers, propertiesJson, component.get(BasicTypeConstants.SCHEMAS), "", operationType);
+      } else if (payload.get(BasicTypeConstants.REF) != null) {
         var fillProperties = processAvro(responseBodyMatchers, payload);
         messageBody = fillProperties.getValue();
       } else {
-        propertiesJson = payload.get(payload.fieldNames().next()).get(PROPERTIES);
-        messageBody = fillObjectProperties(responseBodyMatchers, propertiesJson, component.get(SCHEMAS), "", operationType);
+        propertiesJson = payload.get(payload.fieldNames().next()).get(BasicTypeConstants.PROPERTIES);
+        messageBody = fillObjectProperties(responseBodyMatchers, propertiesJson, component.get(BasicTypeConstants.SCHEMAS), "", operationType);
       }
 
-    } else if (message.get(REF) != null) {
+    } else if (message.get(BasicTypeConstants.REF) != null) {
       var fillProperties = processAvro(responseBodyMatchers, message);
       messageBody = fillProperties.getValue();
     } else {
-      propertiesJson = message.get(message.fieldNames().next()).get(PROPERTIES);
+      propertiesJson = message.get(message.fieldNames().next()).get(BasicTypeConstants.PROPERTIES);
       messageBody = fillObjectProperties(responseBodyMatchers, propertiesJson, null, "", operationType);
     }
     return messageBody;
@@ -195,10 +145,10 @@ public class AsyncApiContractConverter  {
   private JsonNode subscribeOrPublishOperation(JsonNode rootNode) {
     JsonNode result;
 
-    if (rootNode.has(SUBSCRIBE)) {
-      result = rootNode.get(SUBSCRIBE);
+    if (rootNode.has(BasicTypeConstants.SUBSCRIBE)) {
+      result = rootNode.get(BasicTypeConstants.SUBSCRIBE);
     } else {
-      result = rootNode.get(PUBLISH);
+      result = rootNode.get(BasicTypeConstants.PUBLISH);
     }
     return result;
   }
@@ -212,10 +162,10 @@ public class AsyncApiContractConverter  {
       var property = it.next();
       var path = rootProperty + property;
 
-      if (!Objects.nonNull(properties.get(property).get(PROPERTIES)) || !Objects.nonNull(properties.get(property).get(PROPERTIES).get(REF))) {
+      if (!Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES)) || !Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES).get(BasicTypeConstants.REF))) {
         String enumType = "";
-        var type = (properties.get(String.valueOf(property)).get(FORMAT) != null) ? properties.get(String.valueOf(property)).get(FORMAT).asText() :
-            properties.get(String.valueOf(property)).get(TYPE).asText();
+        var type = (properties.get(String.valueOf(property)).get(BasicTypeConstants.FORMAT) != null) ? properties.get(String.valueOf(property)).get(BasicTypeConstants.FORMAT).asText() :
+            properties.get(String.valueOf(property)).get(BasicTypeConstants.TYPE).asText();
 
         if (isEnum(properties.get(property))) {
           enumType = type;
@@ -223,70 +173,70 @@ public class AsyncApiContractConverter  {
         }
 
         switch (type) {
-          case STRING_TYPE:
-            if (operationType.equals(SUBSCRIBE)) {
-              messageBody.put(property, properties.get(property).get(EXAMPLE).asText());
+          case BasicTypeConstants.STRING_TYPE:
+            if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+              messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asText());
             } else {
-              responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(STRING_REGEX));
+              responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
               messageBody.put(property, RandomStringUtils.random(5, true, false));
             }
             break;
-          case INT32_TYPE:
-          case NUMBER_TYPE:
-            if (operationType.equals(SUBSCRIBE)) {
-              messageBody.put(property, properties.get(property).get(EXAMPLE).asInt());
+          case BasicTypeConstants.INT32_TYPE:
+          case BasicTypeConstants.NUMBER_TYPE:
+            if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+              messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asInt());
             } else {
-              responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(INT_REGEX));
-              messageBody.put(property, RANDOM.nextInt());
+              responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
+              messageBody.put(property, BasicTypeConstants.RANDOM.nextInt());
             }
             break;
-          case INT64_TYPE:
-          case FLOAT_TYPE:
-            if (operationType.equals(SUBSCRIBE)) {
-              messageBody.put(property, properties.get(property).get(EXAMPLE).asDouble());
+          case BasicTypeConstants.INT64_TYPE:
+          case BasicTypeConstants.FLOAT_TYPE:
+            if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+              messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asDouble());
             } else {
-              responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(DECIMAL_REGEX));
-              messageBody.put(property, Math.abs(RANDOM.nextFloat()));
+              responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
+              messageBody.put(property, Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
             }
             break;
-          case DOUBLE_TYPE:
-            if (operationType.equals(SUBSCRIBE)) {
-              messageBody.put(property, properties.get(property).get(EXAMPLE).asDouble());
+          case BasicTypeConstants.DOUBLE_TYPE:
+            if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+              messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asDouble());
             } else {
-              responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(DECIMAL_REGEX));
-              messageBody.put(property, RANDOM.nextDouble());
+              responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
+              messageBody.put(property, BasicTypeConstants.RANDOM.nextDouble());
             }
             break;
-          case BOOLEAN_TYPE:
-            if (operationType.equals(SUBSCRIBE)) {
-              messageBody.put(property, properties.get(property).get(EXAMPLE).asBoolean());
+          case BasicTypeConstants.BOOLEAN_TYPE:
+            if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+              messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asBoolean());
             } else {
               responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex("^(true|false)$"));
-              messageBody.put(property, RANDOM.nextBoolean());
+              messageBody.put(property, BasicTypeConstants.RANDOM.nextBoolean());
             }
             break;
           case "enum":
-            if (operationType.equals(SUBSCRIBE)) {
-              messageBody.put(property, processEnumTypes(properties.get(property).get(EXAMPLE), enumType));
+            if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+              messageBody.put(property, processEnumTypes(properties.get(property).get(BasicTypeConstants.EXAMPLE), enumType));
             } else {
               var enumList = properties.get(property).get("enum");
               responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(getEnumRegex(enumType, properties, property)));
-              messageBody.put(property, processEnumTypes(enumList.get(RANDOM.nextInt(enumList.size())), enumType));
+              messageBody.put(property, processEnumTypes(enumList.get(BasicTypeConstants.RANDOM.nextInt(enumList.size())), enumType));
             }
             break;
           case "object":
-            messageBody.put(property, fillObjectProperties(responseBodyMatchers, properties.get(property).get(PROPERTIES), schemas, path + ".", operationType));
+            messageBody.put(property, fillObjectProperties(responseBodyMatchers, properties.get(property).get(BasicTypeConstants.PROPERTIES), schemas, path + ".", operationType));
             break;
           case "array":
             messageBody.put(property, processArray(responseBodyMatchers, property, properties.get(property).get("items"), path, operationType));
             break;
           default:
-            throw new ElementNotFoundException(TYPE);
+            throw new ElementNotFoundException(BasicTypeConstants.TYPE);
         }
       } else {
-        String[] pathToObject = properties.get(property).get(PROPERTIES).get(REF).asText().split("/");
+        String[] pathToObject = properties.get(property).get(BasicTypeConstants.PROPERTIES).get(BasicTypeConstants.REF).asText().split("/");
         var body = pathToObject[pathToObject.length - 1];
-        var schema = schemas.get(body).get(PROPERTIES);
+        var schema = schemas.get(body).get(BasicTypeConstants.PROPERTIES);
         messageBody.put(property, fillObjectProperties(responseBodyMatchers, schema, schemas, path + ".", operationType));
       }
     }
@@ -300,12 +250,12 @@ public class AsyncApiContractConverter  {
     String enumType = "";
     String type;
 
-    if (node.get(FORMAT) != null) {
-      type = node.get(FORMAT).asText();
-    } else if (node.get(TYPE) != null) {
-      type = node.get(TYPE).asText();
+    if (node.get(BasicTypeConstants.FORMAT) != null) {
+      type = node.get(BasicTypeConstants.FORMAT).asText();
+    } else if (node.get(BasicTypeConstants.TYPE) != null) {
+      type = node.get(BasicTypeConstants.TYPE).asText();
     } else {
-      type = node.get(node.fieldNames().next()).get(TYPE).asText();
+      type = node.get(node.fieldNames().next()).get(BasicTypeConstants.TYPE).asText();
     }
 
     if (isEnum(node)) {
@@ -314,92 +264,92 @@ public class AsyncApiContractConverter  {
     }
 
     switch (type) {
-      case STRING_TYPE:
-        if (operationType.equals(SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(EXAMPLE);
+      case BasicTypeConstants.STRING_TYPE:
+        if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             result.add(arrayNode.get(i).asText());
           }
         } else {
           result.add(RandomStringUtils.random(5, true, false));
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
-            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(STRING_REGEX));
+            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
           }
         }
         break;
-      case INT32_TYPE:
-      case NUMBER_TYPE:
-        if (operationType.equals(SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(EXAMPLE);
+      case BasicTypeConstants.INT32_TYPE:
+      case BasicTypeConstants.NUMBER_TYPE:
+        if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             result.add(arrayNode.get(i).asInt());
           }
         } else {
-          result.add(RANDOM.nextInt());
+          result.add(BasicTypeConstants.RANDOM.nextInt());
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
-            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(INT_REGEX));
+            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
           }
         }
         break;
-      case INT64_TYPE:
-      case FLOAT_TYPE:
-        if (operationType.equals(SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(EXAMPLE);
+      case BasicTypeConstants.INT64_TYPE:
+      case BasicTypeConstants.FLOAT_TYPE:
+        if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             result.add(arrayNode.get(i).asDouble());
           }
         } else {
-          result.add(Math.abs(RANDOM.nextFloat()));
+          result.add(Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
-            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(DECIMAL_REGEX));
+            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
           }
         }
         break;
-      case DOUBLE_TYPE:
-        if (operationType.equals(SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(EXAMPLE);
+      case BasicTypeConstants.DOUBLE_TYPE:
+        if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             result.add(arrayNode.get(i).asDouble());
           }
         } else {
-          result.add(RANDOM.nextDouble());
+          result.add(BasicTypeConstants.RANDOM.nextDouble());
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
-            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(DECIMAL_REGEX));
+            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
           }
         }
         break;
-      case BOOLEAN_TYPE:
-        if (operationType.equals(SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(EXAMPLE);
+      case BasicTypeConstants.BOOLEAN_TYPE:
+        if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             result.add(arrayNode.get(i).asBoolean());
           }
         } else {
-          result.add(RANDOM.nextBoolean());
+          result.add(BasicTypeConstants.RANDOM.nextBoolean());
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
-            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BOOLEAN_REGEX));
+            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
           }
         }
         break;
       case "enum":
-        if (operationType.equals(SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(EXAMPLE);
+        if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             result.add(processEnumTypes(arrayNode.get(i), enumType));
           }
         } else {
           var enumList = node.get("enum");
-          result.add(processEnumTypes(enumList.get(RANDOM.nextInt(enumList.size())), enumType));
+          result.add(processEnumTypes(enumList.get(BasicTypeConstants.RANDOM.nextInt(enumList.size())), enumType));
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
             responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(getEnumRegex(enumType, node, property)));
           }
         }
         break;
       case "object":
-        result.add(fillObjectProperties(responseBodyMatchers, node.get(node.fieldNames().next()).get(PROPERTIES), node, path + ".", operationType));
+        result.add(fillObjectProperties(responseBodyMatchers, node.get(node.fieldNames().next()).get(BasicTypeConstants.PROPERTIES), node, path + ".", operationType));
         break;
       default:
-        throw new ElementNotFoundException(TYPE);
+        throw new ElementNotFoundException(BasicTypeConstants.TYPE);
     }
     return result;
   }
@@ -408,23 +358,23 @@ public class AsyncApiContractConverter  {
     Object enumValue;
 
     switch (type) {
-      case STRING_TYPE:
+      case BasicTypeConstants.STRING_TYPE:
         enumValue = value.asText();
         break;
-      case INT32_TYPE:
-      case NUMBER_TYPE:
+      case BasicTypeConstants.INT32_TYPE:
+      case BasicTypeConstants.NUMBER_TYPE:
         enumValue = value.asInt();
         break;
-      case INT64_TYPE:
-      case FLOAT_TYPE:
-      case DOUBLE_TYPE:
+      case BasicTypeConstants.INT64_TYPE:
+      case BasicTypeConstants.FLOAT_TYPE:
+      case BasicTypeConstants.DOUBLE_TYPE:
         enumValue = value.asDouble();
         break;
-      case BOOLEAN_TYPE:
+      case BasicTypeConstants.BOOLEAN_TYPE:
         enumValue = value.asBoolean();
         break;
       default:
-        throw new ElementNotFoundException(TYPE);
+        throw new ElementNotFoundException(BasicTypeConstants.TYPE);
     }
 
     return enumValue;
@@ -445,7 +395,7 @@ public class AsyncApiContractConverter  {
     String regex = "";
     Iterator<JsonNode> enumObjects = properties.get(property).get("enum").iterator();
     while (enumObjects.hasNext()) {
-      if (STRING_TYPE.equalsIgnoreCase(type)) {
+      if (BasicTypeConstants.STRING_TYPE.equalsIgnoreCase(type)) {
         while (enumObjects.hasNext()) {
           JsonNode nextObject = enumObjects.next();
           if (!enumObjects.hasNext()) {
@@ -479,56 +429,56 @@ public class AsyncApiContractConverter  {
     Map<String, Object> messageBody = new HashMap<>();
 
     for (int i = 0; i < properties.size(); i++) {
-      var type = (properties.get(i).get(FORMAT) != null) ? properties.get(i).get(FORMAT).asText() :
-          properties.get(i).get(TYPE).asText();
+      var type = (properties.get(i).get(BasicTypeConstants.FORMAT) != null) ? properties.get(i).get(BasicTypeConstants.FORMAT).asText() :
+          properties.get(i).get(BasicTypeConstants.TYPE).asText();
       if (type.equals("")) {
-        type = properties.get(i).get(TYPE).get(TYPE).asText();
+        type = properties.get(i).get(BasicTypeConstants.TYPE).get(BasicTypeConstants.TYPE).asText();
       }
       String fieldName = properties.get(i).get("name").asText();
       String path = rootProperty + properties.get(i).get("name").asText();
 
       switch (type) {
-        case STRING_TYPE:
+        case BasicTypeConstants.STRING_TYPE:
           String randomString = RandomStringUtils.random(5, true, false);
           result.put(fieldName, randomString);
-          responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex(STRING_REGEX));
+          responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
           messageBody.put(fieldName, randomString);
           break;
         case "int":
-          int randomInt = RANDOM.nextInt();
+          int randomInt = BasicTypeConstants.RANDOM.nextInt();
           result.put(properties.get(i).get("name").asText(), randomInt);
           responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex("[0-9]+"));
           messageBody.put(fieldName, randomInt);
           break;
-        case BOOLEAN_TYPE:
+        case BasicTypeConstants.BOOLEAN_TYPE:
           List<Boolean> list = new ArrayList<>();
           list.add(true);
           list.add(false);
-          Boolean randomBoolean = list.get(RANDOM.nextInt(2));
+          Boolean randomBoolean = list.get(BasicTypeConstants.RANDOM.nextInt(2));
           result.put(fieldName, randomBoolean);
           responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex("^(true|false)$"));
           messageBody.put(fieldName, randomBoolean);
           break;
         case "decimal":
-          float randomDecimal = RANDOM.nextFloat() * RANDOM.nextInt();
+          float randomDecimal = BasicTypeConstants.RANDOM.nextFloat() * BasicTypeConstants.RANDOM.nextInt();
           result.put(fieldName, randomDecimal);
           responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex("/^\\d*\\.?\\d*$/"));
           messageBody.put(fieldName, randomDecimal);
           break;
         case "record":
-          var subObject = fillObjectPropertiesFromAvro(responseBodyMatchers, (ArrayNode) properties.get(i).get(TYPE).get("fields"), path + ".");
+          var subObject = fillObjectPropertiesFromAvro(responseBodyMatchers, (ArrayNode) properties.get(i).get(BasicTypeConstants.TYPE).get("fields"), path + ".");
           result.putIfAbsent(fieldName, subObject.getKey());
           messageBody.put(fieldName, subObject.getValue());
           break;
         default:
-          throw new ElementNotFoundException(TYPE);
+          throw new ElementNotFoundException(BasicTypeConstants.TYPE);
       }
     }
     return new MutablePair<>(result, messageBody);
   }
 
   private Pair<JsonNode, Map<String, Object>> processAvro(ResponseBodyMatchers responseBodyMatchers, JsonNode jsonNode) {
-    File avroFile = new File(jsonNode.get(REF).asText());
+    File avroFile = new File(jsonNode.get(BasicTypeConstants.REF).asText());
     ObjectMapper mapper = new ObjectMapper();
     JsonNode fileTree = null;
     try {
