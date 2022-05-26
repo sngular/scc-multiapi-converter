@@ -1,0 +1,41 @@
+---
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Corunet Challenge Game Server
+  license:
+    name: MIT
+servers:
+- url: http://localhost:8080/v1
+paths:
+  /games:
+    summary: Hola
+    get:
+      summary: List all available games
+      operationId: listGames
+      tags:
+      - games
+      responses:
+        '200':
+          description: A paged array of games
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PersonalInfo"
+components:
+  schemas:
+    PersonalInfo:
+      type: object
+      properties:
+        name:
+          type: object
+          properties:
+            firstname:
+              type: string
+            lastname:
+              type: string
+        address:
+          type: object
+          properties:
+            street:
+              type: string
