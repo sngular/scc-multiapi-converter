@@ -10,6 +10,10 @@ import org.springframework.cloud.contract.spec.internal.RegexProperty;
 
 public class BasicTypeConstants {
 
+  public static final String ASYNCAPI = "asyncapi";
+
+  public static final String OPENAPI = "openapi";
+
   public static final String INT_32 = "int32";
 
   public static final String STRING = "string";
@@ -32,7 +36,25 @@ public class BasicTypeConstants {
 
   public static final String ENUM = "enum";
 
-  public static final String OPENAPI = "openapi";
+  public static final String CHANNELS = "channels";
+
+  public static final String SUBSCRIBE = "subscribe";
+
+  public static final String PUBLISH = "publish";
+
+  public static final String REF = "$ref";
+
+  public static final String PROPERTIES = "properties";
+
+  public static final String SCHEMAS = "schemas";
+
+  public static final String FORMAT = "format";
+
+  public static final String EXAMPLE = "example";
+
+  public static final String NAME = "name";
+
+  public static final String TYPE = "type";
 
   public static final RegexProperty STRING_REGEX = RegexPatterns.alphaNumeric();
 

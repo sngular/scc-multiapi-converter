@@ -10,16 +10,12 @@ import com.corunet.multiapi.converter.exception.MultiApiContractConverterExcepti
 import com.corunet.multiapi.converter.openapi.OpenApiContractConverter;
 import com.corunet.multiapi.converter.utils.BasicTypeConstants;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.contract.spec.Contract;
 import org.springframework.cloud.contract.spec.ContractConverter;
 
 @Slf4j
 public class MultiApiContractConverter implements ContractConverter<Collection<Contract>> {
-
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
   private static final OpenApiContractConverter openApiContractConverter = new OpenApiContractConverter();
 
@@ -36,19 +32,6 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
         isAccepted = (node != null && node.size() > 0 && (Objects.nonNull(node.get(BasicTypeConstants.ASYNCAPI)) || Objects.nonNull(node.get(BasicTypeConstants.OPENAPI))));
       } catch (IOException e) {
         isAccepted = false;
-      }
-      if (!isAccepted){
-        OpenAPI openAPI = null;
-        try {
-          openAPI = getOpenApi(file);
-        } catch (RuntimeException e) {
-          e.printStackTrace();
-        }
-        if (openAPI == null) {
-          log.error("Code generation failed why .yaml is empty");
-        } else {
-          isAccepted = true;
-        }
       }
     }
     return isAccepted;

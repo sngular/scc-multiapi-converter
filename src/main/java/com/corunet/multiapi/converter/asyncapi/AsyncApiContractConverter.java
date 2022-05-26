@@ -10,9 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.corunet.multiapi.converter.BasicTypeConstants;
-import com.corunet.multiapi.converter.asyncapi.exception.DuplicatedOperationException;
-import com.corunet.multiapi.converter.asyncapi.exception.ElementNotFoundException;
+import com.corunet.multiapi.converter.exception.ElementNotFoundException;
+import com.corunet.multiapi.converter.utils.BasicTypeConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,9 +28,6 @@ import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 
 @Slf4j
 public class AsyncApiContractConverter  {
-
-  private final List<String> processedOperationIds = new ArrayList<>();
-
 
   public Collection<Contract> convertFrom(final File file) {
     Collection<Contract> sccContracts = new ArrayList<>();
@@ -51,7 +47,7 @@ public class AsyncApiContractConverter  {
         JsonNode channel = it.next();
         operationType = channel.fieldNames().next();
         operationContent = subscribeOrPublishOperation(channel);
-        String operationId = getOperationId(operationContent);
+        String operationId = operationContent.get("operationId").asText();
         contract.setName(operationId);
         ResponseBodyMatchers responseBodyMatchers = new ResponseBodyMatchers();
         bodyProcessed = processMessage(responseBodyMatchers, operationContent, node, operationType);
@@ -86,19 +82,6 @@ public class AsyncApiContractConverter  {
       log.error("Error", e);
     }
     return sccContracts;
-  }
-
-  private String getOperationId(JsonNode operationType) {
-    String operationId;
-
-    operationId = operationType.get("operationId").asText();
-
-    if (processedOperationIds.contains(operationId)) {
-      throw new DuplicatedOperationException(operationId);
-    } else {
-      processedOperationIds.add(operationId);
-    }
-    return operationId;
   }
 
   private Map<String, Object> processMessage(ResponseBodyMatchers responseBodyMatchers, JsonNode operationContent, JsonNode node, String operationType) throws JsonProcessingException {
@@ -168,11 +151,11 @@ public class AsyncApiContractConverter  {
 
         if (isEnum(properties.get(property))) {
           enumType = type;
-          type = "enum";
+          type = BasicTypeConstants.ENUM;
         }
 
         switch (type) {
-          case BasicTypeConstants.STRING_TYPE:
+          case BasicTypeConstants.STRING:
             if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
               messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asText());
             } else {
@@ -180,8 +163,8 @@ public class AsyncApiContractConverter  {
               messageBody.put(property, RandomStringUtils.random(5, true, false));
             }
             break;
-          case BasicTypeConstants.INT32_TYPE:
-          case BasicTypeConstants.NUMBER_TYPE:
+          case BasicTypeConstants.INT_32:
+          case BasicTypeConstants.NUMBER:
             if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
               messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asInt());
             } else {
@@ -189,8 +172,8 @@ public class AsyncApiContractConverter  {
               messageBody.put(property, BasicTypeConstants.RANDOM.nextInt());
             }
             break;
-          case BasicTypeConstants.INT64_TYPE:
-          case BasicTypeConstants.FLOAT_TYPE:
+          case BasicTypeConstants.INT_64:
+          case BasicTypeConstants.FLOAT:
             if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
               messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asDouble());
             } else {
@@ -198,7 +181,7 @@ public class AsyncApiContractConverter  {
               messageBody.put(property, Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
             }
             break;
-          case BasicTypeConstants.DOUBLE_TYPE:
+          case BasicTypeConstants.DOUBLE:
             if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
               messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asDouble());
             } else {
@@ -206,7 +189,7 @@ public class AsyncApiContractConverter  {
               messageBody.put(property, BasicTypeConstants.RANDOM.nextDouble());
             }
             break;
-          case BasicTypeConstants.BOOLEAN_TYPE:
+          case BasicTypeConstants.BOOLEAN:
             if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
               messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asBoolean());
             } else {
@@ -214,19 +197,19 @@ public class AsyncApiContractConverter  {
               messageBody.put(property, BasicTypeConstants.RANDOM.nextBoolean());
             }
             break;
-          case "enum":
+          case BasicTypeConstants.ENUM:
             if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
               messageBody.put(property, processEnumTypes(properties.get(property).get(BasicTypeConstants.EXAMPLE), enumType));
             } else {
-              var enumList = properties.get(property).get("enum");
+              var enumList = properties.get(property).get(BasicTypeConstants.ENUM);
               responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(getEnumRegex(enumType, properties, property)));
               messageBody.put(property, processEnumTypes(enumList.get(BasicTypeConstants.RANDOM.nextInt(enumList.size())), enumType));
             }
             break;
-          case "object":
+          case BasicTypeConstants.OBJECT:
             messageBody.put(property, fillObjectProperties(responseBodyMatchers, properties.get(property).get(BasicTypeConstants.PROPERTIES), schemas, path + ".", operationType));
             break;
-          case "array":
+          case BasicTypeConstants.ARRAY:
             messageBody.put(property, processArray(responseBodyMatchers, property, properties.get(property).get("items"), path, operationType));
             break;
           default:
@@ -259,11 +242,11 @@ public class AsyncApiContractConverter  {
 
     if (isEnum(node)) {
       enumType = type;
-      type = "enum";
+      type = BasicTypeConstants.ENUM;
     }
 
     switch (type) {
-      case BasicTypeConstants.STRING_TYPE:
+      case BasicTypeConstants.STRING:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
           var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
@@ -276,8 +259,8 @@ public class AsyncApiContractConverter  {
           }
         }
         break;
-      case BasicTypeConstants.INT32_TYPE:
-      case BasicTypeConstants.NUMBER_TYPE:
+      case BasicTypeConstants.INT_32:
+      case BasicTypeConstants.NUMBER:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
           var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
@@ -290,8 +273,8 @@ public class AsyncApiContractConverter  {
           }
         }
         break;
-      case BasicTypeConstants.INT64_TYPE:
-      case BasicTypeConstants.FLOAT_TYPE:
+      case BasicTypeConstants.INT_64:
+      case BasicTypeConstants.FLOAT:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
           var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
@@ -304,7 +287,7 @@ public class AsyncApiContractConverter  {
           }
         }
         break;
-      case BasicTypeConstants.DOUBLE_TYPE:
+      case BasicTypeConstants.DOUBLE:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
           var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
@@ -317,7 +300,7 @@ public class AsyncApiContractConverter  {
           }
         }
         break;
-      case BasicTypeConstants.BOOLEAN_TYPE:
+      case BasicTypeConstants.BOOLEAN:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
           var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
@@ -330,21 +313,21 @@ public class AsyncApiContractConverter  {
           }
         }
         break;
-      case "enum":
+      case BasicTypeConstants.ENUM:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
           var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             result.add(processEnumTypes(arrayNode.get(i), enumType));
           }
         } else {
-          var enumList = node.get("enum");
+          var enumList = node.get(BasicTypeConstants.ENUM);
           result.add(processEnumTypes(enumList.get(BasicTypeConstants.RANDOM.nextInt(enumList.size())), enumType));
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
             responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(getEnumRegex(enumType, node, property)));
           }
         }
         break;
-      case "object":
+      case BasicTypeConstants.OBJECT:
         result.add(fillObjectProperties(responseBodyMatchers, node.get(node.fieldNames().next()).get(BasicTypeConstants.PROPERTIES), node, path + ".", operationType));
         break;
       default:
@@ -357,19 +340,19 @@ public class AsyncApiContractConverter  {
     Object enumValue;
 
     switch (type) {
-      case BasicTypeConstants.STRING_TYPE:
+      case BasicTypeConstants.STRING:
         enumValue = value.asText();
         break;
-      case BasicTypeConstants.INT32_TYPE:
-      case BasicTypeConstants.NUMBER_TYPE:
+      case BasicTypeConstants.INT_32:
+      case BasicTypeConstants.NUMBER:
         enumValue = value.asInt();
         break;
-      case BasicTypeConstants.INT64_TYPE:
-      case BasicTypeConstants.FLOAT_TYPE:
-      case BasicTypeConstants.DOUBLE_TYPE:
+      case BasicTypeConstants.INT_64:
+      case BasicTypeConstants.FLOAT:
+      case BasicTypeConstants.DOUBLE:
         enumValue = value.asDouble();
         break;
-      case BasicTypeConstants.BOOLEAN_TYPE:
+      case BasicTypeConstants.BOOLEAN:
         enumValue = value.asBoolean();
         break;
       default:
@@ -392,9 +375,9 @@ public class AsyncApiContractConverter  {
 
   private String getEnumRegex(final String type, final JsonNode properties, final String property) {
     String regex = "";
-    Iterator<JsonNode> enumObjects = properties.get(property).get("enum").iterator();
+    Iterator<JsonNode> enumObjects = properties.get(property).get(BasicTypeConstants.ENUM).iterator();
     while (enumObjects.hasNext()) {
-      if (BasicTypeConstants.STRING_TYPE.equalsIgnoreCase(type)) {
+      if (BasicTypeConstants.STRING.equalsIgnoreCase(type)) {
         while (enumObjects.hasNext()) {
           JsonNode nextObject = enumObjects.next();
           if (!enumObjects.hasNext()) {
@@ -415,7 +398,7 @@ public class AsyncApiContractConverter  {
     Iterator<String> ite = properties.fieldNames();
 
     while (ite.hasNext()) {
-      if (ite.next().equals("enum")) {
+      if (ite.next().equals(BasicTypeConstants.ENUM)) {
         isEnum = true;
       }
     }
@@ -433,23 +416,23 @@ public class AsyncApiContractConverter  {
       if (type.equals("")) {
         type = properties.get(i).get(BasicTypeConstants.TYPE).get(BasicTypeConstants.TYPE).asText();
       }
-      String fieldName = properties.get(i).get("name").asText();
-      String path = rootProperty + properties.get(i).get("name").asText();
+      String fieldName = properties.get(i).get(BasicTypeConstants.NAME).asText();
+      String path = rootProperty + properties.get(i).get(BasicTypeConstants.NAME).asText();
 
       switch (type) {
-        case BasicTypeConstants.STRING_TYPE:
+        case BasicTypeConstants.STRING:
           String randomString = RandomStringUtils.random(5, true, false);
           result.put(fieldName, randomString);
           responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
           messageBody.put(fieldName, randomString);
           break;
-        case "int":
+        case BasicTypeConstants.INT_32:
           int randomInt = BasicTypeConstants.RANDOM.nextInt();
-          result.put(properties.get(i).get("name").asText(), randomInt);
+          result.put(properties.get(i).get(BasicTypeConstants.NAME).asText(), randomInt);
           responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex("[0-9]+"));
           messageBody.put(fieldName, randomInt);
           break;
-        case BasicTypeConstants.BOOLEAN_TYPE:
+        case BasicTypeConstants.BOOLEAN:
           List<Boolean> list = new ArrayList<>();
           list.add(true);
           list.add(false);
@@ -458,7 +441,7 @@ public class AsyncApiContractConverter  {
           responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex("^(true|false)$"));
           messageBody.put(fieldName, randomBoolean);
           break;
-        case "decimal":
+        case BasicTypeConstants.FLOAT:
           float randomDecimal = BasicTypeConstants.RANDOM.nextFloat() * BasicTypeConstants.RANDOM.nextInt();
           result.put(fieldName, randomDecimal);
           responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex("/^\\d*\\.?\\d*$/"));

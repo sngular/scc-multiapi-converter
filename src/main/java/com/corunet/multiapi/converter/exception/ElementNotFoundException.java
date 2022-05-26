@@ -1,4 +1,4 @@
-package com.corunet.multiapi.converter.asyncapi.exception;
+package com.corunet.multiapi.converter.exception;
 
 public class ElementNotFoundException extends RuntimeException {
 
