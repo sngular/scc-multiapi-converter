@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import com.corunet.multiapi.converter.BasicTypeConstants;
-import com.corunet.multiapi.converter.openapi.exception.SCCVerifierOpenApiConverterException;
+import com.corunet.multiapi.converter.utils.BasicTypeConstants;
+import com.corunet.multiapi.converter.exception.MultiApiContractConverterException;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -40,7 +40,7 @@ import org.springframework.cloud.contract.spec.internal.Url;
 import org.springframework.cloud.contract.spec.internal.UrlPath;
 
 @Slf4j
-public class OpenApiContractConverter  {
+public class OpenApiContractConverter {
 
   public Collection<Contract> convertFrom(File file) {
 
@@ -54,7 +54,7 @@ public class OpenApiContractConverter  {
     return contracts;
   }
 
-  private Collection<Contract> getContracts(OpenAPI openApi){
+  private Collection<Contract> getContracts(OpenAPI openApi) {
 
     List<Contract> contracts = new ArrayList<>();
 
@@ -78,7 +78,7 @@ public class OpenApiContractConverter  {
     return contracts;
   }
 
-  private void processContract(List<Contract> contracts, OpenAPI openAPI, Entry<String, PathItem> pathItem, Operation operation, String name){
+  private void processContract(List<Contract> contracts, OpenAPI openAPI, Entry<String, PathItem> pathItem, Operation operation, String name) {
     for (Entry<String, ApiResponse> response : operation.getResponses().entrySet()) {
       Contract contract = new Contract();
       String fileName = name + pathItem.getKey().replaceAll("[{}]", "") + response.getKey().substring(0, 1).toUpperCase() + response.getKey().substring(1) + "Response";
@@ -119,7 +119,7 @@ public class OpenApiContractConverter  {
           response.setBody(new Body(bodyMap));
           response.setBodyMatchers(responseBodyMatchers);
         } else if (Objects.nonNull(schema.getType()) && BasicTypeConstants.BASIC_OBJECT_TYPE.contains(schema.getType())) {
-          ContractConverterUtils.processBasicResponseTypeBody(response, schema);
+          OpenApiContractConverterUtils.processBasicResponseTypeBody(response, schema);
         } else {
           processBodyAndMatchers(bodyMap, schema, openAPI, responseBodyMatchers);
           response.setBody(new Body(bodyMap));
@@ -143,8 +143,8 @@ public class OpenApiContractConverter  {
       request.url(url);
     }
     request.method(name.toUpperCase(Locale.ROOT));
-      if (Objects.nonNull(operation.getRequestBody()) && Objects.nonNull(operation.getRequestBody().getContent())) {
-        processRequestContent(openAPI, operation, request);
+    if (Objects.nonNull(operation.getRequestBody()) && Objects.nonNull(operation.getRequestBody().getContent())) {
+      processRequestContent(openAPI, operation, request);
     }
     return request;
   }
@@ -163,7 +163,7 @@ public class OpenApiContractConverter  {
         request.body(bodyMap);
         request.setBodyMatchers(bodyMatchers);
       } else if (Objects.nonNull(schema.getType()) && BasicTypeConstants.BASIC_OBJECT_TYPE.contains(schema.getType())) {
-        ContractConverterUtils.processBasicRequestTypeBody(request, schema);
+        OpenApiContractConverterUtils.processBasicRequestTypeBody(request, schema);
       } else {
         processBodyAndMatchers(bodyMap, schema, openAPI, bodyMatchers);
         request.body(bodyMap);
@@ -179,7 +179,7 @@ public class OpenApiContractConverter  {
       Map<String, Schema> basicObjectProperties = schema.getProperties();
       for (Entry<String, Schema> property : basicObjectProperties.entrySet()) {
         if (Objects.nonNull(property.getValue().get$ref())) {
-          String subRef = ContractConverterUtils.mapRefName(property.getValue());
+          String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
           HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
           bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, openAPI, bodyMatchers));
         } else {
@@ -188,14 +188,14 @@ public class OpenApiContractConverter  {
       }
     }
     if (Objects.nonNull(schema.get$ref())) {
-      String ref = ContractConverterUtils.mapRefName(schema);
+      String ref = OpenApiContractConverterUtils.mapRefName(schema);
       HashMap<String, Schema> properties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(ref).getProperties();
       for (Entry<String, Schema> property : properties.entrySet()) {
         if (property.getValue() instanceof ComposedSchema) {
           ComposedSchema subComposedSchema = (ComposedSchema) property.getValue();
           processComposedSchema(openAPI, bodyMatchers, bodyMap, subComposedSchema);
         } else if (Objects.nonNull(property.getValue().get$ref())) {
-          String subRef = ContractConverterUtils.mapRefName(property.getValue());
+          String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
           HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
           bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, openAPI, bodyMatchers));
         } else {
@@ -247,7 +247,7 @@ public class OpenApiContractConverter  {
           break;
         case BasicTypeConstants.OBJECT:
           if (Objects.nonNull(schema.get$ref())) {
-            String subRef = ContractConverterUtils.mapRefName(schema);
+            String subRef = OpenApiContractConverterUtils.mapRefName(schema);
             HashMap<String, Schema> subPropertiesWithRef = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
             bodyMap.put(fieldName, processComplexBodyAndMatchers(fieldName, subPropertiesWithRef, openAPI, bodyMatchers));
           } else {
@@ -275,13 +275,13 @@ public class OpenApiContractConverter  {
     }
   }
 
-  private HashMap<String, Object> processComplexBodyAndMatchers(String objectName, HashMap<String, Schema> properties, OpenAPI openAPI, BodyMatchers bodyMatchers) {
+  private HashMap<String, Object> processComplexBodyAndMatchers(String objectName, Map<String, Schema> properties, OpenAPI openAPI, BodyMatchers bodyMatchers) {
 
     HashMap<String, Object> propertyMap = new HashMap<>();
     for (Entry<String, Schema> property : properties.entrySet()) {
       String newObjectName = objectName + "." + property.getKey();
       if (Objects.nonNull(property.getValue().get$ref())) {
-        String ref = ContractConverterUtils.mapRefName(property.getValue());
+        String ref = OpenApiContractConverterUtils.mapRefName(property.getValue());
         HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(ref).getProperties();
         propertyMap.put(property.getKey(), processComplexBodyAndMatchers(newObjectName, subProperties, openAPI, bodyMatchers));
       } else {
@@ -329,7 +329,7 @@ public class OpenApiContractConverter  {
               break;
             case BasicTypeConstants.OBJECT:
               if (Objects.nonNull(property.getValue().get$ref())) {
-                String subRef = ContractConverterUtils.mapRefName(property.getValue());
+                String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
                 HashMap<String, Schema> subPropertiesWithRef = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
                 propertyMap.put(property.getKey(), processComplexBodyAndMatchers(newObjectName, subPropertiesWithRef, openAPI, bodyMatchers));
               } else {
@@ -360,7 +360,7 @@ public class OpenApiContractConverter  {
   private List<Object> processArray(Schema<?> arraySchema, List<Object> propertyList, String objectName, BodyMatchers bodyMatchers, OpenAPI openAPI) {
 
     if (Objects.nonNull(arraySchema.get$ref())) {
-      String ref = ContractConverterUtils.mapRefName(arraySchema);
+      String ref = OpenApiContractConverterUtils.mapRefName(arraySchema);
       HashMap<String, Schema> subObject = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(ref).getProperties();
       propertyList.add(processComplexBodyAndMatchers(objectName + "[0]", subObject, openAPI, bodyMatchers));
     } else {
@@ -426,7 +426,7 @@ public class OpenApiContractConverter  {
         case BasicTypeConstants.ARRAY:
           Schema<?> subArray = ((ArraySchema) arraySchema).getItems();
           if (Objects.nonNull(subArray.getExample())) {
-              propertyList.add(subArray.getExample());
+            propertyList.add(subArray.getExample());
           } else {
             List<Object> subPropertyList = new ArrayList<>();
             propertyList.add(processArray(subArray, subPropertyList, objectName, bodyMatchers, openAPI));
@@ -497,16 +497,16 @@ public class OpenApiContractConverter  {
     bodyMap.put(enumName, property.getEnum().get(BasicTypeConstants.RANDOM.nextInt(property.getEnum().size())));
   }
 
-  private OpenAPI getOpenApi(File file) throws SCCVerifierOpenApiConverterException {
+  private OpenAPI getOpenApi(File file) throws MultiApiContractConverterException {
     OpenAPI openAPI;
     try {
       SwaggerParseResult result = new OpenAPIParser().readLocation(file.getPath(), null, null);
       openAPI = result.getOpenAPI();
     } catch (Exception e) {
-      throw new SCCVerifierOpenApiConverterException("Code generation failed when parser the .yaml file ");
+      throw new MultiApiContractConverterException("Code generation failed when parser the .yaml file ");
     }
     if (openAPI == null) {
-      throw new SCCVerifierOpenApiConverterException("Code generation failed why .yaml is empty");
+      throw new MultiApiContractConverterException("Code generation failed why .yaml is empty");
     }
     return openAPI;
   }

@@ -276,7 +276,7 @@ class MultiApiContractConverterTest {
     Response response = contract.getResponse();
     assertThat(response).isNotNull();
     assertThat(response.getBody().getServerValue()).isNotNull();
-    assertThat(response.getBody().getServerValue().toString()).isEqualTo("[a-zA-Z0-9]+");
+    assertThat(response.getBody().getServerValue().toString()).hasToString("[a-zA-Z0-9]+");
   }
 
   @Test
@@ -294,9 +294,9 @@ class MultiApiContractConverterTest {
     assertThat(contract).isNotNull();
     assertThat(bodyServerValueMap.get("code")).isInstanceOf(Integer.class);
     assertThat(bodyMatchers.get(0).path()).isEqualTo("code");
-    assertThat(bodyMatchers.get(0).value().toString()).isEqualTo("([1-9]\\d*)");
+    assertThat(bodyMatchers.get(0).value().toString()).hasToString("([1-9]\\d*)");
     assertThat(bodyMatchers.get(1).path()).isEqualTo("message.description");
-    assertThat(bodyMatchers.get(1).value().toString()).isEqualTo("[a-zA-Z0-9]+");
+    assertThat(bodyMatchers.get(1).value().toString()).hasToString("[a-zA-Z0-9]+");
     assertThat(messageMap).hasSize(1);
     assertThat(messageMap.get("description")).isInstanceOf(String.class);
   }
@@ -312,12 +312,12 @@ class MultiApiContractConverterTest {
     QueryParameter parameter = queryParameters.getParameters().get(0);
     assertThat(parameter.getName()).isEqualTo("gameId");
     MatchingStrategy matchingStrategy = (MatchingStrategy) parameter.getServerValue();
-    assertThat(matchingStrategy.getType().toString()).isEqualTo("EQUAL_TO");
+    assertThat(matchingStrategy.getType().toString()).hasToString("EQUAL_TO");
     assertThat(matchingStrategy.getServerValue()).isEqualTo(1);
     assertThat(matchingStrategy.getClientValue()).isEqualTo(1);
     HashMap <String, Object> serverValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
-    assertThat(serverValueMap.get("rooms")).isEqualTo(1);
-    assertThat(serverValueMap.get("gameName")).isEqualTo("hangman");
+    assertThat(serverValueMap)
+        .containsEntry("rooms", 1)
+        .containsEntry("gameName", "hangman");
   }
-
 }

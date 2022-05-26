@@ -8,7 +8,10 @@ import java.util.Objects;
 import com.corunet.multiapi.converter.asyncapi.AsyncApiContractConverter;
 import com.corunet.multiapi.converter.exception.MultiApiContractConverterException;
 import com.corunet.multiapi.converter.openapi.OpenApiContractConverter;
+import com.corunet.multiapi.converter.utils.BasicTypeConstants;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.contract.spec.Contract;
 import org.springframework.cloud.contract.spec.ContractConverter;
@@ -16,13 +19,11 @@ import org.springframework.cloud.contract.spec.ContractConverter;
 @Slf4j
 public class MultiApiContractConverter implements ContractConverter<Collection<Contract>> {
 
-  private static final String ASYNCAPI = "asyncapi";
-
-  private static final String OPENAPI = "openapi";
-
-  private static final AsyncApiContractConverter asyncApiContractConverter = new AsyncApiContractConverter();
+  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
   private static final OpenApiContractConverter openApiContractConverter = new OpenApiContractConverter();
+
+  private static final AsyncApiContractConverter asyncApiContractConverter = new AsyncApiContractConverter();
 
   @Override
   public boolean isAccepted(final File file) {
@@ -32,9 +33,22 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
       try {
         JsonNode node;
         node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
-        isAccepted = (node != null && node.size() > 0 && (Objects.nonNull(node.get(ASYNCAPI)) || Objects.nonNull(node.get(OPENAPI))));
+        isAccepted = (node != null && node.size() > 0 && (Objects.nonNull(node.get(BasicTypeConstants.ASYNCAPI)) || Objects.nonNull(node.get(BasicTypeConstants.OPENAPI))));
       } catch (IOException e) {
         isAccepted = false;
+      }
+      if (!isAccepted){
+        OpenAPI openAPI = null;
+        try {
+          openAPI = getOpenApi(file);
+        } catch (RuntimeException e) {
+          e.printStackTrace();
+        }
+        if (openAPI == null) {
+          log.error("Code generation failed why .yaml is empty");
+        } else {
+          isAccepted = true;
+        }
       }
     }
     return isAccepted;
@@ -47,9 +61,9 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
     try {
       node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
       if (node != null && node.size() > 0) {
-        if (Objects.nonNull(node.get(ASYNCAPI))) {
+        if (Objects.nonNull(node.get(BasicTypeConstants.ASYNCAPI))) {
           contracts = asyncApiContractConverter.convertFrom(file);
-        } else if (Objects.nonNull(node.get(OPENAPI))) {
+        } else if (Objects.nonNull(node.get(BasicTypeConstants.OPENAPI))) {
           contracts = openApiContractConverter.convertFrom(file);
         }
       } else {
@@ -63,7 +77,5 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
   }
 
   @Override
-  public Collection<Contract> convertTo(Collection<Contract> contract) {
-    return contract;
-  }
+  public Collection<Contract> convertTo(Collection<Contract> contract) {return contract;}
 }
