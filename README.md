@@ -37,7 +37,7 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
     <dependency>
       <groupId>com.corunet</groupId>
       <artifactId>scc-multiapi-converter</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
+      <version>1.1.0-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
