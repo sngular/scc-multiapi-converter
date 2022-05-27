@@ -26,7 +26,7 @@ import org.springframework.cloud.contract.spec.internal.Response;
 import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 
 @Slf4j
-class MultiApiContractConverterTest {
+class OpenApiContractConverterTest {
 
   private final MultiApiContractConverter multiApiContractConverter = new MultiApiContractConverter();
 
