@@ -61,6 +61,12 @@ public class AsyncApiContractConverter  {
           input.messageHeaders(headers -> headers.accept("application/json"));
           contract.setInput(input);
 
+          OutputMessage outputMessage = new OutputMessage();
+           outputMessage.headers(headers -> headers.accept("application/json"));
+           outputMessage.sentTo(topicName);
+           outputMessage.body(bodyProcessed);
+           contract.setOutputMessage(outputMessage);
+
         } else if (operationType.equals(BasicTypeConstants.PUBLISH)) {
           Input input = new Input();
           input.triggeredBy(operationId + "()");
