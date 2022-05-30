@@ -231,38 +231,15 @@ class OpenApiContractConverterTest {
   @DisplayName("Check if AllOfs are being processed okay")
   void testAllOfs() {
     File file = new File("src/test/resources/ymls/testAllOfs.yml");
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
-    Contract contract = contractList.get(0);
-    assertThat(contract).isNotNull();
-    assertThat(contract.getResponse()).isNotNull();
-    List<String> assertKeys = new ArrayList<>();
-    Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
-    bodyServerValueMap.forEach((key, value) ->
-                               {
-                                 assertKeys.add(key);
-                               }
-    );
-    assertThat(assertKeys).containsExactlyInAnyOrder("gameId", "gameName", "roomId", "newGameId", "playerName");
+    testAnyOfAndOneOf(file);
   }
+
 
   @Test
   @DisplayName("Check if anyOfs are being processed okay")
   void testAnyOf() {
     File file = new File("src/test/resources/ymls/testAnyOfs.yml");
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
-    Contract contract = contractList.get(0);
-    assertThat(contract).isNotNull();
-    assertThat(contract.getResponse()).isNotNull();
-    List<String> assertKeys = new ArrayList<>();
-    Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
-    bodyServerValueMap.forEach((key, value) ->
-                               {
-                                 assertKeys.add(key);
-                               }
-    );
-    assertThat(assertKeys).containsAnyOf("gameId", "gameName", "roomId", "newGameId", "playerName");
+    testAnyOfAndOneOf(file);
   }
 
   @Test
@@ -319,5 +296,22 @@ class OpenApiContractConverterTest {
     assertThat(serverValueMap)
         .containsEntry("rooms", 1)
         .containsEntry("gameName", "hangman");
+  }
+
+
+  private void testAnyOfAndOneOf(final File file) {
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    Contract contract = contractList.get(0);
+    assertThat(contract).isNotNull();
+    assertThat(contract.getResponse()).isNotNull();
+    List<String> assertKeys = new ArrayList<>();
+    Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    bodyServerValueMap.forEach((key, value) ->
+                               {
+                                 assertKeys.add(key);
+                               }
+    );
+    assertThat(assertKeys).containsExactlyInAnyOrder("gameId", "gameName", "roomId", "newGameId", "playerName");
   }
 }
