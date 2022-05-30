@@ -1,8 +1,9 @@
+package com.corunet.multiapi.converter.openapi;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.regex.Pattern;
 
-import com.corunet.multiapi.converter.openapi.OpenApiContractConverterUtils;
 import io.swagger.v3.oas.models.media.Schema;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
