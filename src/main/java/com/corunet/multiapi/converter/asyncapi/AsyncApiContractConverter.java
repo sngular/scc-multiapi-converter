@@ -387,7 +387,6 @@ public class AsyncApiContractConverter  {
         while (enumObjects.hasNext()) {
           JsonNode nextObject = enumObjects.next();
           if (!enumObjects.hasNext()) {
-            log.info(nextObject.asText());
             regex = regex.concat(nextObject.asText());
           } else {
             regex = regex.concat(nextObject.asText() + "|");
@@ -395,7 +394,6 @@ public class AsyncApiContractConverter  {
         }
       }
     }
-    log.info(regex);
     return regex;
   }
 
