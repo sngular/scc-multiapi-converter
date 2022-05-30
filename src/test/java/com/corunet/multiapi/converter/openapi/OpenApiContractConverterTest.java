@@ -1,3 +1,5 @@
+package com.corunet.multiapi.converter.openapi;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -26,7 +28,7 @@ import org.springframework.cloud.contract.spec.internal.Response;
 import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 
 @Slf4j
-class MultiApiContractConverterTest {
+class OpenApiContractConverterTest {
 
   private final MultiApiContractConverter multiApiContractConverter = new MultiApiContractConverter();
 
@@ -34,7 +36,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Testing the method that checks if the yaml is incorrect")
   void isAcceptedFalse() {
-    File file = new File("src/test/resources/ymls/testFalse.yml");
+    File file = new File("src/test/resources/openapi/testFalse.yml");
     Boolean isAccepted = multiApiContractConverter.isAccepted(file);
     assertThat(isAccepted).isFalse();
   }
@@ -42,7 +44,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Testing the method that checks if the yaml is correct")
   void isAcceptedTrue() {
-    File file = new File("src/test/resources/ymls/testCompleteApi.yml");
+    File file = new File("src/test/resources/openapi/testCompleteApi.yml");
     Boolean isAccepted = multiApiContractConverter.isAccepted(file);
     assertThat(isAccepted).isTrue();
   }
@@ -50,7 +52,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if a contract is returned")
   void convertFromTest() {
-    File file = new File("src/test/resources/ymls/testCompleteApi.yml");
+    File file = new File("src/test/resources/openapi/testCompleteApi.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     assertThat(contractList).hasSize(6);
@@ -63,7 +65,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if RequestHeaders are being processed okay")
   void testRequestHeaders() {
-    File file = new File("src/test/resources/ymls/testRequestHeaders.yml");
+    File file = new File("src/test/resources/openapi/testRequestHeaders.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -76,7 +78,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if QueryParameters are being processed okay")
   void testRequestQueryParameters() {
-    File file = new File("src/test/resources/ymls/testRequestQueryParameters.yml");
+    File file = new File("src/test/resources/openapi/testRequestQueryParameters.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -90,7 +92,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if a simple Request Body is being processed okay")
   void testRequestBody() {
-    File file = new File("src/test/resources/ymls/testRequestBody.yml");
+    File file = new File("src/test/resources/openapi/testRequestBody.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -104,7 +106,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if a simple Request BodyMatcher is being processed okay")
   void testRequestBodyMatcher() {
-    File file = new File("src/test/resources/ymls/testRequestBody.yml");
+    File file = new File("src/test/resources/openapi/testRequestBody.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -119,7 +121,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if the enum logic is being processed okay")
   void testEnums() {
-    File file = new File("src/test/resources/ymls/testEnums.yml");
+    File file = new File("src/test/resources/openapi/testEnums.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -136,7 +138,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if complex objects are being processed okay")
   void testComplexObjects() {
-    File file = new File("src/test/resources/ymls/testComplexObjects.yml");
+    File file = new File("src/test/resources/openapi/testComplexObjects.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -163,7 +165,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if Arrays are being processed okay")
   void testArrays() {
-    File file = new File("src/test/resources/ymls/testArrays.yml");
+    File file = new File("src/test/resources/openapi/testArrays.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -187,7 +189,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if Refs are being processed okay")
   void testRef() {
-    File file = new File("src/test/resources/ymls/testRefs.yml");
+    File file = new File("src/test/resources/openapi/testRefs.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -211,7 +213,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if oneOfs are being processed okay")
   void testOneOfs() {
-    File file = new File("src/test/resources/ymls/testOneOfs.yml");
+    File file = new File("src/test/resources/openapi/testOneOfs.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -230,7 +232,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if AllOfs are being processed okay")
   void testAllOfs() {
-    File file = new File("src/test/resources/ymls/testAllOfs.yml");
+    File file = new File("src/test/resources/openapi/testAllOfs.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -249,7 +251,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check if anyOfs are being processed okay")
   void testAnyOf() {
-    File file = new File("src/test/resources/ymls/testAnyOfs.yml");
+    File file = new File("src/test/resources/openapi/testAnyOfs.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -268,7 +270,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check that BasicSchemas are being processed okay")
   void testBasicSchema() {
-    File file = new File("src/test/resources/ymls/testBasicSchema.yml");
+    File file = new File("src/test/resources/openapi/testBasicSchema.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -282,7 +284,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check that Basic Schemas and $refs processing works well with both. ")
   void testBasicObjectAndRef() {
-    File file = new File("src/test/resources/ymls/testBasicObjectAndRef.yml");
+    File file = new File("src/test/resources/openapi/testBasicObjectAndRef.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -304,7 +306,7 @@ class MultiApiContractConverterTest {
   @Test
   @DisplayName("Check that Examples are being processed okay")
   void testExamples() {
-    File file = new File("src/test/resources/ymls/testExamples.yml");
+    File file = new File("src/test/resources/openapi/testExamples.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
