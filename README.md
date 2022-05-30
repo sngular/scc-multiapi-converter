@@ -1,8 +1,7 @@
 
 # SCC Verifier Open Api Converter
 
-
-## 📜 Summary:
+## 📜 Summary
 
 SCC Verifier Open Api Converter allows us to use Spring Cloud Contract to generate contracts from an OpenApi yaml document.
 
@@ -41,6 +40,7 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
   </dependencies>
 </plugin>
 ```
+
 ## 🧑🏻‍💻 Usage
 
 Inside the configuration tag, you must declare the **contractsDirectory** tag. In this tag you must specify the directory that contains the OpenApi Yamls.
@@ -53,7 +53,7 @@ It will also generate the contractTesting class for the producer with the tests 
 
 If you need more control over the settings of your project, you can use all the Configuration Options that Spring Cloud Contract Maven Plugin has. These configuration options can be checked in the official documentation webpage under 4.2.7 Section: [Spring Cloud Contract Verifier Setup](https://cloud.spring.io/spring-cloud-contract/2.0.x/multi/multi__spring_cloud_contract_verifier_setup.html#maven-configuration-options)
 
-## ✏️ Writing Ymls:
+## ✏️ Writing Ymls
 
 This plugin supports most of the OpenApi/Swagger, but there are a couple of things that must be noted:
 
@@ -99,7 +99,7 @@ components:
           type: string
 ```
 
-## ⚠️Current Limitations:
+## ⚠️Current Limitations
 
 Currently, this plugin has some limitations that will be addressed in the future. In order to make it work, we must follow some rules:
 
@@ -107,8 +107,7 @@ Currently, this plugin has some limitations that will be addressed in the future
 
 - Some OpenApi functionalities are not implemented yet, such as creating example objects, instead you must use the example tag in every property of the object
 
-
-## 🌐 RoadMap:
+## 🌐 RoadMap
 
 - Further investigation for OpenApi and Spring Cloud Contract possibilities.
 - More testing and fixing possible bugs that may occur in the future.
