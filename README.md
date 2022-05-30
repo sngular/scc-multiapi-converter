@@ -1,4 +1,3 @@
-
 # SCC Verifier Open Api Converter
 
 ## 📜 Summary
@@ -8,7 +7,6 @@ SCC Verifier Open Api Converter allows us to use Spring Cloud Contract to genera
 Here is the documentation for these technologies:
 
 - [Spring Cloud Contract](https://cloud.spring.io/spring-cloud-contract/reference/html/)
-
 - [OpenApi](https://swagger.io/specification/)
 
 ## 🚀 Getting Started
@@ -58,7 +56,6 @@ If you need more control over the settings of your project, you can use all the 
 This plugin supports most of the OpenApi/Swagger, but there are a couple of things that must be noted:
 
 - Using **OpenApi´s example label** in the parameters/schemas will check in our contracts that the response is equal to the example value instead of using a Regex.
-
 - Please be wary that writing an example must be the same type as indicated in the file, otherwise your contract will break.
 
 This is an easy example of a small YAML that will work with our plugin:
@@ -104,7 +101,6 @@ components:
 Currently, this plugin has some limitations that will be addressed in the future. In order to make it work, we must follow some rules:
 
 - This plugin allows the use of AllOfs and AnyOfs in the Response section. However, OpenApi does not support AllOfs in this section and AnyOf usage might not work depending on the OpenApi version you are using.
-
 - Some OpenApi functionalities are not implemented yet, such as creating example objects, instead you must use the example tag in every property of the object
 
 ## 🌐 RoadMap
