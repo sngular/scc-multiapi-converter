@@ -32,7 +32,6 @@ class OpenApiContractConverterTest {
 
   private final MultiApiContractConverter multiApiContractConverter = new MultiApiContractConverter();
 
-
   @Test
   @DisplayName("OpenApi: Testing the method that checks if the yaml is incorrect")
   void isAcceptedFalse() {
@@ -233,6 +232,7 @@ class OpenApiContractConverterTest {
       assertThat(assertKeys).containsAnyOf("gameId", "gameName", "roomId", "newGameId", "playerName");
     }
   }
+
   @Test
   @DisplayName("OpenApi: Check if AllOfs are being processed okay")
   void testAllOfs() {
@@ -302,7 +302,7 @@ class OpenApiContractConverterTest {
     assertThat(matchingStrategy.getType().toString()).hasToString("EQUAL_TO");
     assertThat(matchingStrategy.getServerValue()).isEqualTo(1);
     assertThat(matchingStrategy.getClientValue()).isEqualTo(1);
-    HashMap <String, Object> serverValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    HashMap<String, Object> serverValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
     assertThat(serverValueMap)
         .containsEntry("rooms", 1)
         .containsEntry("gameName", "hangman");
