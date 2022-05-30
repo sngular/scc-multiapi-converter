@@ -12,5 +12,6 @@ public class MultiApiContractConverterException extends RuntimeException {
 
   public MultiApiContractConverterException(final Exception e) {
     super(e);
+    
   }
 }
