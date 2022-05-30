@@ -1,3 +1,9 @@
+/*
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  * License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
 package com.corunet.multiapi.converter.asyncapi;
 
 import java.io.File;
@@ -27,7 +33,7 @@ import org.springframework.cloud.contract.spec.internal.OutputMessage;
 import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 
 @Slf4j
-public class AsyncApiContractConverter  {
+public class AsyncApiContractConverter {
 
   public Collection<Contract> convertFrom(final File file) {
     Collection<Contract> sccContracts = new ArrayList<>();
@@ -62,10 +68,10 @@ public class AsyncApiContractConverter  {
           contract.setInput(input);
 
           OutputMessage outputMessage = new OutputMessage();
-           outputMessage.headers(headers -> headers.accept("application/json"));
-           outputMessage.sentTo(topicName);
-           outputMessage.body(bodyProcessed);
-           contract.setOutputMessage(outputMessage);
+          outputMessage.headers(headers -> headers.accept("application/json"));
+          outputMessage.sentTo(topicName);
+          outputMessage.body(bodyProcessed);
+          contract.setOutputMessage(outputMessage);
 
         } else if (operationType.equals(BasicTypeConstants.PUBLISH)) {
           Input input = new Input();
@@ -90,7 +96,8 @@ public class AsyncApiContractConverter  {
     return sccContracts;
   }
 
-  private Map<String, Object> processMessage(ResponseBodyMatchers responseBodyMatchers, JsonNode operationContent, JsonNode node, String operationType) throws JsonProcessingException {
+  private Map<String, Object> processMessage(ResponseBodyMatchers responseBodyMatchers, JsonNode operationContent, JsonNode node, String operationType)
+      throws JsonProcessingException {
     JsonNode message;
     JsonNode component;
     JsonNode schema;
@@ -150,9 +157,11 @@ public class AsyncApiContractConverter  {
       var property = it.next();
       var path = rootProperty + property;
 
-      if (!Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES)) || !Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES).get(BasicTypeConstants.REF))) {
+      if (!Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES)) ||
+          !Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES).get(BasicTypeConstants.REF))) {
         String enumType = "";
-        var type = (properties.get(String.valueOf(property)).get(BasicTypeConstants.FORMAT) != null) ? properties.get(String.valueOf(property)).get(BasicTypeConstants.FORMAT).asText() :
+        var type = (properties.get(String.valueOf(property)).get(BasicTypeConstants.FORMAT) != null) ? properties.get(String.valueOf(property)).get(BasicTypeConstants.FORMAT)
+                                                                                                                 .asText() :
             properties.get(String.valueOf(property)).get(BasicTypeConstants.TYPE).asText();
 
         if (isEnum(properties.get(property))) {
