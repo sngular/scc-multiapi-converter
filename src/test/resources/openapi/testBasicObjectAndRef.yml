@@ -3,7 +3,10 @@ info:
   version: 1.0.0
   title: Corunet Challenge Game Server
   description: Test File for SCC MultiApi Plugin.
-  contact: Corunet
+  contact:
+    name: Corunet
+    url: coru.net
+    email: info@coru.net
   license:
     name: MIT
 servers:
@@ -14,6 +17,8 @@ paths:
       summary: Start a Game
       operationId: createGame
       description: Test File for SCC MultiApi Plugin.
+      tags:
+      - games
       responses:
         '200':
           description: Test File for SCC MultiApi Plugin.
@@ -33,3 +38,7 @@ components:
       properties:
         description:
           type: string
+tags:
+  - name: games
+    description: Test description for SCC MultiApi Plugin.
+
