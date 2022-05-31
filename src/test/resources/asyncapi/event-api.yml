@@ -5,7 +5,7 @@ info:
   description: Order management Service
   contact:
     name: Corunet
-    url: coru.net
+    url: http://www.asyncapi.org/support
     email: info@coru.net
   license:
     name: MIT
