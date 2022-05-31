@@ -438,6 +438,7 @@ public class OpenApiContractConverter {
           break;
         default:
           log.error("Format not supported");
+          break;
       }
     }
     return propertyList;

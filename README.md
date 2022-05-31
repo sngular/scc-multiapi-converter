@@ -1,18 +1,14 @@
 # SCC Verifier MultiApi Converter
 
-
-## 📜 Summary:
+## 📜 Summary
 
 SCC Verifier MultiApi Converter allows us to use Spring Cloud Contract to generate contracts from an OpenApi yaml document or an AsyncApi document. This plugin will detect automatically what contract needs to be generated
 
 Here is the documentation for these technologies:
 
 - [Spring Cloud Contract](https://cloud.spring.io/spring-cloud-contract/reference/html/)
-
 - [OpenApi](https://swagger.io/specification/)
-
 - [AsyncApi](https://www.asyncapi.com/docs/getting-started)
-
 
 ## 🚀 Getting Started
 
@@ -37,12 +33,13 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
     <dependency>
       <groupId>com.corunet</groupId>
       <artifactId>scc-multiapi-converter</artifactId>
-      <version>1.1.0-SNAPSHOT</version>
+      <version>1.1.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
 </plugin>
 ```
+
 ## 🧑🏻‍💻 Usage
 
 Inside the configuration tag, you must declare the **contractsDirectory** tag. In this tag you must specify the directory that contains the OpenApi/AsyncApi Yamls.
@@ -55,12 +52,11 @@ It will also generate the ContractVerifierTest class for the producer and consum
 
 If you need more control over the settings of your project, you can use all the Configuration Options that Spring Cloud Contract Maven Plugin has. These configuration options can be checked in the official documentation webpage under 4.2.7 Section: [Spring Cloud Contract Verifier Setup](https://cloud.spring.io/spring-cloud-contract/2.0.x/multi/multi__spring_cloud_contract_verifier_setup.html#maven-configuration-options).
 
-## ✏️ Writing Ymls:
+## ✏️ Writing Ymls
 
 This plugin supports most of the OpenApi/Swagger and AsyncApi, but there are a couple of things that must be noted:
 
 - Using **OpenApi/AsyncApi´s example label** in the parameters/schemas will check in our contracts that the response is equal to the example value instead of using a Regex.
-
 - Please be aware that writing an example must be the same type as indicated in the file, otherwise your contract will break.
 
 This is an easy example of a small YAML for OpenApi that will work with our plugin:
@@ -140,10 +136,9 @@ components:
           type: integer
           format: int32
           example: 432
-
 ```
 
-## ⚠️Current Limitations:
+## ⚠️Current Limitations
 
 Currently, this plugin has some limitations that will be addressed in the future. In order to make it work, we must follow some rules:
 
@@ -152,14 +147,13 @@ Currently, this plugin has some limitations that will be addressed in the future
 - This plugin allows the use of AllOfs and AnyOfs in the Response section. However, OpenApi does not support AllOfs in this section and AnyOf usage might not work depending on the OpenApi version you are using.
 - Some OpenApi functionalities are not implemented yet, such as creating example objects, instead you must use the example tag in every property of the object.
 
-
 **Async Api implementation**:
 
 - This plugin doesn't allow the use of AllOfs, OneOfs and AnyOfs.
 - Support for generating contracts from avro files.
 - Some AsyncApi functionalities are not implemented yet, such as creating example objects, instead you must use the example tag in every property of the object.
 
-## 🌐 RoadMap:
+## 🌐 RoadMap
 
 - Add implementation to support AllOfs, AnyOfs and OneOfs in AsyncApi.
 - Add support for generating contracts from avro files.
