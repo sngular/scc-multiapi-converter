@@ -3,6 +3,11 @@ openapi: "3.0.0"
 info:
   version: 1.0.0
   title: Corunet Challenge Game Server
+  description: Test File for SCC MultiApi Plugin.
+  contact:
+    name: Corunet
+    url: coru.net
+    email: info@coru.net
   license:
     name: MIT
 servers:
@@ -13,6 +18,7 @@ paths:
     post:
       summary: Start a Game
       operationId: createGame
+      description: Test File for SCC MultiApi Plugin.
       tags:
       - games
       requestBody:
@@ -36,9 +42,10 @@ paths:
                 $ref: "#/components/schemas/Error"
     get:
       summary: List all available games
-      operationId: listGames
+      description: Test File for SCC MultiApi Plugin.
       tags:
       - games
+      operationId: listGames
       responses:
         '200':
           description: A paged array of games
@@ -60,7 +67,6 @@ paths:
   /games/{gameId}:
     get:
       summary: Info for a specific game
-      operationId: showGameById
       tags:
       - games
       parameters:
@@ -139,68 +145,6 @@ components:
         roomId:
           type: integer
           format: int32
-    GamePlay:
-      type: object
-      required:
-        - id
-        - name
-        - roomId
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-        roomId:
-          type: integer
-          format: int32
-    Games:
-      type: array
-      items:
-        $ref: "#/components/schemas/Game"
-    Movement:
-      type: object
-      required:
-        - movement
-      properties:
-        movement:
-          type: string
-    GamePlayStats:
-      type: array
-      items:
-        $ref: "#/components/schemas/GameStat"
-    GameStat:
-      type: object
-      required:
-        - gameName
-        - roomId
-        - result
-      properties:
-        gameName:
-          type: string
-        roomId:
-          type: integer
-          format: int32
-        result:
-          type: array
-          items:
-            $ref: "#/components/schemas/GamePlayResult"
-        dateTime:
-          type: string
-          format: date-time
-    GamePlayResult:
-      type: object
-      required:
-        - movement
-        - info
-        - result
-      properties:
-        movement:
-          type: string
-        info:
-          type: string
-        result:
-          type: string
     Error:
       type: object
       required:
@@ -212,3 +156,6 @@ components:
           format: int32
         message:
           type: string
+tags:
+  - name: games
+    description: Test description for SCC MultiApi Plugin.
