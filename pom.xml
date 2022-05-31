@@ -7,6 +7,19 @@
   <groupId>com.corunet</groupId>
   <artifactId>scc-multiapi-converter</artifactId>
   <version>1.0.0</version>
+  <name>SCC-MultiApi-Converter</name>
+  <description>Generates Spring Cloud Contract based on an OpenApi document</description>
+  <url>https://github.com/corunet/scc-multiapi-converter</url>
+
+  <licenses>
+    <license>
+      <name>Mozilla Public License 2.0</name>
+      <url>https://github.com/corunet/scc-multiapi-converter/blob/main/LICENSE</url>
+      <distribution>repo</distribution>
+      <comments></comments>
+    </license>
+  </licenses>
+
 
   <properties>
     <maven.compiler.source>11</maven.compiler.source>
@@ -81,6 +94,25 @@
       <timezone>Europe/Madrid</timezone>
     </developer>
   </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:corunet/scc-multiapi-converter.git</connection>
+    <developerConnection>scm:git:git@github.com:corunet/scc-multiapi-converter.git</developerConnection>
+    <url>scm:git:git@github.com:corunet/scc-multiapi-converter.git</url>
+  </scm>
+
+  <distributionManagement>
+    <repository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+
   <dependencies>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -189,6 +221,37 @@
               <version>1.0.1</version>
             </dependency>
           </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.6.8</version>
+          <extensions>true</extensions>
+          <configuration>
+            <serverId>ossrh</serverId>
+            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>1.6</version>
+          <executions>
+            <execution>
+              <id>sign-artifacts</id>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+              <phase>verify</phase>
+              <configuration>
+                <gpgArguments>
+                  <arg>--pinentry-mode</arg>
+                  <arg>loopback</arg>
+                </gpgArguments>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>

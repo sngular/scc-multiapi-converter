@@ -3,6 +3,8 @@ openapi: "3.0.0"
 info:
   version: 1.0.0
   title: Corunet Challenge Game Server
+  description: Test File for SCC MultiApi Plugin.
+  contact: Corunet
   license:
     name: MIT
 servers:
@@ -12,8 +14,7 @@ paths:
     get:
       summary: Info for a specific game
       operationId: showGameById
-      tags:
-      - games
+      description: Test File for SCC MultiApi Plugin.
       parameters:
       - name: gameId
         in: path

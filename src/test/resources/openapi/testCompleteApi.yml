@@ -3,6 +3,8 @@ openapi: "3.0.0"
 info:
   version: 1.0.0
   title: Corunet Challenge Game Server
+  description: Test File for SCC MultiApi Plugin.
+  contact: Corunet
   license:
     name: MIT
 servers:
@@ -13,8 +15,7 @@ paths:
     post:
       summary: Start a Game
       operationId: createGame
-      tags:
-      - games
+      description: Test File for SCC MultiApi Plugin.
       requestBody:
         required: true
         content:
@@ -36,9 +37,8 @@ paths:
                 $ref: "#/components/schemas/Error"
     get:
       summary: List all available games
+      description: Test File for SCC MultiApi Plugin.
       operationId: listGames
-      tags:
-      - games
       responses:
         '200':
           description: A paged array of games
@@ -60,9 +60,6 @@ paths:
   /games/{gameId}:
     get:
       summary: Info for a specific game
-      operationId: showGameById
-      tags:
-      - games
       parameters:
       - name: gameId
         in: query
@@ -139,36 +136,6 @@ components:
         roomId:
           type: integer
           format: int32
-    GamePlay:
-      type: object
-      required:
-        - id
-        - name
-        - roomId
-      properties:
-        id:
-          type: integer
-          format: int32
-        name:
-          type: string
-        roomId:
-          type: integer
-          format: int32
-    Games:
-      type: array
-      items:
-        $ref: "#/components/schemas/Game"
-    Movement:
-      type: object
-      required:
-        - movement
-      properties:
-        movement:
-          type: string
-    GamePlayStats:
-      type: array
-      items:
-        $ref: "#/components/schemas/GameStat"
     GameStat:
       type: object
       required:
