@@ -41,15 +41,15 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Testing the method that checks if the yaml is incorrect")
   void isAcceptedFalse() {
-    File file = new File("src/test/resources/openapi/testFalse.yml");
-    Boolean isAccepted = multiApiContractConverter.isAccepted(file);
+    final File file = new File("src/test/resources/openapi/testFalse.yml");
+    final Boolean isAccepted = multiApiContractConverter.isAccepted(file);
     assertThat(isAccepted).isFalse();
   }
 
   @Test
   @DisplayName("OpenApi: Testing the method that checks if the yaml is correct")
   void isAcceptedTrue() {
-    File file = new File("src/test/resources/openapi/testCompleteApi.yml");
+    final File file = new File("src/test/resources/openapi/testCompleteApi.yml");
     Boolean isAccepted = multiApiContractConverter.isAccepted(file);
     assertThat(isAccepted).isTrue();
   }
@@ -57,9 +57,9 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check if a contract is returned")
   void convertFromTest() {
-    File file = new File("src/test/resources/openapi/testCompleteApi.yml");
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    final File file = new File("src/test/resources/openapi/testCompleteApi.yml");
+    final Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    final ArrayList<Contract> contractList = new ArrayList<>(contracts);
     assertThat(contractList).hasSize(6);
     assertThat(contractList.get(0).getResponse()).isNotNull();
     assertThat(contractList.get(0).getRequest()).isNotNull();
@@ -70,11 +70,11 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check if RequestHeaders are being processed okay")
   void testRequestHeaders() {
-    File file = new File("src/test/resources/openapi/testRequestHeaders.yml");
+    final File file = new File("src/test/resources/openapi/testRequestHeaders.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
-    Contract contract = contractList.get(0);
-    Header header = contract.getRequest().getHeaders().getEntries().stream().iterator().next();
+    final Contract contract = contractList.get(0);
+    final Header header = contract.getRequest().getHeaders().getEntries().stream().iterator().next();
     assertThat(header.getName()).isEqualTo("Content-Type");
     assertThat(header.getClientValue()).isEqualTo("application/json");
     assertThat(header.getServerValue()).isEqualTo("application/json");
@@ -83,12 +83,12 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check if QueryParameters are being processed okay")
   void testRequestQueryParameters() {
-    File file = new File("src/test/resources/openapi/testRequestQueryParameters.yml");
+    final File file = new File("src/test/resources/openapi/testRequestQueryParameters.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
-    QueryParameters queryParameters = contract.getRequest().getUrlPath().getQueryParameters();
-    QueryParameter parameter = queryParameters.getParameters().get(0);
+    final QueryParameters queryParameters = contract.getRequest().getUrlPath().getQueryParameters();
+    final QueryParameter parameter = queryParameters.getParameters().get(0);
     assertThat(parameter.getName()).isEqualTo("gameId");
     assertThat(parameter.getClientValue()).isInstanceOf(Pattern.class);
     Assertions.assertTrue("([1-9]\\d*)".equalsIgnoreCase(parameter.getClientValue().toString()));
@@ -97,12 +97,12 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check if a simple Request Body is being processed okay")
   void testRequestBody() {
-    File file = new File("src/test/resources/openapi/testRequestBody.yml");
+    final File file = new File("src/test/resources/openapi/testRequestBody.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
-    Body body = contract.getRequest().getBody();
-    HashMap<String, Object> bodyServerValueMap = (HashMap<String, Object>) body.getServerValue();
+    final Body body = contract.getRequest().getBody();
+    final HashMap<String, Object> bodyServerValueMap = (HashMap<String, Object>) body.getServerValue();
     assertThat(bodyServerValueMap).isNotEmpty();
     assertThat(bodyServerValueMap.get("gameId")).isInstanceOf(Integer.class);
     assertThat(bodyServerValueMap.get("playerName")).isInstanceOf(String.class);
@@ -115,8 +115,8 @@ class OpenApiContractConverterTest {
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
-    BodyMatchers bodyMatchers = contract.getRequest().getBodyMatchers();
-    List<BodyMatcher> bodyMatcherList = bodyMatchers.matchers();
+    final BodyMatchers bodyMatchers = contract.getRequest().getBodyMatchers();
+    final List<BodyMatcher> bodyMatcherList = bodyMatchers.matchers();
     for (BodyMatcher bodyMatcher : bodyMatcherList) {
       assertThat(bodyMatcher.path()).isInstanceOf(String.class);
       assertThat(bodyMatcher.matchingType()).isInstanceOf(MatchingType.class);
@@ -126,15 +126,15 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check if the enum logic is being processed okay")
   void testEnums() {
-    File file = new File("src/test/resources/openapi/testEnums.yml");
+    final File file = new File("src/test/resources/openapi/testEnums.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
-    Body body = contract.getResponse().getBody();
-    String[] enumValues = {"hola", "adios"};
+    final Body body = contract.getResponse().getBody();
+    final String[] enumValues = {"hola", "adios"};
     HashMap<String, Object> bodyServerValueMap = (HashMap<String, Object>) body.getServerValue();
     assertThat(bodyServerValueMap).isNotEmpty();
-    String name = (String) bodyServerValueMap.get("name");
+    final String name = (String) bodyServerValueMap.get("name");
     assertThat(name)
         .isInstanceOf(String.class)
         .isIn(enumValues);
@@ -143,7 +143,7 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check if complex objects are being processed okay")
   void testComplexObjects() {
-    File file = new File("src/test/resources/openapi/testComplexObjects.yml");
+    final File file = new File("src/test/resources/openapi/testComplexObjects.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -158,7 +158,7 @@ class OpenApiContractConverterTest {
         .isNotNull()
         .containsKey("name")
         .hasSize(2);
-    HashMap<String, Object> nameSubMap = (HashMap<String, Object>) bodyServerValueMap.get("name");
+    final HashMap<String, Object> nameSubMap = (HashMap<String, Object>) bodyServerValueMap.get("name");
     assertThat(nameSubMap)
         .containsKey("lastname")
         .hasSize(2);
@@ -170,23 +170,23 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check if Arrays are being processed okay")
   void testArrays() {
-    File file = new File("src/test/resources/openapi/testArrays.yml");
+    final File file = new File("src/test/resources/openapi/testArrays.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
     assertThat(contract).isNotNull();
     assertThat(contract.getRequest()).isNotNull();
     assertThat(contract.getResponse()).isNotNull();
-    Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    final Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
     assertThat(bodyServerValueMap)
         .containsKey("name")
         .containsKey("address")
         .isNotNull();
-    List<HashMap<String, String>> nameSubList = (ArrayList<HashMap<String, String>>) bodyServerValueMap.get("name");
-    Map<String, String> lastNameMap = nameSubList.get(0);
+    final List<HashMap<String, String>> nameSubList = (ArrayList<HashMap<String, String>>) bodyServerValueMap.get("name");
+    final Map<String, String> lastNameMap = nameSubList.get(0);
     assertThat(lastNameMap).containsKey("lastname");
     assertThat(lastNameMap.get("lastname")).isInstanceOf(String.class);
-    List<ArrayList<String>> addressSubList = (ArrayList<ArrayList<String>>) bodyServerValueMap.get("address");
+    final List<ArrayList<String>> addressSubList = (ArrayList<ArrayList<String>>) bodyServerValueMap.get("address");
     assertThat(addressSubList.get(0)).isInstanceOf(ArrayList.class);
     assertThat(addressSubList.get(0).get(0)).isInstanceOf(String.class);
   }
@@ -194,7 +194,7 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check if Refs are being processed okay")
   void testRef() {
-    File file = new File("src/test/resources/openapi/testRefs.yml");
+    final File file = new File("src/test/resources/openapi/testRefs.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -204,10 +204,10 @@ class OpenApiContractConverterTest {
     Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
     assertThat(bodyServerValueMap)
         .containsKey("player");
-    Map<String, Object> playerMap = (HashMap<String, Object>) bodyServerValueMap.get("player");
+    final Map<String, Object> playerMap = (HashMap<String, Object>) bodyServerValueMap.get("player");
     assertThat(playerMap)
         .containsKey("name");
-    Map<String, Object> nameMap = (Map<String, Object>) playerMap.get("name");
+    final Map<String, Object> nameMap = (Map<String, Object>) playerMap.get("name");
     assertThat(nameMap)
         .containsKey("firstname")
         .containsKey("lastname");
@@ -219,7 +219,7 @@ class OpenApiContractConverterTest {
   @DisplayName("OpenApi: Check if oneOfs are being processed okay")
   void testOneOfsAndAnyOfs() {
 
-    List<File> fileList = new ArrayList<>();
+    final List<File> fileList = new ArrayList<>();
     fileList.add(new File("src/test/resources/openapi/testOneOfs.yml"));
     fileList.add(new File("src/test/resources/openapi/testAnyOfs.yml"));
     for (File file : fileList) {
@@ -228,7 +228,7 @@ class OpenApiContractConverterTest {
       Contract contract = contractList.get(0);
       assertThat(contract).isNotNull();
       assertThat(contract.getResponse()).isNotNull();
-      List<String> assertKeys = new ArrayList<>();
+      final List<String> assertKeys = new ArrayList<>();
       Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
       bodyServerValueMap.forEach((key, value) ->
                                  {
@@ -242,7 +242,7 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check if AllOfs are being processed okay")
   void testAllOfs() {
-    File file = new File("src/test/resources/openapi/testAllOfs.yml");
+    final File file = new File("src/test/resources/openapi/testAllOfs.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -257,16 +257,16 @@ class OpenApiContractConverterTest {
     );
     assertThat(assertKeys).containsExactlyInAnyOrder("gameId", "gameName", "roomId", "newGameId", "playerName");
   }
-  
+
   @Test
   @DisplayName("OpenApi: Check that BasicSchemas are being processed okay")
   void testBasicSchema() {
-    File file = new File("src/test/resources/openapi/testBasicSchema.yml");
+    final File file = new File("src/test/resources/openapi/testBasicSchema.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
     assertThat(contract).isNotNull();
-    Response response = contract.getResponse();
+    final Response response = contract.getResponse();
     assertThat(response).isNotNull();
     assertThat(response.getBody().getServerValue()).isNotNull();
     assertThat(response.getBody().getServerValue().toString()).hasToString("[a-zA-Z0-9]+");
@@ -275,15 +275,15 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check that Basic Schemas and $refs processing works well with both. ")
   void testBasicObjectAndRef() {
-    File file = new File("src/test/resources/openapi/testBasicObjectAndRef.yml");
+    final File file = new File("src/test/resources/openapi/testBasicObjectAndRef.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
     Response response = contract.getResponse();
-    Map<String, Object> bodyServerValueMap = (Map<String, Object>) response.getBody().getServerValue();
-    Map<String, Object> messageMap = (Map<String, Object>) bodyServerValueMap.get("message");
-    ResponseBodyMatchers responseBodyMatchers = response.getBodyMatchers();
-    List<BodyMatcher> bodyMatchers = responseBodyMatchers.matchers();
+    final Map<String, Object> bodyServerValueMap = (Map<String, Object>) response.getBody().getServerValue();
+    final Map<String, Object> messageMap = (Map<String, Object>) bodyServerValueMap.get("message");
+    final ResponseBodyMatchers responseBodyMatchers = response.getBodyMatchers();
+    final List<BodyMatcher> bodyMatchers = responseBodyMatchers.matchers();
     assertThat(contract).isNotNull();
     assertThat(bodyServerValueMap.get("code")).isInstanceOf(Integer.class);
     assertThat(bodyMatchers.get(0).path()).isEqualTo("code");
@@ -297,22 +297,20 @@ class OpenApiContractConverterTest {
   @Test
   @DisplayName("OpenApi: Check that Examples are being processed okay")
   void testExamples() {
-    File file = new File("src/test/resources/openapi/testExamples.yml");
+    final File file = new File("src/test/resources/openapi/testExamples.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
     QueryParameters queryParameters = contract.getRequest().getUrlPath().getQueryParameters();
     QueryParameter parameter = queryParameters.getParameters().get(0);
     assertThat(parameter.getName()).isEqualTo("gameId");
-    MatchingStrategy matchingStrategy = (MatchingStrategy) parameter.getServerValue();
+    final MatchingStrategy matchingStrategy = (MatchingStrategy) parameter.getServerValue();
     assertThat(matchingStrategy.getType().toString()).hasToString("EQUAL_TO");
     assertThat(matchingStrategy.getServerValue()).isEqualTo(1);
     assertThat(matchingStrategy.getClientValue()).isEqualTo(1);
-    HashMap<String, Object> serverValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    final HashMap<String, Object> serverValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
     assertThat(serverValueMap)
         .containsEntry("rooms", 1)
         .containsEntry("gameName", "hangman");
   }
-
-
 }

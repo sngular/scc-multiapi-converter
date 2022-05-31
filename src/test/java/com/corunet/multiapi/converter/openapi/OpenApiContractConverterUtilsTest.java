@@ -21,16 +21,16 @@ class OpenApiContractConverterUtilsTest {
   @Test
   @DisplayName("Check that mapRefName returns the name we want ")
   void testMapRefName() {
-    Schema schema = new Schema ();
+    final Schema schema = new Schema ();
     schema.set$ref("#/components/schemas/Game");
-    String ref = OpenApiContractConverterUtils.mapRefName(schema);
+    final String ref = OpenApiContractConverterUtils.mapRefName(schema);
     assertThat(ref).hasToString("Game");
   }
 
   @Test
   @DisplayName("Check that processBasicResponseTypeBody gives us the right body Matcher ")
   void testProcessBasicResponseTypeBody() {
-    Response response = new Response();
+    final Response response = new Response();
     Schema schema = new Schema ();
     schema.setType("string");
     OpenApiContractConverterUtils.processBasicResponseTypeBody(response, schema);
@@ -40,7 +40,7 @@ class OpenApiContractConverterUtilsTest {
   @Test
   @DisplayName("Check that processBasicRequestTypeBody gives us the right body Matcher ")
   void testProcessBasicRequestTypeBody() {
-    Request request = new Request();
+    final Request request = new Request();
     Schema schema = new Schema ();
     schema.setType("string");
     OpenApiContractConverterUtils.processBasicRequestTypeBody(request, schema);

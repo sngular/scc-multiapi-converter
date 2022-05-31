@@ -14,7 +14,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.springframework.cloud.contract.spec.internal.RegexPatterns;
 import org.springframework.cloud.contract.spec.internal.RegexProperty;
 
-public class BasicTypeConstants {
+public final class BasicTypeConstants {
 
   public static final String INT_32 = "int32";
 
