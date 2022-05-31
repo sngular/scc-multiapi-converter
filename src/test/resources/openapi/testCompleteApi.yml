@@ -145,19 +145,6 @@ components:
         roomId:
           type: integer
           format: int32
-    GamePlayResult:
-      type: object
-      required:
-        - movement
-        - info
-        - result
-      properties:
-        movement:
-          type: string
-        info:
-          type: string
-        result:
-          type: string
     Error:
       type: object
       required:
