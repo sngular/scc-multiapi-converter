@@ -14,26 +14,26 @@ import io.swagger.v3.oas.models.media.Schema;
 import org.springframework.cloud.contract.spec.internal.Request;
 import org.springframework.cloud.contract.spec.internal.Response;
 
-public class OpenApiContractConverterUtils {
+public final class OpenApiContractConverterUtils {
 
   private OpenApiContractConverterUtils() {}
 
-  public static String mapRefName(Schema schema) {
+  public static String mapRefName(final Schema schema) {
     String refName = "";
     if (BasicTypeConstants.ARRAY.equalsIgnoreCase(schema.getType())) {
-      ArraySchema arraySchema = (ArraySchema) schema;
-      String[] wholeRef = arraySchema.getItems().get$ref().split("/");
+      final ArraySchema arraySchema = (ArraySchema) schema;
+      final String[] wholeRef = arraySchema.getItems().get$ref().split("/");
       refName = wholeRef[wholeRef.length - 1];
     }
     if (Objects.nonNull(schema.get$ref())) {
-      String[] wholeRef = schema.get$ref().split("/");
+      final String[] wholeRef = schema.get$ref().split("/");
       refName = wholeRef[wholeRef.length - 1];
 
     }
     return refName;
   }
 
-  public static void processBasicResponseTypeBody(Response response, Schema schema) {
+  public static void processBasicResponseTypeBody(final Response response, Schema schema) {
     if (Objects.nonNull(schema.getExample())) {
       response.body(schema.getExample());
     } else {
@@ -67,7 +67,7 @@ public class OpenApiContractConverterUtils {
     }
   }
 
-  public static void processBasicRequestTypeBody(Request request, Schema schema) {
+  public static void processBasicRequestTypeBody(final Request request, Schema schema) {
 
     if (Objects.nonNull(schema.getExample())) {
       request.body(schema.getExample());
