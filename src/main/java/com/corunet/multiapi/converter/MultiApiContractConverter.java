@@ -26,15 +26,15 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
 
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
-  private static final OpenApiContractConverter openApiContractConverter = new OpenApiContractConverter();
+  private static final OpenApiContractConverter OPEN_API_CONTRACT_CONVERTER = new OpenApiContractConverter();
 
   @Override
   public boolean isAccepted(final File file) {
-    String name = file.getName();
+    final String name = file.getName();
     boolean isAccepted = name.endsWith(".yml") || name.endsWith(".yaml");
     if (isAccepted) {
       try {
-        JsonNode node;
+        final JsonNode node;
         node = OBJECT_MAPPER.readTree(file);
         isAccepted = (node != null && node.size() > 0 && Objects.nonNull(node.get(BasicTypeConstants.OPENAPI)));
       } catch (IOException e) {
@@ -53,7 +53,7 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
       node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
       if (node != null && node.size() > 0) {
         if (Objects.nonNull(node.get(BasicTypeConstants.OPENAPI))) {
-          contracts = openApiContractConverter.convertFrom(file);
+          contracts = OPEN_API_CONTRACT_CONVERTER.convertFrom(file);
         }
       } else {
         throw new MultiApiContractConverterException("Yaml file is not correct");
@@ -67,5 +67,5 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
   }
 
   @Override
-  public Collection<Contract> convertTo(Collection<Contract> contract) {return contract;}
+  public Collection<Contract> convertTo(final Collection<Contract> contract) {return contract;}
 }

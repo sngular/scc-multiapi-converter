@@ -39,7 +39,6 @@ components:
       type: object
       properties:
         name:
-          type: object
           $ref: "#/components/schemas/Name"
     Name:
       type: object

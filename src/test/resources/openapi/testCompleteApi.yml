@@ -66,9 +66,6 @@ paths:
                 $ref: "#/components/schemas/Error"
   /games/{gameId}:
     get:
-      summary: Info for a specific game
-      tags:
-      - games
       parameters:
       - name: gameId
         in: query
@@ -77,6 +74,11 @@ paths:
         schema:
           type: integer
           format: int32
+      summary: Info for a specific game
+      operationId: getGamesByGameId
+      description: Test Description for SCC multiApi Converter
+      tags:
+      - games
       responses:
         '200':
           description: Expected response to a valid request
