@@ -38,7 +38,6 @@ class OpenApiContractConverterTest {
 
   private final MultiApiContractConverter multiApiContractConverter = new MultiApiContractConverter();
 
-
   @Test
   @DisplayName("OpenApi: Testing the method that checks if the yaml is incorrect")
   void isAcceptedFalse() {
@@ -218,8 +217,32 @@ class OpenApiContractConverterTest {
 
   @Test
   @DisplayName("OpenApi: Check if oneOfs are being processed okay")
-  void testOneOfs() {
-    File file = new File("src/test/resources/openapi/testOneOfs.yml");
+  void testOneOfsAndAnyOfs() {
+
+    List<File> fileList = new ArrayList<>();
+    fileList.add(new File("src/test/resources/openapi/testOneOfs.yml"));
+    fileList.add(new File("src/test/resources/openapi/testAnyOfs.yml"));
+    for (File file : fileList) {
+      Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+      ArrayList<Contract> contractList = new ArrayList<>(contracts);
+      Contract contract = contractList.get(0);
+      assertThat(contract).isNotNull();
+      assertThat(contract.getResponse()).isNotNull();
+      List<String> assertKeys = new ArrayList<>();
+      Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+      bodyServerValueMap.forEach((key, value) ->
+                                 {
+                                   assertKeys.add(key);
+                                 }
+      );
+      assertThat(assertKeys).containsAnyOf("gameId", "gameName", "roomId", "newGameId", "playerName");
+    }
+  }
+
+  @Test
+  @DisplayName("OpenApi: Check if AllOfs are being processed okay")
+  void testAllOfs() {
+    File file = new File("src/test/resources/openapi/testAllOfs.yml");
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     ArrayList<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
@@ -232,24 +255,9 @@ class OpenApiContractConverterTest {
                                  assertKeys.add(key);
                                }
     );
-    assertThat(assertKeys).containsAnyOf("gameId", "gameName", "roomId", "newGameId", "playerName");
+    assertThat(assertKeys).containsExactlyInAnyOrder("gameId", "gameName", "roomId", "newGameId", "playerName");
   }
-
-  @Test
-  @DisplayName("OpenApi: Check if AllOfs are being processed okay")
-  void testAllOfs() {
-    File file = new File("src/test/resources/openapi/testAllOfs.yml");
-    testAnyOfAndOneOf(file);
-  }
-
-
-  @Test
-  @DisplayName("OpenApi: Check if anyOfs are being processed okay")
-  void testAnyOf() {
-    File file = new File("src/test/resources/openapi/testAnyOfs.yml");
-    testAnyOfAndOneOf(file);
-  }
-
+  
   @Test
   @DisplayName("OpenApi: Check that BasicSchemas are being processed okay")
   void testBasicSchema() {
@@ -300,26 +308,11 @@ class OpenApiContractConverterTest {
     assertThat(matchingStrategy.getType().toString()).hasToString("EQUAL_TO");
     assertThat(matchingStrategy.getServerValue()).isEqualTo(1);
     assertThat(matchingStrategy.getClientValue()).isEqualTo(1);
-    HashMap <String, Object> serverValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    HashMap<String, Object> serverValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
     assertThat(serverValueMap)
         .containsEntry("rooms", 1)
         .containsEntry("gameName", "hangman");
   }
 
 
-  private void testAnyOfAndOneOf(final File file) {
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
-    Contract contract = contractList.get(0);
-    assertThat(contract).isNotNull();
-    assertThat(contract.getResponse()).isNotNull();
-    List<String> assertKeys = new ArrayList<>();
-    Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
-    bodyServerValueMap.forEach((key, value) ->
-                               {
-                                 assertKeys.add(key);
-                               }
-    );
-    assertThat(assertKeys).containsExactlyInAnyOrder("gameId", "gameName", "roomId", "newGameId", "playerName");
-  }
 }
