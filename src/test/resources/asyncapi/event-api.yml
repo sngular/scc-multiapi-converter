@@ -1,8 +1,14 @@
-asyncapi: 2.3.0
+asyncapi: "2.3.0"
 info:
   title: Order Service
   version: 1.0.0
   description: Order management Service
+  contact:
+    name: Corunet
+    url: coru.net
+    email: info@coru.net
+  license:
+    name: MIT
 servers:
   development:
     url: development.gigantic-server.com
@@ -25,11 +31,13 @@ channels:
       operationId: "publishOperation"
       message:
         $ref: '#/components/messages/OrderCreated'
+    description: Operation that will produce an OrderCreated object
   createOrder:
     subscribe:
       operationId: "subscribeOperation"
       message:
         $ref: '#/components/messages/CreateOrder'
+    description: Operation that will consume an CreateOrder object
 components:
   messages:
     OrderCreated:
@@ -39,16 +47,6 @@ components:
       payload:
         $ref: '#/components/schemas/CreateOrder'
   schemas:
-    Waiter:
-      type: object
-      properties:
-        ref:
-          type: string
-        timestamp:
-          type: string
-          format: 'dd/mm/yyyy hh:MM:sss'
-        table:
-          type: string
     CreateOrder:
       type: object
       properties:
@@ -72,33 +70,3 @@ components:
             type: integer
             format: int32
             example: [ 1, 2, 3 ]
-    OrderLine:
-      type: object
-      required:
-      - ref
-      - products
-      properties:
-        ref:
-          type: string
-        products:
-          type: array
-          items:
-            $ref: '#/components/schemas/OrderProduct'
-    OrderProduct:
-      type: object
-      required:
-      - ref
-      - productRef
-      - price
-      - quantity
-      properties:
-        ref:
-          type: string
-        productRef:
-          type: string
-        price:
-          type: string
-          format: decimal
-        quantity:
-          type: string
-          format: decimal
