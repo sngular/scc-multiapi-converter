@@ -11,7 +11,7 @@ info:
   license:
     name: MIT
 servers:
-  - url: http://localhost:8080/v1
+- url: http://localhost:8080/v1
 paths:
   /games:
     summary: Hola
@@ -97,8 +97,8 @@ components:
     Game:
       type: object
       required:
-        - id
-        - name
+      - id
+      - name
       properties:
         id:
           type: integer
@@ -108,9 +108,9 @@ components:
     GameInfo:
       type: object
       required:
-        - gameName
-        - players
-        - rooms
+      - gameName
+      - players
+      - rooms
       properties:
         rooms:
           type: integer
@@ -124,8 +124,8 @@ components:
     NewGame:
       type: object
       required:
-        - gameId
-        - playerName
+      - gameId
+      - playerName
       properties:
         gameId:
           type: integer
@@ -135,9 +135,9 @@ components:
     NewGamePlay:
       type: object
       required:
-        - gameId
-        - gameName
-        - roomId
+      - gameId
+      - gameName
+      - roomId
       properties:
         gameId:
           type: integer
@@ -150,8 +150,8 @@ components:
     Error:
       type: object
       required:
-        - code
-        - message
+      - code
+      - message
       properties:
         code:
           type: integer
@@ -159,5 +159,5 @@ components:
         message:
           type: string
 tags:
-  - name: games
-    description: Test description for SCC MultiApi Plugin.
+- name: games
+  description: Test description for SCC MultiApi Plugin.

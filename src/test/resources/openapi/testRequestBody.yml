@@ -63,7 +63,7 @@ components:
           type: integer
           format: int32
 tags:
-  - name: games
-    description: Test description for SCC MultiApi Plugin.
+- name: games
+  description: Test description for SCC MultiApi Plugin.
 
 

@@ -43,10 +43,10 @@ components:
     Name:
       type: object
       properties:
-          firstname:
-            type: string
-          lastname:
-            type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
 tags:
-  - name: games
-    description: Test description for SCC MultiApi Plugin.
+- name: games
+  description: Test description for SCC MultiApi Plugin.
