@@ -4,7 +4,7 @@
  *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.corunet.multiapi.converter.openapi;
+package net.coru.multiapi.converter.openapi;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
