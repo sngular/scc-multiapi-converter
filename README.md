@@ -6,7 +6,7 @@ SCC Verifier Open Api Converter allows us to use Spring Cloud Contract to genera
 
 Here is the documentation for these technologies:
 
-- [Spring Cloud Contract](https://cloud.spring.io/spring-cloud-contract/reference/html/)
+- [Spring Cloud Contract](https://docs.spring.io/spring-cloud-contract/docs/current/reference/html/)
 - [OpenApi](https://swagger.io/specification/)
 
 ## 🚀 Getting Started
