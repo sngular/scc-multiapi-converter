@@ -11,22 +11,21 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.extern.slf4j.Slf4j;
+import net.coru.multiapi.converter.asyncapi.AsyncApiContractConverter;
 import net.coru.multiapi.converter.exception.MultiApiContractConverterException;
 import net.coru.multiapi.converter.openapi.OpenApiContractConverter;
 import net.coru.multiapi.converter.utils.BasicTypeConstants;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.contract.spec.Contract;
 import org.springframework.cloud.contract.spec.ContractConverter;
 
 @Slf4j
 public class MultiApiContractConverter implements ContractConverter<Collection<Contract>> {
 
-  public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
-
   private static final OpenApiContractConverter OPEN_API_CONTRACT_CONVERTER = new OpenApiContractConverter();
+
+  private static final AsyncApiContractConverter ASYNC_API_CONTRACT_CONVERTER = new AsyncApiContractConverter();
 
   @Override
   public boolean isAccepted(final File file) {
@@ -35,8 +34,8 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
     if (isAccepted) {
       try {
         final JsonNode node;
-        node = OBJECT_MAPPER.readTree(file);
-        isAccepted = (node != null && node.size() > 0 && Objects.nonNull(node.get(BasicTypeConstants.OPENAPI)));
+        node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
+        isAccepted = (node != null && node.size() > 0 && (Objects.nonNull(node.get(BasicTypeConstants.ASYNCAPI)) || Objects.nonNull(node.get(BasicTypeConstants.OPENAPI))));
       } catch (IOException e) {
         isAccepted = false;
       }
@@ -52,7 +51,9 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
     try {
       node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
       if (node != null && node.size() > 0) {
-        if (Objects.nonNull(node.get(BasicTypeConstants.OPENAPI))) {
+        if (Objects.nonNull(node.get(BasicTypeConstants.ASYNCAPI))) {
+          contracts = ASYNC_API_CONTRACT_CONVERTER.convertFrom(file);
+        } else if (Objects.nonNull(node.get(BasicTypeConstants.OPENAPI))) {
           contracts = OPEN_API_CONTRACT_CONVERTER.convertFrom(file);
         }
       } else {

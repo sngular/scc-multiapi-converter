@@ -6,12 +6,11 @@
 
 package net.coru.multiapi.converter.exception;
 
-public class MultiApiContractConverterException extends RuntimeException {
+public class ElementNotFoundException extends RuntimeException {
 
-  public MultiApiContractConverterException(final String message) {super(message);}
+  private static final String MESSAGE = "%s not found";
 
-  public MultiApiContractConverterException(final Exception e) {
-    super(e);
-
+  public ElementNotFoundException(final String message) {
+    super(String.format(MESSAGE, message));
   }
 }
