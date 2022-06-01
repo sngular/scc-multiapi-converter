@@ -49,7 +49,7 @@ Once you specify this in your pom.xml you must use the command: **maven** **clea
 
 It will also generate the contractTesting class for the producer with the tests for your Api REST in the package indicated at the **packageWithBaseClasses** tag. If you want to change where your contracts will be located you must use the **basePackageForTests** tag in the pom.xml
 
-If you need more control over the settings of your project, you can use all the Configuration Options that Spring Cloud Contract Maven Plugin has. These configuration options can be checked in the official documentation webpage under 4.2.7 Section: [Spring Cloud Contract Verifier Setup](https://cloud.spring.io/spring-cloud-contract/2.0.x/multi/multi__spring_cloud_contract_verifier_setup.html#maven-configuration-options)
+If you need more control over the settings of your project, you can use all the Configuration Options that Spring Cloud Contract Maven Plugin has. These configuration options can be checked in the official documentation webpage under 4.2.7 Section: [Spring Cloud Contract Verifier Setup](https://docs.spring.io/spring-cloud-contract/docs/current/reference/html/maven-project.html)
 
 ## ✏️ Writing Ymls
 
