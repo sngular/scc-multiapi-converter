@@ -4,7 +4,7 @@
  *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.corunet.multiapi.converter.asyncapi;
+package net.coru.multiapi.converter.asyncapi;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,14 +16,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.corunet.multiapi.converter.exception.ElementNotFoundException;
-import com.corunet.multiapi.converter.utils.BasicTypeConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
+import net.coru.multiapi.converter.exception.ElementNotFoundException;
+import net.coru.multiapi.converter.utils.BasicTypeConstants;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;

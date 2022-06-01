@@ -4,7 +4,7 @@
  *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.corunet.multiapi.converter.asyncapi;
+package net.coru.multiapi.converter.asyncapi;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.corunet.multiapi.converter.MultiApiContractConverter;
+import net.coru.multiapi.converter.MultiApiContractConverter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.cloud.contract.spec.Contract;

@@ -4,7 +4,7 @@
  *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.corunet.multiapi.converter.asyncapi;
+package net.coru.multiapi.converter.asyncapi;
 
 import java.util.HashMap;
 import java.util.List;
