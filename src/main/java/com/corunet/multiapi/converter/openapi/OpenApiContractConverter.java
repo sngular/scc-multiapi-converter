@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import com.corunet.multiapi.converter.utils.BasicTypeConstants;
 import com.corunet.multiapi.converter.exception.MultiApiContractConverterException;
+import com.corunet.multiapi.converter.utils.BasicTypeConstants;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;

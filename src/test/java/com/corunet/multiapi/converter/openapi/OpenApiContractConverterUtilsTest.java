@@ -21,7 +21,7 @@ class OpenApiContractConverterUtilsTest {
   @Test
   @DisplayName("Check that mapRefName returns the name we want ")
   void testMapRefName() {
-    final Schema schema = new Schema ();
+    final Schema schema = new Schema();
     schema.set$ref("#/components/schemas/Game");
     final String ref = OpenApiContractConverterUtils.mapRefName(schema);
     assertThat(ref).hasToString("Game");
@@ -31,17 +31,18 @@ class OpenApiContractConverterUtilsTest {
   @DisplayName("Check that processBasicResponseTypeBody gives us the right body Matcher ")
   void testProcessBasicResponseTypeBody() {
     final Response response = new Response();
-    Schema schema = new Schema ();
+    Schema schema = new Schema();
     schema.setType("string");
     OpenApiContractConverterUtils.processBasicResponseTypeBody(response, schema);
     assertThat(response.getBody().getClientValue()).isInstanceOf(String.class);
     assertThat(response.getBody().getServerValue()).isInstanceOf(Pattern.class);
   }
+
   @Test
   @DisplayName("Check that processBasicRequestTypeBody gives us the right body Matcher ")
   void testProcessBasicRequestTypeBody() {
     final Request request = new Request();
-    Schema schema = new Schema ();
+    Schema schema = new Schema();
     schema.setType("string");
     OpenApiContractConverterUtils.processBasicRequestTypeBody(request, schema);
     assertThat(request.getBody().getServerValue()).isInstanceOf(String.class);

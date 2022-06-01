@@ -52,6 +52,6 @@ components:
           type: string
           example: hangman
 tags:
-  - name: games
-    description: Test description for SCC MultiApi Plugin.
+- name: games
+  description: Test description for SCC MultiApi Plugin.
 
