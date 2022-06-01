@@ -4,11 +4,11 @@
  *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.corunet.multiapi.converter.openapi;
+package net.coru.multiapi.converter.openapi;
 
 import java.util.Objects;
 
-import com.corunet.multiapi.converter.utils.BasicTypeConstants;
+import net.coru.multiapi.converter.utils.BasicTypeConstants;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.springframework.cloud.contract.spec.internal.Request;

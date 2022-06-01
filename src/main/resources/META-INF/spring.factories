@@ -1,2 +1,2 @@
 org.springframework.cloud.contract.spec.ContractConverter=\
-com.corunet.multiapi.converter.MultiApiContractConverter
+net.coru.multiapi.converter.MultiApiContractConverter

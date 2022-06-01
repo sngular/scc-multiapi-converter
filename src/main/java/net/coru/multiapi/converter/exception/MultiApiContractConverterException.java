@@ -4,7 +4,7 @@
  *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.corunet.multiapi.converter.exception;
+package net.coru.multiapi.converter.exception;
 
 public class MultiApiContractConverterException extends RuntimeException {
 

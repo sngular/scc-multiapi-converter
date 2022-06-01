@@ -4,16 +4,16 @@
  *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.corunet.multiapi.converter;
+package net.coru.multiapi.converter;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Objects;
 
-import com.corunet.multiapi.converter.exception.MultiApiContractConverterException;
-import com.corunet.multiapi.converter.openapi.OpenApiContractConverter;
-import com.corunet.multiapi.converter.utils.BasicTypeConstants;
+import net.coru.multiapi.converter.exception.MultiApiContractConverterException;
+import net.coru.multiapi.converter.openapi.OpenApiContractConverter;
+import net.coru.multiapi.converter.utils.BasicTypeConstants;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
