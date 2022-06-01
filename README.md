@@ -1,3 +1,5 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0d331d782ff849f1bdf6d71f60203eff)](https://www.codacy.com/gh/corunet/scc-multiapi-converter/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=corunet/scc-multiapi-converter&amp;utm_campaign=Badge_Grade)
+
 # SCC Verifier Open Api Converter
 
 ## 📜 Summary
