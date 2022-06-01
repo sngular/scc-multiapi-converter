@@ -6,7 +6,7 @@
 
   <groupId>com.corunet</groupId>
   <artifactId>scc-multiapi-converter</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
   <name>SCC-MultiApi-Converter</name>
   <description>Generates Spring Cloud Contract based on an OpenApi document</description>
   <url>https://github.com/corunet/scc-multiapi-converter</url>
@@ -128,7 +128,7 @@
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-contract-verifier</artifactId>
-      <version>3.1.1</version>
+      <version>3.1.3</version>
     </dependency>
     <dependency>
       <groupId>org.sonatype.plexus</groupId>
@@ -182,7 +182,7 @@
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-contract-spec-java</artifactId>
-      <version>3.1.1</version>
+      <version>3.1.3</version>
     </dependency>
   </dependencies>
   <build>
