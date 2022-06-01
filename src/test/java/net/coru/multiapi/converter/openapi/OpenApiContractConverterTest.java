@@ -4,7 +4,7 @@
  *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.corunet.multiapi.converter.openapi;
+package net.coru.multiapi.converter.openapi;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import com.corunet.multiapi.converter.MultiApiContractConverter;
+import net.coru.multiapi.converter.MultiApiContractConverter;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

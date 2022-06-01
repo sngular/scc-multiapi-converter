@@ -4,7 +4,7 @@
  *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-package com.corunet.multiapi.converter.utils;
+package net.coru.multiapi.converter.utils;
 
 import java.util.Random;
 import java.util.Set;

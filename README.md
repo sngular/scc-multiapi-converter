@@ -1,4 +1,8 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0d331d782ff849f1bdf6d71f60203eff)](https://www.codacy.com/gh/corunet/scc-multiapi-converter/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=corunet/scc-multiapi-converter&amp;utm_campaign=Badge_Grade)
+
 # SCC Verifier MultiApi Converter
+
+# SCC Verifier Open Api Converter
 
 ## 📜 Summary
 
@@ -6,7 +10,7 @@ SCC Verifier MultiApi Converter allows us to use Spring Cloud Contract to genera
 
 Here is the documentation for these technologies:
 
-- [Spring Cloud Contract](https://cloud.spring.io/spring-cloud-contract/reference/html/)
+- [Spring Cloud Contract](https://docs.spring.io/spring-cloud-contract/docs/current/reference/html/)
 - [OpenApi](https://swagger.io/specification/)
 - [AsyncApi](https://www.asyncapi.com/docs/getting-started)
 
@@ -33,7 +37,7 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
     <dependency>
       <groupId>com.corunet</groupId>
       <artifactId>scc-multiapi-converter</artifactId>
-      <version>1.1.0</version>
+      <version>2.0.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

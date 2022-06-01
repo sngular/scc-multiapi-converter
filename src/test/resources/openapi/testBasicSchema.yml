@@ -27,5 +27,5 @@ paths:
               schema:
                 type: string
 tags:
-  - name: games
-    description: Test description for SCC MultiApi Plugin.
+- name: games
+  description: Test description for SCC MultiApi Plugin.
