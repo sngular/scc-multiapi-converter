@@ -2,8 +2,6 @@
 
 # SCC Verifier MultiApi Converter
 
-# SCC Verifier Open Api Converter
-
 ## 📜 Summary
 
 SCC Verifier MultiApi Converter allows us to use Spring Cloud Contract to generate contracts from an OpenApi yaml document or an AsyncApi document. This plugin will detect automatically what contract needs to be generated
