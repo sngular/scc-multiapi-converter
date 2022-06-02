@@ -33,7 +33,7 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
   </configuration>
   <dependencies>
     <dependency>
-      <groupId>com.corunet</groupId>
+      <groupId>net.coru</groupId>
       <artifactId>scc-multiapi-converter</artifactId>
       <version>2.0.0</version>
       <scope>compile</scope>
@@ -64,60 +64,87 @@ This plugin supports most of the OpenApi/Swagger and AsyncApi, but there are a c
 This is an easy example of a small YAML for OpenApi that will work with our plugin:
 
 ```yaml
+---
 openapi: "3.0.0"
 info:
   version: 1.0.0
   title: Corunet Challenge Game Server
+  description: Test File for SCC MultiApi Plugin.
+  contact:
+    name: Corunet
+    url: coru.net
+    email: info@coru.net
   license:
-    name: MIT
+    name: MPL 2.0
 servers:
 - url: http://localhost:8080/v1
 paths:
   /games:
-    post:
-      summary: Start a Game
-      operationId: createGame
+    summary: Hola
+    get:
+      summary: List all available games
+      description: Test File for SCC MultiApi Plugin.
       tags:
       - games
+      operationId: listGames
       responses:
         '200':
+          description: A paged array of games
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  code:
-                    type: integer
-                  message:
-                    $ref: "#/components/schemas/Message"
+                $ref: "#/components/schemas/Game"
 components:
   schemas:
-    Message:
+    Game:
       type: object
       properties:
-        description:
+        player:
+          $ref: "#/components/schemas/Player"
+    Player:
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/Name"
+    Name:
+      type: object
+      properties:
+        firstname:
           type: string
+        lastname:
+          type: string
+tags:
+- name: games
+  description: Test description for SCC MultiApi Plugin.
 ```
 
 And here, there is an example of a YAML file for the AsyncApi side:
 
 ```yaml
-asyncapi: 2.3.0
+asyncapi: "2.3.0"
 info:
   title: Order Service
   version: 1.0.0
   description: Order management Service
+  contact:
+    name: Corunet
+    url: http://www.asyncapi.org/support
+    email: info@coru.net
+    license:
+      name: MPL 2.0
 channels:
   orderCreated:
     publish:
       operationId: "publishOperation"
       message:
         $ref: '#/components/messages/OrderCreated'
+    description: Operation that will produce an OrderCreated object
   createOrder:
     subscribe:
       operationId: "subscribeOperation"
       message:
         $ref: '#/components/messages/CreateOrder'
+    description: Operation that will consume an CreateOrder object
 components:
   messages:
     OrderCreated:
