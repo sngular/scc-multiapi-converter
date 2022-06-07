@@ -18,8 +18,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import net.coru.multiapi.converter.exception.MultiApiContractConverterException;
-import net.coru.multiapi.converter.utils.BasicTypeConstants;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -32,6 +30,8 @@ import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import lombok.extern.slf4j.Slf4j;
+import net.coru.multiapi.converter.exception.MultiApiContractConverterException;
+import net.coru.multiapi.converter.utils.BasicTypeConstants;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.cloud.contract.spec.Contract;
 import org.springframework.cloud.contract.spec.internal.Body;
@@ -196,24 +196,29 @@ public class OpenApiContractConverter {
     }
     if (Objects.nonNull(schema.get$ref())) {
       final String ref = OpenApiContractConverterUtils.mapRefName(schema);
-      final HashMap<String, Schema> properties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(ref).getProperties();
-      for (Entry<String, Schema> property : properties.entrySet()) {
-        if (property.getValue() instanceof ComposedSchema) {
-          final ComposedSchema subComposedSchema = (ComposedSchema) property.getValue();
-          processComposedSchema(openAPI, bodyMatchers, bodyMap, subComposedSchema);
-        } else if (Objects.nonNull(property.getValue().get$ref())) {
-          String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
-          HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
-          bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, openAPI, bodyMatchers));
-        } else {
-          final String refType;
-          if (Objects.nonNull(property.getValue().getEnum())) {
-            refType = BasicTypeConstants.ENUM;
+      if (Objects.nonNull(openAPI.getComponents().getSchemas().get(ref).getProperties())) {
+        final HashMap<String, Schema> properties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(ref).getProperties();
+        for (Entry<String, Schema> property : properties.entrySet()) {
+          if (property.getValue() instanceof ComposedSchema) {
+            final ComposedSchema subComposedSchema = (ComposedSchema) property.getValue();
+            processComposedSchema(openAPI, bodyMatchers, bodyMap, subComposedSchema);
+          } else if (Objects.nonNull(property.getValue().get$ref())) {
+            String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
+            HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
+            bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, openAPI, bodyMatchers));
           } else {
-            refType = property.getValue().getType();
+            final String refType;
+            if (Objects.nonNull(property.getValue().getEnum())) {
+              refType = BasicTypeConstants.ENUM;
+            } else {
+              refType = property.getValue().getType();
+            }
+            writeBodyMatcher(bodyMap, openAPI, bodyMatchers, property.getKey(), property.getValue(), refType);
           }
-          writeBodyMatcher(bodyMap, openAPI, bodyMatchers, property.getKey(), property.getValue(), refType);
         }
+      } else {
+        Schema arraySchema = openAPI.getComponents().getSchemas().get(ref);
+        writeBodyMatcher(bodyMap, openAPI, bodyMatchers, ref, arraySchema, arraySchema.getType());
       }
     }
   }
@@ -243,7 +248,7 @@ public class OpenApiContractConverter {
           } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(schema.getFormat())) {
             bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
             bodyMap.put(fieldName, Math.abs(BasicTypeConstants.RANDOM.nextDouble()));
-          } else if (schema.getFormat().isEmpty()) {
+          } else if (schema.getFormat() == null || schema.getFormat().isEmpty()) {
             bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
             bodyMap.put(fieldName, BasicTypeConstants.RANDOM.nextInt());
           }
@@ -322,7 +327,7 @@ public class OpenApiContractConverter {
               } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(property.getValue().getFormat())) {
                 bodyMatchers.jsonPath(property.getKey(), bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
                 propertyMap.put(property.getKey(), BasicTypeConstants.RANDOM.nextDouble());
-              } else if (property.getValue().getFormat().isEmpty()) {
+              } else if (property.getValue().getFormat() == null  || property.getValue().getFormat().isEmpty()) {
                 bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
                 propertyMap.put(property.getKey(), BasicTypeConstants.RANDOM.nextInt());
               }
