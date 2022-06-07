@@ -6,7 +6,7 @@
 
   <groupId>net.coru</groupId>
   <artifactId>scc-multiapi-converter</artifactId>
-  <version>2.3.0</version>
+  <version>2.3.1</version>
   <name>SCC-MultiApi-Converter</name>
   <description>Generates Spring Cloud Contracts based on an OpenApi and AsyncApi document</description>
   <url>https://github.com/corunet/scc-multiapi-converter</url>
