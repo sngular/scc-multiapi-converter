@@ -27,6 +27,7 @@ class AsyncApiContractConverterTest {
   private final AsyncApiContractConverterTestFixtures asyncApiContractConverterTestFixtures = new AsyncApiContractConverterTestFixtures();
 
   @Test
+  @DisplayName("AsyncApi: Testing the method that checks if the yaml is correct")
   void fileIsAcceptedTrue() {
     File file = new File(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
     Boolean isAccepted = multiApiContractConverter.isAccepted(file);
