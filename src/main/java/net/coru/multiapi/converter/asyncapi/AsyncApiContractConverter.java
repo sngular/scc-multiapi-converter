@@ -225,7 +225,7 @@ public class AsyncApiContractConverter {
             messageBody.put(property, fillObjectProperties(responseBodyMatchers, properties.get(property).get(BasicTypeConstants.PROPERTIES), schemas, path + ".", operationType));
             break;
           case BasicTypeConstants.ARRAY:
-            messageBody.put(property, processArray(responseBodyMatchers, property, properties.get(property).get("items"), path, operationType));
+            messageBody.put(property, processArray(responseBodyMatchers, property, properties.get(property).get("items"), path, operationType, schemas));
             break;
           default:
             throw new ElementNotFoundException(BasicTypeConstants.TYPE);
@@ -241,23 +241,39 @@ public class AsyncApiContractConverter {
     return messageBody;
   }
 
-  private List<Object> processArray(ResponseBodyMatchers responseBodyMatchers, String property, JsonNode node, String path, String operationType) throws JsonProcessingException {
+  private List<Object> processArray(ResponseBodyMatchers responseBodyMatchers, String property, JsonNode node, String path, String operationType, JsonNode schemas)
+      throws JsonProcessingException {
     final List<Object> result = new ArrayList<>();
     final ObjectMapper objectMapper = new ObjectMapper();
     String enumType = "";
     String type;
 
-    if (node.get(BasicTypeConstants.FORMAT) != null) {
-      type = node.get(BasicTypeConstants.FORMAT).asText();
-    } else if (node.get(BasicTypeConstants.TYPE) != null) {
-      type = node.get(BasicTypeConstants.TYPE).asText();
-    } else {
-      type = node.get(node.fieldNames().next()).get(BasicTypeConstants.TYPE).asText();
-    }
+    if (node.get(BasicTypeConstants.REF) != null && node.get(BasicTypeConstants.REF).asText().startsWith("#")) {
+      String[] pathToObject = node.get(BasicTypeConstants.REF).asText().split("/");
+      var body = pathToObject[pathToObject.length - 1];
+      var fieldnames = schemas.fieldNames();
 
-    if (isEnum(node)) {
-      enumType = type;
-      type = BasicTypeConstants.ENUM;
+      while (fieldnames.hasNext()) {
+        if (fieldnames.next().equals(body)) {
+          ((ObjectNode) node).remove("$ref");
+          ((ObjectNode) node).set(body, schemas.get(body));
+        }
+      }
+
+      type = BasicTypeConstants.OBJECT;
+    } else {
+      if (node.get(BasicTypeConstants.FORMAT) != null) {
+        type = node.get(BasicTypeConstants.FORMAT).asText();
+      } else if (node.get(BasicTypeConstants.TYPE) != null) {
+        type = node.get(BasicTypeConstants.TYPE).asText();
+      } else {
+        type = node.get(node.fieldNames().next()).get(BasicTypeConstants.TYPE).asText();
+      }
+
+      if (isEnum(node)) {
+        enumType = type;
+        type = BasicTypeConstants.ENUM;
+      }
     }
 
     switch (type) {

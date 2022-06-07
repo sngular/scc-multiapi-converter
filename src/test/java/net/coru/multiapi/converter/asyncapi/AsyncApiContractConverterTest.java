@@ -186,6 +186,32 @@ class AsyncApiContractConverterTest {
   }
 
   @Test
+  @DisplayName("AsyncApi: Check if arrays with reference to an object are being processed okay")
+  void testArraysWithRef() {
+    File file = new File(asyncApiContractConverterTestFixtures.TEST_ARRAYS_REF_FILE);
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+
+    for (int i = 0; i < contractList.size(); i++) {
+      Contract contract = contractList.get(i);
+
+      Map<String, Object> bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
+      Map<String, Object> orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
+      assertThat(orderValue.get(asyncApiContractConverterTestFixtures.EMPLOYEES)).isNotNull();
+      List<Object> employeeListValue = (ArrayList<Object>) orderValue.get(asyncApiContractConverterTestFixtures.EMPLOYEES);
+      assertThat(employeeListValue.get(0)).isNotNull();
+      Map<String, Object> nameValue = (Map<String, Object>) employeeListValue.get(0);
+
+      if (i == 0) {
+        assertThat(nameValue.get(asyncApiContractConverterTestFixtures.NAME)).isNotNull().isInstanceOf(String.class);
+      } else {
+        assertThat(nameValue).containsEntry(asyncApiContractConverterTestFixtures.NAME, asyncApiContractConverterTestFixtures.PERSON_NAME);
+      }
+    }
+  }
+
+  @Test
   @DisplayName("AsyncApi: Check if basic types are being processed okay")
   void testBasicTypes() {
     File file = new File(asyncApiContractConverterTestFixtures.TEST_BASIC_TYPES_FILE);

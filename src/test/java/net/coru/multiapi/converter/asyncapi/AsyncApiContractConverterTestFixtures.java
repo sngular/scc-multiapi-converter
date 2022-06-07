@@ -20,6 +20,8 @@ public class AsyncApiContractConverterTestFixtures {
 
   public final String TEST_ARRAYS_FILE = "src/test/resources/asyncapi/testArrays.yml";
 
+  public final String TEST_ARRAYS_REF_FILE = "src/test/resources/asyncapi/testArraysWithRef.yml";
+
   public final String TEST_ENUMS_FILE = "src/test/resources/asyncapi/testEnums.yml";
 
   public final String PUBLISH_NAME = "publishOperation";
@@ -40,11 +42,15 @@ public class AsyncApiContractConverterTestFixtures {
 
   public final String ORDER = "order";
 
+  public final String EMPLOYEES = "employees";
+
   public final String INT_ARRAY = "intArray";
 
   public final String NAME = "name";
 
   public final String CORUNET = "Corunet";
+
+  public final String PERSON_NAME = "Carlos";
 
   public final String ADDRESS = "address";
 
