@@ -160,9 +160,7 @@ public class AsyncApiContractConverter {
       if (!Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES)) ||
           !Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES).get(BasicTypeConstants.REF))) {
         String enumType = "";
-        var type = (properties.get(String.valueOf(property)).get(BasicTypeConstants.FORMAT) != null) ? properties.get(String.valueOf(property)).get(BasicTypeConstants.FORMAT)
-                                                                                                                 .asText() :
-            properties.get(String.valueOf(property)).get(BasicTypeConstants.TYPE).asText();
+        var type = getType(properties.get(String.valueOf(property)));
 
         if (isEnum(properties.get(property))) {
           enumType = type;
@@ -241,8 +239,10 @@ public class AsyncApiContractConverter {
     return messageBody;
   }
 
-  private List<Object> processArray(ResponseBodyMatchers responseBodyMatchers, String property, JsonNode node, String path, String operationType, JsonNode schemas)
-      throws JsonProcessingException {
+  private List<Object> processArray(
+      ResponseBodyMatchers responseBodyMatchers, String property, JsonNode node, String path,
+      String operationType, JsonNode schemas) throws JsonProcessingException {
+
     final List<Object> result = new ArrayList<>();
     final ObjectMapper objectMapper = new ObjectMapper();
     String enumType = "";
@@ -255,20 +255,14 @@ public class AsyncApiContractConverter {
 
       while (fieldnames.hasNext()) {
         if (fieldnames.next().equals(body)) {
-          ((ObjectNode) node).remove("$ref");
+          ((ObjectNode) node).remove(BasicTypeConstants.REF);
           ((ObjectNode) node).set(body, schemas.get(body));
         }
       }
 
       type = BasicTypeConstants.OBJECT;
     } else {
-      if (node.get(BasicTypeConstants.FORMAT) != null) {
-        type = node.get(BasicTypeConstants.FORMAT).asText();
-      } else if (node.get(BasicTypeConstants.TYPE) != null) {
-        type = node.get(BasicTypeConstants.TYPE).asText();
-      } else {
-        type = node.get(node.fieldNames().next()).get(BasicTypeConstants.TYPE).asText();
-      }
+      type = getType(node);
 
       if (isEnum(node)) {
         enumType = type;
@@ -367,6 +361,18 @@ public class AsyncApiContractConverter {
     return result;
   }
 
+  private String getType(final JsonNode node) {
+    String type;
+    if (node.get(BasicTypeConstants.FORMAT) != null) {
+      type = node.get(BasicTypeConstants.FORMAT).asText();
+    } else if (node.get(BasicTypeConstants.TYPE) != null) {
+      type = node.get(BasicTypeConstants.TYPE).asText();
+    } else {
+      type = node.get(node.fieldNames().next()).get(BasicTypeConstants.TYPE).asText();
+    }
+    return type;
+  }
+
   private Object processEnumTypes(JsonNode value, String type) {
     Object enumValue;
 
@@ -440,8 +446,7 @@ public class AsyncApiContractConverter {
     Map<String, Object> messageBody = new HashMap<>();
 
     for (int i = 0; i < properties.size(); i++) {
-      var type = (properties.get(i).get(BasicTypeConstants.FORMAT) != null) ? properties.get(i).get(BasicTypeConstants.FORMAT).asText() :
-          properties.get(i).get(BasicTypeConstants.TYPE).asText();
+      var type = getType(properties.get(i));
       if (type.equals("")) {
         type = properties.get(i).get(BasicTypeConstants.TYPE).get(BasicTypeConstants.TYPE).asText();
       }
