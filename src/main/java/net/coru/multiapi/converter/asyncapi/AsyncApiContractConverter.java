@@ -160,9 +160,7 @@ public class AsyncApiContractConverter {
       if (!Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES)) ||
           !Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES).get(BasicTypeConstants.REF))) {
         String enumType = "";
-        var type = (properties.get(String.valueOf(property)).get(BasicTypeConstants.FORMAT) != null) ? properties.get(String.valueOf(property)).get(BasicTypeConstants.FORMAT)
-                                                                                                                 .asText() :
-            properties.get(String.valueOf(property)).get(BasicTypeConstants.TYPE).asText();
+        var type = getType(properties.get(String.valueOf(property)));
 
         if (isEnum(properties.get(property))) {
           enumType = type;
@@ -225,7 +223,7 @@ public class AsyncApiContractConverter {
             messageBody.put(property, fillObjectProperties(responseBodyMatchers, properties.get(property).get(BasicTypeConstants.PROPERTIES), schemas, path + ".", operationType));
             break;
           case BasicTypeConstants.ARRAY:
-            messageBody.put(property, processArray(responseBodyMatchers, property, properties.get(property).get("items"), path, operationType));
+            messageBody.put(property, processArray(responseBodyMatchers, property, properties.get(property).get("items"), path, operationType, schemas));
             break;
           default:
             throw new ElementNotFoundException(BasicTypeConstants.TYPE);
@@ -241,23 +239,35 @@ public class AsyncApiContractConverter {
     return messageBody;
   }
 
-  private List<Object> processArray(ResponseBodyMatchers responseBodyMatchers, String property, JsonNode node, String path, String operationType) throws JsonProcessingException {
+  private List<Object> processArray(
+      ResponseBodyMatchers responseBodyMatchers, String property, JsonNode node, String path,
+      String operationType, JsonNode schemas) throws JsonProcessingException {
+
     final List<Object> result = new ArrayList<>();
     final ObjectMapper objectMapper = new ObjectMapper();
     String enumType = "";
     String type;
 
-    if (node.get(BasicTypeConstants.FORMAT) != null) {
-      type = node.get(BasicTypeConstants.FORMAT).asText();
-    } else if (node.get(BasicTypeConstants.TYPE) != null) {
-      type = node.get(BasicTypeConstants.TYPE).asText();
-    } else {
-      type = node.get(node.fieldNames().next()).get(BasicTypeConstants.TYPE).asText();
-    }
+    if (node.get(BasicTypeConstants.REF) != null && node.get(BasicTypeConstants.REF).asText().startsWith("#")) {
+      String[] pathToObject = node.get(BasicTypeConstants.REF).asText().split("/");
+      var body = pathToObject[pathToObject.length - 1];
+      var fieldnames = schemas.fieldNames();
 
-    if (isEnum(node)) {
-      enumType = type;
-      type = BasicTypeConstants.ENUM;
+      while (fieldnames.hasNext()) {
+        if (fieldnames.next().equals(body)) {
+          ((ObjectNode) node).remove(BasicTypeConstants.REF);
+          ((ObjectNode) node).set(body, schemas.get(body));
+        }
+      }
+
+      type = BasicTypeConstants.OBJECT;
+    } else {
+      type = getType(node);
+
+      if (isEnum(node)) {
+        enumType = type;
+        type = BasicTypeConstants.ENUM;
+      }
     }
 
     switch (type) {
@@ -351,6 +361,18 @@ public class AsyncApiContractConverter {
     return result;
   }
 
+  private String getType(final JsonNode node) {
+    String type;
+    if (node.get(BasicTypeConstants.FORMAT) != null) {
+      type = node.get(BasicTypeConstants.FORMAT).asText();
+    } else if (node.get(BasicTypeConstants.TYPE) != null) {
+      type = node.get(BasicTypeConstants.TYPE).asText();
+    } else {
+      type = node.get(node.fieldNames().next()).get(BasicTypeConstants.TYPE).asText();
+    }
+    return type;
+  }
+
   private Object processEnumTypes(JsonNode value, String type) {
     Object enumValue;
 
@@ -424,8 +446,7 @@ public class AsyncApiContractConverter {
     Map<String, Object> messageBody = new HashMap<>();
 
     for (int i = 0; i < properties.size(); i++) {
-      var type = (properties.get(i).get(BasicTypeConstants.FORMAT) != null) ? properties.get(i).get(BasicTypeConstants.FORMAT).asText() :
-          properties.get(i).get(BasicTypeConstants.TYPE).asText();
+      var type = getType(properties.get(i));
       if (type.equals("")) {
         type = properties.get(i).get(BasicTypeConstants.TYPE).get(BasicTypeConstants.TYPE).asText();
       }
