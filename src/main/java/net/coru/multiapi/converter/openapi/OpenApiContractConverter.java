@@ -141,9 +141,9 @@ public class OpenApiContractConverter {
 
   private Request processRequest(final OpenAPI openAPI, Entry<String, PathItem> pathItem, Operation operation, String name) {
     final Request request = new Request();
-    if (Objects.nonNull(operation.getParameters())) {
+    if (Objects.nonNull(operation.getParameters()) || Objects.nonNull(pathItem.getValue().getParameters())) {
       final UrlPath url = new UrlPath(pathItem.getKey());
-      url.queryParameters(queryParameters -> processQueryParameters(queryParameters, operation.getParameters()));
+      url.queryParameters(queryParameters -> processQueryParameters(queryParameters, operation.getParameters(), pathItem.getValue()));
       request.setUrlPath(url);
     } else {
       final Url url = new Url(pathItem.getKey());
@@ -327,7 +327,7 @@ public class OpenApiContractConverter {
               } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(property.getValue().getFormat())) {
                 bodyMatchers.jsonPath(property.getKey(), bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
                 propertyMap.put(property.getKey(), BasicTypeConstants.RANDOM.nextDouble());
-              } else if (property.getValue().getFormat() == null  || property.getValue().getFormat().isEmpty()) {
+              } else if (property.getValue().getFormat() == null || property.getValue().getFormat().isEmpty()) {
                 bodyMatchers.jsonPath(newObjectName, bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
                 propertyMap.put(property.getKey(), BasicTypeConstants.RANDOM.nextInt());
               }
@@ -456,7 +456,22 @@ public class OpenApiContractConverter {
     return propertyList;
   }
 
-  private void processQueryParameters(QueryParameters queryParameters, List<Parameter> parameters) {
+  private void processQueryParameters(final QueryParameters queryParameters, final List<Parameter> parameters, final PathItem pathItem) {
+    if (Objects.nonNull(pathItem.getParameters())) {
+      if (Objects.nonNull(parameters) && Objects.nonNull(pathItem.getParameters())) {
+        throw new MultiApiContractConverterException("Defining parameters in both Path and Operations is not supported in this plugin");
+      } else {
+        mapQueryParameters(queryParameters, pathItem.getParameters());
+
+      }
+    } else {
+      mapQueryParameters(queryParameters, parameters);
+
+    }
+
+  }
+
+  private void mapQueryParameters(final QueryParameters queryParameters, final List<Parameter> parameters) {
     for (Parameter parameter : parameters) {
       if (Objects.nonNull(parameter.getExample())) {
         queryParameters.parameter(parameter.getName(), new MatchingStrategy(parameter.getExample(), Type.EQUAL_TO));
