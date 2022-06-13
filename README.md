@@ -35,7 +35,7 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
     <dependency>
       <groupId>net.coru</groupId>
       <artifactId>scc-multiapi-converter</artifactId>
-      <version>2.4.0</version>
+      <version>2.4.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -58,7 +58,10 @@ If you need more control over the settings of your project, you can use all the 
 
 This plugin supports most of the OpenApi/Swagger and AsyncApi, but there are a couple of things that must be noted:
 
-- Using **OpenApi/AsyncApi´s example label** in the parameters/schemas will check in our contracts that the response is equal to the example value instead of using a Regex.
+- Using **OpenApi/AsyncApi´s example label** in the parameters/schemas will check in our contracts that the response is equal to the example
+value instead of using a Regex.
+- **OpenApi**: Since 2.4.0 version, we support the definition of parameters in both Path and Operation object, but you can only define it 
+in one of them. If you specify them in both objects it will trigger an Exception.
 - Please be aware that writing an example must be the same type as indicated in the file, otherwise your contract will break.
 
 This is an easy example of a small YAML for OpenApi that will work with our plugin:
