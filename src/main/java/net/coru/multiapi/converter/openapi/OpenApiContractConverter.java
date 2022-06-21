@@ -563,7 +563,7 @@ public class OpenApiContractConverter {
       processBodyAndMatchers(bodyMap, composedSchema.getOneOf().get(oneOfNumber), openAPI, bodyMatchers);
     } else if (Objects.nonNull(composedSchema.getAnyOf())) {
       for (int i = 0; i < BasicTypeConstants.RANDOM.nextInt(composedSchema.getAnyOf().size()) + 1; i++) {
-        processBodyAndMatchers(bodyMap, composedSchema.getAnyOf().get(BasicTypeConstants.RANDOM.nextInt(composedSchema.getAnyOf().size())), openAPI, bodyMatchers);
+        processBodyAndMatchers(bodyMap, composedSchema.getAnyOf().get(i), openAPI, bodyMatchers);
       }
     }
   }
