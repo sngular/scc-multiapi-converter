@@ -177,8 +177,8 @@ public class AsyncApiContractConverter {
     }
     var property = schema.fieldNames().next();
 
-    if (Objects.nonNull(schema.get(schema.fieldNames().next()).get(BasicTypeConstants.PROPERTIES).get(BasicTypeConstants.REF))) {
-      schema = schema.get(schema.fieldNames().next()).get(BasicTypeConstants.PROPERTIES);
+    if (Objects.nonNull(schema.get(property).get(BasicTypeConstants.PROPERTIES).get(BasicTypeConstants.REF))) {
+      schema = schema.get(property).get(BasicTypeConstants.PROPERTIES);
       pathToObject = schema.get(BasicTypeConstants.REF).asText().split("/");
     }
 
