@@ -1,0 +1,13 @@
+components:
+  schemas:
+    OrderCreated:
+      type: object
+      properties:
+        $ref: '#/components/schemas/Order'
+
+    order:
+      type: object
+      properties:
+        stringType:
+          type: string
+          example: Corunet

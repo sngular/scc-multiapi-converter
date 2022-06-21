@@ -26,6 +26,8 @@ public class AsyncApiContractConverterTestFixtures {
 
   public final String TEST_EXTERNAL_FILE = "src/test/resources/asyncapi/testExternalFiles.yml";
 
+  public final String TEST_EXTERNAL_FILE_MULTIPLE_SCHEMAS = "src/test/resources/asyncapi/testExternalFilesWithMultipleSchemas.yml";
+
   public final String PUBLISH_NAME = "publishOperation";
 
   public final String TRIGGERED_BY = "publishOperation()";
@@ -43,8 +45,6 @@ public class AsyncApiContractConverterTestFixtures {
   public final String HEADER_VALUE = "application/json";
 
   public final String ORDER = "order";
-
-  public final String FIRST_SCHEMA = "firstSchema";
 
   public final String SECOND_SCHEMA = "secondSchema";
 

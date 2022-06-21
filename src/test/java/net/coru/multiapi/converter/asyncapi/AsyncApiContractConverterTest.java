@@ -257,10 +257,8 @@ class AsyncApiContractConverterTest {
       Contract contract = contractList.get(i);
 
       Map<String, Object> bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
-      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.FIRST_SCHEMA)).isNotNull();
-      Map<String, Object> firstSchemaValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.FIRST_SCHEMA);
-      assertThat(firstSchemaValue.get(asyncApiContractConverterTestFixtures.SECOND_SCHEMA)).isNotNull();
-      Map<String, Object> secondSchemaValue = (Map<String, Object>) firstSchemaValue.get(asyncApiContractConverterTestFixtures.SECOND_SCHEMA);
+      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.SECOND_SCHEMA)).isNotNull();
+      Map<String, Object> secondSchemaValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.SECOND_SCHEMA);
       List<Integer> intArray = (ArrayList<Integer>) secondSchemaValue.get(asyncApiContractConverterTestFixtures.INT_ARRAY_TYPE);
 
       if (i == 0) {
@@ -271,6 +269,28 @@ class AsyncApiContractConverterTest {
         assertThat(secondSchemaValue).containsEntry(asyncApiContractConverterTestFixtures.STRING_TYPE, asyncApiContractConverterTestFixtures.CORUNET);
         assertThat(secondSchemaValue).containsEntry(asyncApiContractConverterTestFixtures.BOOLEAN_TYPE, true);
         assertThat(intArray).isEqualTo(asyncApiContractConverterTestFixtures.INT_ARRAY_VALUES);
+      }
+    }
+  }
+
+  @Test
+  @DisplayName("AsyncApi: Check if references to external files work correctly with multiple schemas")
+  void testExternalFilesWithMultipleSchemas() {
+    File file = new File(asyncApiContractConverterTestFixtures.TEST_EXTERNAL_FILE_MULTIPLE_SCHEMAS);
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+
+    for (int i = 0; i < contractList.size(); i++) {
+      Contract contract = contractList.get(i);
+
+      Map<String, Object> bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
+      Map<String, Object> orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
+
+      if (i == 0) {
+        assertThat(orderValue.get(asyncApiContractConverterTestFixtures.STRING_TYPE)).isNotNull().isInstanceOf(String.class);
+      } else {
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.STRING_TYPE, asyncApiContractConverterTestFixtures.CORUNET);
       }
     }
   }

@@ -52,6 +52,8 @@ public final class BasicTypeConstants {
 
   public static final String PROPERTIES = "properties";
 
+  public static final String SCHEMA = "schema";
+
   public static final String SCHEMAS = "schemas";
 
   public static final String FORMAT = "format";
