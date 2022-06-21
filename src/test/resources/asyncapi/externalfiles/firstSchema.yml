@@ -1,0 +1,6 @@
+components:
+  schema:
+    firstSchema:
+      type: object
+      properties:
+        $ref: './externalfiles/secondSchema.yml#/components/schemas'

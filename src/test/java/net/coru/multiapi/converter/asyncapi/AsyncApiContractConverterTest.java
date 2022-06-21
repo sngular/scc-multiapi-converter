@@ -244,7 +244,35 @@ class AsyncApiContractConverterTest {
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.BOOLEAN_TYPE, true);
       }
     }
+  }
 
+  @Test
+  @DisplayName("AsyncApi: Check if references to external files work correctly")
+  void testExternalFiles() {
+    File file = new File(asyncApiContractConverterTestFixtures.TEST_EXTERNAL_FILE);
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+
+    for (int i = 0; i < contractList.size(); i++) {
+      Contract contract = contractList.get(i);
+
+      Map<String, Object> bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.FIRST_SCHEMA)).isNotNull();
+      Map<String, Object> firstSchemaValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.FIRST_SCHEMA);
+      assertThat(firstSchemaValue.get(asyncApiContractConverterTestFixtures.SECOND_SCHEMA)).isNotNull();
+      Map<String, Object> secondSchemaValue = (Map<String, Object>) firstSchemaValue.get(asyncApiContractConverterTestFixtures.SECOND_SCHEMA);
+      List<Integer> intArray = (ArrayList<Integer>) secondSchemaValue.get(asyncApiContractConverterTestFixtures.INT_ARRAY_TYPE);
+
+      if (i == 0) {
+        assertThat(secondSchemaValue.get(asyncApiContractConverterTestFixtures.STRING_TYPE)).isNotNull().isInstanceOf(String.class);
+        assertThat(secondSchemaValue.get(asyncApiContractConverterTestFixtures.BOOLEAN_TYPE)).isNotNull().isInstanceOf(Boolean.class);
+        assertThat(intArray).isNotNull().isInstanceOf(ArrayList.class);
+      } else {
+        assertThat(secondSchemaValue).containsEntry(asyncApiContractConverterTestFixtures.STRING_TYPE, asyncApiContractConverterTestFixtures.CORUNET);
+        assertThat(secondSchemaValue).containsEntry(asyncApiContractConverterTestFixtures.BOOLEAN_TYPE, true);
+        assertThat(intArray).isEqualTo(asyncApiContractConverterTestFixtures.INT_ARRAY_VALUES);
+      }
+    }
   }
 
 }

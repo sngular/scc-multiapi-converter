@@ -1,0 +1,17 @@
+components:
+  schema:
+    secondSchema:
+      type: object
+      properties:
+        stringType:
+          type: string
+          example: Corunet
+        booleanType:
+          type: boolean
+          example: true
+        intArray:
+          type: array
+          items:
+            type: integer
+            format: int32
+            example: [ 1, 2, 3 ]

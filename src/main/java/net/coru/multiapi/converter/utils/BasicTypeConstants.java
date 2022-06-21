@@ -62,6 +62,8 @@ public final class BasicTypeConstants {
 
   public static final String TYPE = "type";
 
+  public static final String COMPONENTS = "components";
+
   public static final RegexProperty STRING_REGEX = RegexPatterns.alphaNumeric();
 
   public static final RegexProperty INT_REGEX = RegexPatterns.positiveInt();

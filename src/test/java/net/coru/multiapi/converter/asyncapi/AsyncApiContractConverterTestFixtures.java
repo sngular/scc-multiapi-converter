@@ -24,6 +24,8 @@ public class AsyncApiContractConverterTestFixtures {
 
   public final String TEST_ENUMS_FILE = "src/test/resources/asyncapi/testEnums.yml";
 
+  public final String TEST_EXTERNAL_FILE = "src/test/resources/asyncapi/testExternalFiles.yml";
+
   public final String PUBLISH_NAME = "publishOperation";
 
   public final String TRIGGERED_BY = "publishOperation()";
@@ -41,6 +43,10 @@ public class AsyncApiContractConverterTestFixtures {
   public final String HEADER_VALUE = "application/json";
 
   public final String ORDER = "order";
+
+  public final String FIRST_SCHEMA = "firstSchema";
+
+  public final String SECOND_SCHEMA = "secondSchema";
 
   public final String EMPLOYEES = "employees";
 
@@ -75,6 +81,8 @@ public class AsyncApiContractConverterTestFixtures {
   public final String STRING_TYPE = "stringType";
 
   public final String BOOLEAN_TYPE = "booleanType";
+
+  public final String INT_ARRAY_TYPE = "intArray";
 
   public final List<Integer> INT_ARRAY_VALUES = List.of(1, 2, 3);
 
