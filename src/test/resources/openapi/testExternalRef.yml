@@ -1,0 +1,18 @@
+openapi: 3.0.2
+info:
+  title: Schema Registry Mangement
+  version: "1.0"
+servers:
+- url: https://localhost/v1
+paths:
+  /schema_generator:
+    post:
+      tags:
+      - generator
+      responses:
+        200:
+          description: Test File for SCC MultiApi Plugin.
+          content:
+            application/json:
+              schema:
+                $ref: "test-config/components.yml#/components/schema/generator"

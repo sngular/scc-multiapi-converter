@@ -1,0 +1,15 @@
+components:
+  schema:
+    generator:
+      type: object
+      properties:
+        schemaName:
+          type: string
+        schemaRegistryName:
+          type: string
+        kafkaName:
+          type: string
+        topic:
+          type: string
+        repetitions:
+          type: int32
