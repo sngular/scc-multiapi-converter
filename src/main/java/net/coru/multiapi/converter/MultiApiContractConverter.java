@@ -48,23 +48,23 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
 
     Collection<Contract> contracts = null;
     JsonNode node;
-    try {
-      node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
-      if (node != null && node.size() > 0) {
-        if (Objects.nonNull(node.get(BasicTypeConstants.ASYNCAPI))) {
-          contracts = ASYNC_API_CONTRACT_CONVERTER.convertFrom(file);
-        } else if (Objects.nonNull(node.get(BasicTypeConstants.OPENAPI))) {
-          contracts = OPEN_API_CONTRACT_CONVERTER.convertFrom(file);
+    if (isAccepted(file)) {
+      try {
+        node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
+        if (node != null && node.size() > 0) {
+          if (Objects.nonNull(node.get(BasicTypeConstants.ASYNCAPI))) {
+            contracts = ASYNC_API_CONTRACT_CONVERTER.convertFrom(file);
+          } else if (Objects.nonNull(node.get(BasicTypeConstants.OPENAPI))) {
+            contracts = OPEN_API_CONTRACT_CONVERTER.convertFrom(file);
+          }
+        } else {
+          throw new MultiApiContractConverterException("Yaml file is not correct");
         }
-      } else {
-        throw new MultiApiContractConverterException("Yaml file is not correct");
+      } catch (IOException e) {
+        throw new MultiApiContractConverterException(e);
       }
-    } catch (IOException e) {
-      throw new MultiApiContractConverterException(e);
     }
-
     return contracts;
-
   }
 
   @Override

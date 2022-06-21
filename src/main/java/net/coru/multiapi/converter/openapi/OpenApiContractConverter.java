@@ -28,7 +28,9 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
+import io.swagger.v3.parser.exception.ReadContentException;
 import lombok.extern.slf4j.Slf4j;
 import net.coru.multiapi.converter.exception.MultiApiContractConverterException;
 import net.coru.multiapi.converter.utils.BasicTypeConstants;
@@ -204,8 +206,18 @@ public class OpenApiContractConverter {
             processComposedSchema(openAPI, bodyMatchers, bodyMap, subComposedSchema);
           } else if (Objects.nonNull(property.getValue().get$ref())) {
             String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
-            HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
-            bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, openAPI, bodyMatchers));
+            Schema<?> subSchema = openAPI.getComponents().getSchemas().get(subRef);
+            if(Objects.nonNull(subSchema.getProperties())){
+              Map<String, Schema> subProperties = subSchema.getProperties();
+              bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, openAPI, bodyMatchers));
+            } else {
+              final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
+              if(arraySchema instanceof ComposedSchema){
+                processComposedSchema(openAPI, bodyMatchers, bodyMap, (ComposedSchema) arraySchema);
+              } else{
+                writeBodyMatcher(bodyMap, openAPI, bodyMatchers, ref, arraySchema, arraySchema.getType());
+              }
+            }
           } else {
             final String refType;
             if (Objects.nonNull(property.getValue().getEnum())) {
@@ -527,10 +539,12 @@ public class OpenApiContractConverter {
 
   private OpenAPI getOpenApi(File file) throws MultiApiContractConverterException {
     OpenAPI openAPI;
+    ParseOptions options = new ParseOptions();
+    options.setResolve(true);
     try {
-      SwaggerParseResult result = new OpenAPIParser().readLocation(file.getPath(), null, null);
+      SwaggerParseResult result = new OpenAPIParser().readLocation(file.getPath(), null, options);
       openAPI = result.getOpenAPI();
-    } catch (Exception e) {
+    } catch (ReadContentException e) {
       throw new MultiApiContractConverterException("Code generation failed when parser the .yaml file ");
     }
     if (openAPI == null) {

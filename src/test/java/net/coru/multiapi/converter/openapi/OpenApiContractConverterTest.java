@@ -343,4 +343,20 @@ class OpenApiContractConverterTest {
         .isInstanceOf(HashMap.class);
   }
 
+  @Test
+  @DisplayName("OpenApi: Check that Refs inside arrays are being processed okay")
+  void testExternalRefs() {
+    final File file = new File(openApiContractConverterTestFixtures.OPENAPI_TEST_EXTERNAL_REF);
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    List<Contract> contractList = new ArrayList<>(contracts);
+    Contract contract = contractList.get(0);
+    Response response = contract.getResponse();
+    final Map<String, Object> bodyServerValueMap = (Map<String, Object>) response.getBody().getServerValue();
+    assertThat(bodyServerValueMap)
+        .isNotNull()
+        .hasSize(5)
+        .containsKeys(openApiContractConverterTestFixtures.OPENAPI_TEXT_EXTERNAL_REF_KEYS);
+    assertThat(contract).isNotNull();
+  }
+
 }
