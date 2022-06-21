@@ -208,7 +208,7 @@ public class OpenApiContractConverter {
             String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
             Schema<?> subSchema = openAPI.getComponents().getSchemas().get(subRef);
             if(Objects.nonNull(subSchema.getProperties())){
-              Map<String, Schema> subProperties = (Map<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
+              Map<String, Schema> subProperties = subSchema.getProperties();
               bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, openAPI, bodyMatchers));
             } else {
               final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
