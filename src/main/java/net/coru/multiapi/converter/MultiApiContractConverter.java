@@ -48,7 +48,6 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
 
     Collection<Contract> contracts = null;
     JsonNode node;
-
     if (isAccepted(file)) {
       try {
         node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
@@ -65,9 +64,7 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
         throw new MultiApiContractConverterException(e);
       }
     }
-
     return contracts;
-
   }
 
   @Override
