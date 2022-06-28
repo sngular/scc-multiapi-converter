@@ -46,7 +46,9 @@ public class AsyncApiContractConverterTestFixtures {
 
   public final String ORDER = "order";
 
-  public final String SECOND_SCHEMA = "secondSchema";
+  public final String ORDERS = "orders";
+
+  public final String ORDER_LINE = "orderLine";
 
   public final String EMPLOYEES = "employees";
 
@@ -66,6 +68,8 @@ public class AsyncApiContractConverterTestFixtures {
 
   public final String STREET = "street";
 
+  public final String STREET_VALUE = "Calle Sor Joaquina";
+
   public final String AMOUNT = "amount";
 
   public final String INTEGER_TYPE = "integerType";
@@ -82,7 +86,7 @@ public class AsyncApiContractConverterTestFixtures {
 
   public final String BOOLEAN_TYPE = "booleanType";
 
-  public final String INT_ARRAY_TYPE = "intArray";
+  public final String IS_SENT = "isSent";
 
   public final List<Integer> INT_ARRAY_VALUES = List.of(1, 2, 3);
 

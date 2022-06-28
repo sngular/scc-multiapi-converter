@@ -1,15 +1,15 @@
 components:
-  schema:
-    secondSchema:
+  schemas:
+    Order:
       type: object
       properties:
-        stringType:
+        companyName:
           type: string
           example: Corunet
-        booleanType:
+        isSent:
           type: boolean
           example: true
-        intArray:
+        amount:
           type: array
           items:
             type: integer

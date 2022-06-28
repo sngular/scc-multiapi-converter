@@ -1,13 +1,14 @@
 components:
   schemas:
-    OrderCreated:
+    OrderLine:
       type: object
       properties:
-        $ref: '#/components/schemas/Order'
+        order:
+          $ref: '#/components/schemas/Order'
 
-    order:
+    Order:
       type: object
       properties:
-        stringType:
+        companyName:
           type: string
           example: Corunet

@@ -150,7 +150,7 @@ class AsyncApiContractConverterTest {
       } else {
         assertThat(nameValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
         assertThat(nameValue).containsEntry(asyncApiContractConverterTestFixtures.REFERENCE_NAME, 3324);
-        assertThat(addressValue).containsEntry(asyncApiContractConverterTestFixtures.STREET, "Calle Sor Joaquina");
+        assertThat(addressValue).containsEntry(asyncApiContractConverterTestFixtures.STREET, asyncApiContractConverterTestFixtures.STREET_VALUE);
       }
     }
   }
@@ -257,18 +257,18 @@ class AsyncApiContractConverterTest {
       Contract contract = contractList.get(i);
 
       Map<String, Object> bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
-      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.SECOND_SCHEMA)).isNotNull();
-      Map<String, Object> secondSchemaValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.SECOND_SCHEMA);
-      List<Integer> intArray = (ArrayList<Integer>) secondSchemaValue.get(asyncApiContractConverterTestFixtures.INT_ARRAY_TYPE);
+      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
+      Map<String, Object> orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
+      List<Integer> amount = (ArrayList<Integer>) orderValue.get(asyncApiContractConverterTestFixtures.AMOUNT);
 
       if (i == 0) {
-        assertThat(secondSchemaValue.get(asyncApiContractConverterTestFixtures.STRING_TYPE)).isNotNull().isInstanceOf(String.class);
-        assertThat(secondSchemaValue.get(asyncApiContractConverterTestFixtures.BOOLEAN_TYPE)).isNotNull().isInstanceOf(Boolean.class);
-        assertThat(intArray).isNotNull().isInstanceOf(ArrayList.class);
+        assertThat(orderValue.get(asyncApiContractConverterTestFixtures.COMPANY_NAME)).isNotNull().isInstanceOf(String.class);
+        assertThat(orderValue.get(asyncApiContractConverterTestFixtures.IS_SENT)).isNotNull().isInstanceOf(Boolean.class);
+        assertThat(amount).isNotNull().isInstanceOf(ArrayList.class);
       } else {
-        assertThat(secondSchemaValue).containsEntry(asyncApiContractConverterTestFixtures.STRING_TYPE, asyncApiContractConverterTestFixtures.CORUNET);
-        assertThat(secondSchemaValue).containsEntry(asyncApiContractConverterTestFixtures.BOOLEAN_TYPE, true);
-        assertThat(intArray).isEqualTo(asyncApiContractConverterTestFixtures.INT_ARRAY_VALUES);
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.IS_SENT, true);
+        assertThat(amount).isEqualTo(asyncApiContractConverterTestFixtures.INT_ARRAY_VALUES);
       }
     }
   }
@@ -284,13 +284,17 @@ class AsyncApiContractConverterTest {
       Contract contract = contractList.get(i);
 
       Map<String, Object> bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
-      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
-      Map<String, Object> orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
+      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDERS)).isNotNull();
+      Map<String, Object> ordersValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDERS);
+      assertThat(ordersValue.get(asyncApiContractConverterTestFixtures.ORDER_LINE)).isNotNull();
+      Map<String, Object> orderLineValue = (Map<String, Object>) ordersValue.get(asyncApiContractConverterTestFixtures.ORDER_LINE);
+      assertThat(orderLineValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
+      Map<String, Object> orderValue = (Map<String, Object>) orderLineValue.get(asyncApiContractConverterTestFixtures.ORDER);
 
       if (i == 0) {
-        assertThat(orderValue.get(asyncApiContractConverterTestFixtures.STRING_TYPE)).isNotNull().isInstanceOf(String.class);
+        assertThat(orderValue.get(asyncApiContractConverterTestFixtures.COMPANY_NAME)).isNotNull().isInstanceOf(String.class);
       } else {
-        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.STRING_TYPE, asyncApiContractConverterTestFixtures.CORUNET);
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
       }
     }
   }

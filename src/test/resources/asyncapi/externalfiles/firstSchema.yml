@@ -1,6 +1,7 @@
 components:
-  schema:
-    firstSchema:
+  schemas:
+    Orders:
       type: object
       properties:
-        $ref: './externalfiles/secondSchema.yml#/components/schemas'
+        orderLine:
+          $ref: './externalfiles/thirdSchema.yml#/components/schemas/OrderLine'

@@ -42,7 +42,13 @@ components:
   messages:
     OrderCreated:
       payload:
-        $ref: './externalfiles/thirdSchema.yml#/components/schemas'
+        type: object
+        properties:
+          orders:
+            $ref: './externalfiles/firstSchema.yml#/components/schemas/Orders'
     CreateOrder:
       payload:
-        $ref: './externalfiles/thirdSchema.yml#/components/schemas'
+        type: object
+        properties:
+          orders:
+            $ref: './externalfiles/firstSchema.yml#/components/schemas/Orders'

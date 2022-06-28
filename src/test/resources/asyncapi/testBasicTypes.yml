@@ -42,25 +42,21 @@ components:
   messages:
     OrderCreated:
       payload:
-        $ref: '#/components/schemas/OrderCreated'
+        $ref: '#/components/schemas/OrderCreatedSchema'
     CreateOrder:
       payload:
-        $ref: '#/components/schemas/CreateOrder'
+        $ref: '#/components/schemas/CreateOrderSchema'
   schemas:
-    CreateOrder:
+    CreateOrderSchema:
       type: object
       properties:
         order:
-          type: object
-          properties:
-            $ref: '#/components/schemas/Order'
-    OrderCreated:
+          $ref: '#/components/schemas/Order'
+    OrderCreatedSchema:
       type: object
       properties:
         order:
-          type: object
-          properties:
-            $ref: '#/components/schemas/Order'
+          $ref: '#/components/schemas/Order'
     Order:
       type: object
       properties:
