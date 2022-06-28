@@ -37,10 +37,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if a contract is returned")
   void convertFromTest() {
-    Collection<Contract> contracts;
-    File file = new File(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
-    contracts = multiApiContractConverter.convertFrom(file);
-    List<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
 
     assertThat(contractList).hasSize(2);
 
@@ -60,9 +57,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if Input is being processed okay")
   void testInput() {
-    File file = new File(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
     Map<String, Object> order = asyncApiContractConverterTestFixtures.createOrder();
 
     Contract publishContract = contractList.get(0);
@@ -79,9 +74,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if OutputMessage is being processed okay")
   void testOutputMessage() {
-    File file = new File(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
     Map<String, Object> order = asyncApiContractConverterTestFixtures.createOrder();
 
     Contract publishContract = contractList.get(0);
@@ -105,9 +98,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if the enum logic is being processed okay")
   void testEnums() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_ENUMS_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_ENUMS_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -128,9 +119,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if complex objects are being processed okay")
   void testComplexObjects() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_COMPLEX_OBJECTS_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_COMPLEX_OBJECTS_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -158,9 +147,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if arrays are being processed okay")
   void testArrays() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_ARRAYS_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_ARRAYS_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -189,9 +176,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if arrays with reference to an object are being processed okay")
   void testArraysWithRef() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_ARRAYS_REF_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_ARRAYS_REF_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -215,9 +200,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if basic types are being processed okay")
   void testBasicTypes() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_BASIC_TYPES_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_BASIC_TYPES_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -249,9 +232,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if references to external files work correctly")
   void testExternalFiles() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_EXTERNAL_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_EXTERNAL_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -276,9 +257,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if references to external files work correctly with multiple schemas")
   void testExternalFilesWithMultipleSchemas() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_EXTERNAL_FILE_MULTIPLE_SCHEMAS);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_EXTERNAL_FILE_MULTIPLE_SCHEMAS);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -297,6 +276,13 @@ class AsyncApiContractConverterTest {
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
       }
     }
+  }
+
+  private List<Contract> getContracts(String filePath) {
+    File file = new File(filePath);
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    List<Contract> contractList = new ArrayList<>(contracts);
+    return contractList;
   }
 
 }
