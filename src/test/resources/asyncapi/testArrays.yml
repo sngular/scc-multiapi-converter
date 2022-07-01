@@ -63,12 +63,11 @@ components:
         name:
           type: array
           items:
-            ObjectName:
-              type: object
-              properties:
-                companyName:
-                  type: string
-                  example: Corunet
+            type: object
+            properties:
+              companyName:
+                type: string
+                example: Corunet
         amount:
           type: array
           items:

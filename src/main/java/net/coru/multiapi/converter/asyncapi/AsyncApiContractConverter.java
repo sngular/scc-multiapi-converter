@@ -362,13 +362,10 @@ public class AsyncApiContractConverter {
   }
 
   private List<Object> processArray(
-      final ResponseBodyMatchers responseBodyMatchers, final String property, final JsonNode properties, final String path,
+      final ResponseBodyMatchers responseBodyMatchers, String property, JsonNode properties, final String path,
       final String operationType, final JsonNode node, final File basePath) throws IOException {
 
     List<Object> resultArray = new ArrayList<>();
-    String enumType = "";
-    String type;
-    JsonNode objectProperties;
 
     if (properties.get(BasicTypeConstants.REF) != null && properties.get(BasicTypeConstants.REF).asText().contains(".yml")) {
       String[] pathToSchema = properties.get(BasicTypeConstants.REF).asText().split("#");
@@ -377,19 +374,9 @@ public class AsyncApiContractConverter {
       if (properties.get(BasicTypeConstants.REF) != null && properties.get(BasicTypeConstants.REF).asText().startsWith("#")) {
         String[] pathToObject = properties.get(BasicTypeConstants.REF).asText().split("/");
         var body = pathToObject[pathToObject.length - 1];
-        objectProperties = node.findPath(body).get(BasicTypeConstants.PROPERTIES);
-
-        type = BasicTypeConstants.OBJECT;
-      } else {
-        objectProperties = properties.get(properties.fieldNames().next()).get(BasicTypeConstants.PROPERTIES);
-        type = getType(properties);
-
-        if (isEnum(properties)) {
-          enumType = type;
-          type = BasicTypeConstants.ENUM;
-        }
+        properties = node.findPath(body);
       }
-      resultArray = processInternalArray(responseBodyMatchers, property, properties, path, operationType, node, basePath, enumType, type, objectProperties);
+      resultArray = processInternalArray(responseBodyMatchers, property, properties, path, operationType, node, basePath);
     }
 
     return resultArray;
@@ -397,14 +384,29 @@ public class AsyncApiContractConverter {
 
   private List<Object> processInternalArray(
       final ResponseBodyMatchers responseBodyMatchers, final String property, final JsonNode properties, final String path, final String operationType, final JsonNode node,
-      final File basePath, final String enumType, final String type, final JsonNode objectProperties)
+      final File basePath)
       throws IOException {
     List<Object> arrayValues = new ArrayList<>();
+    String enumType = "";
+    String type;
+    JsonNode internalProperties;
 
+    type = getType(properties);
+
+    if (type.equals(BasicTypeConstants.OBJECT)) {
+      internalProperties = properties.get(BasicTypeConstants.PROPERTIES);
+    } else {
+      internalProperties = properties;
+    }
+
+    if (isEnum(internalProperties)) {
+      enumType = type;
+      type = BasicTypeConstants.ENUM;
+    }
     switch (type) {
       case BasicTypeConstants.STRING:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(properties.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             arrayValues.add(arrayNode.get(i).asText());
           }
@@ -418,7 +420,7 @@ public class AsyncApiContractConverter {
       case BasicTypeConstants.INT_32:
       case BasicTypeConstants.NUMBER:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(properties.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             arrayValues.add(arrayNode.get(i).asInt());
           }
@@ -432,7 +434,7 @@ public class AsyncApiContractConverter {
       case BasicTypeConstants.INT_64:
       case BasicTypeConstants.FLOAT:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(properties.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             arrayValues.add(arrayNode.get(i).asDouble());
           }
@@ -445,7 +447,7 @@ public class AsyncApiContractConverter {
         break;
       case BasicTypeConstants.DOUBLE:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(properties.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             arrayValues.add(arrayNode.get(i).asDouble());
           }
@@ -458,7 +460,7 @@ public class AsyncApiContractConverter {
         break;
       case BasicTypeConstants.BOOLEAN:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(properties.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             arrayValues.add(arrayNode.get(i).asBoolean());
           }
@@ -471,20 +473,20 @@ public class AsyncApiContractConverter {
         break;
       case BasicTypeConstants.ENUM:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(properties.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
             arrayValues.add(processEnumTypes(arrayNode.get(i), enumType));
           }
         } else {
-          var enumList = properties.get(BasicTypeConstants.ENUM);
+          var enumList = internalProperties.get(BasicTypeConstants.ENUM);
           arrayValues.add(processEnumTypes(enumList.get(BasicTypeConstants.RANDOM.nextInt(enumList.size())), enumType));
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
-            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(getEnumRegex(enumType, properties, property)));
+            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(getEnumRegex(enumType, internalProperties, property)));
           }
         }
         break;
       case BasicTypeConstants.OBJECT:
-        arrayValues.add(fillObjectProperties(responseBodyMatchers, objectProperties, path + ".", operationType, basePath, node, new HashMap<>()));
+        arrayValues.add(fillObjectProperties(responseBodyMatchers, internalProperties, path + ".", operationType, basePath, node, new HashMap<>()));
         break;
       default:
         throw new ElementNotFoundException(BasicTypeConstants.TYPE);
