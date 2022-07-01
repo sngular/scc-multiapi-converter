@@ -362,10 +362,10 @@ public class AsyncApiContractConverter {
   }
 
   private List<Object> processArray(
-      final ResponseBodyMatchers responseBodyMatchers, String property, JsonNode properties, final String path,
+      final ResponseBodyMatchers responseBodyMatchers, String property, final JsonNode properties, final String path,
       final String operationType, final JsonNode node, final File basePath) throws IOException {
-
     List<Object> resultArray = new ArrayList<>();
+    JsonNode internalProperties = properties;
 
     if (properties.get(BasicTypeConstants.REF) != null && properties.get(BasicTypeConstants.REF).asText().contains(".yml")) {
       String[] pathToSchema = properties.get(BasicTypeConstants.REF).asText().split("#");
@@ -374,9 +374,9 @@ public class AsyncApiContractConverter {
       if (properties.get(BasicTypeConstants.REF) != null && properties.get(BasicTypeConstants.REF).asText().startsWith("#")) {
         String[] pathToObject = properties.get(BasicTypeConstants.REF).asText().split("/");
         var body = pathToObject[pathToObject.length - 1];
-        properties = node.findPath(body);
+        internalProperties = node.findPath(body);
       }
-      resultArray = processInternalArray(responseBodyMatchers, property, properties, path, operationType, node, basePath);
+      resultArray = processInternalArray(responseBodyMatchers, property, internalProperties, path, operationType, node, basePath);
     }
 
     return resultArray;
