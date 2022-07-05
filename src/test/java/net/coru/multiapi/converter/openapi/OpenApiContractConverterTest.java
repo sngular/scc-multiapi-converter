@@ -178,7 +178,7 @@ class OpenApiContractConverterTest {
     assertThat(contract).isNotNull();
     assertThat(contract.getRequest()).isNotNull();
     assertThat(contract.getResponse()).isNotNull();
-    final Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    final Map<String, Object> bodyServerValueMap = ((ArrayList<HashMap<String, Object>>) contract.getResponse().getBody().getServerValue()).get(0);
     assertThat(bodyServerValueMap)
         .containsKey(openApiContractConverterTestFixtures.NAME)
         .containsKey(openApiContractConverterTestFixtures.ADDRESS)

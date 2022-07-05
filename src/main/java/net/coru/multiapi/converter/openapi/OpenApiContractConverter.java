@@ -131,7 +131,11 @@ public class OpenApiContractConverter {
           OpenApiContractConverterUtils.processBasicResponseTypeBody(response, schema);
         } else {
           processBodyAndMatchers(bodyMap, schema, openAPI, responseBodyMatchers);
-          response.setBody(new Body(bodyMap));
+          if (schema.getType() != null && schema.getType().equals("array")){
+            response.setBody(new Body(bodyMap.values().toArray()[0]));
+          } else {
+            response.setBody(new Body(bodyMap));
+          }
           response.setBodyMatchers(responseBodyMatchers);
         }
       }
@@ -185,15 +189,19 @@ public class OpenApiContractConverter {
   private void processBodyAndMatchers(final Map<String, Object> bodyMap, Schema schema, OpenAPI openAPI, BodyMatchers bodyMatchers) {
 
     if (Objects.nonNull(schema.getType())) {
-      final Map<String, Schema> basicObjectProperties = schema.getProperties();
-      for (Entry<String, Schema> property : basicObjectProperties.entrySet()) {
-        if (Objects.nonNull(property.getValue().get$ref())) {
-          final String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
-          final HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
-          bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, openAPI, bodyMatchers));
-        } else {
-          writeBodyMatcher(bodyMap, openAPI, bodyMatchers, property.getKey(), property.getValue(), property.getValue().getType());
+      if (Objects.nonNull(schema.getProperties())){
+        final Map<String, Schema> basicObjectProperties = schema.getProperties();
+        for (Entry<String, Schema> property : basicObjectProperties.entrySet()) {
+          if (Objects.nonNull(property.getValue().get$ref())) {
+            final String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
+            final HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
+            bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, openAPI, bodyMatchers));
+          } else {
+            writeBodyMatcher(bodyMap, openAPI, bodyMatchers, property.getKey(), property.getValue(), property.getValue().getType());
+          }
         }
+      } else {
+        writeBodyMatcher(bodyMap, openAPI, bodyMatchers, null, schema, schema.getType());
       }
     }
     if (Objects.nonNull(schema.get$ref())) {
@@ -306,8 +314,14 @@ public class OpenApiContractConverter {
       final String newObjectName = objectName + "." + property.getKey();
       if (Objects.nonNull(property.getValue().get$ref())) {
         final String ref = OpenApiContractConverterUtils.mapRefName(property.getValue());
-        final HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(ref).getProperties();
-        propertyMap.put(property.getKey(), processComplexBodyAndMatchers(newObjectName, subProperties, openAPI, bodyMatchers));
+        if (Objects.nonNull(openAPI.getComponents().getSchemas().get(ref).getProperties())){
+          final HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(ref).getProperties();
+          propertyMap.put(property.getKey(), processComplexBodyAndMatchers(newObjectName, subProperties, openAPI, bodyMatchers));
+        } else {
+          final var subProperties = ((ArraySchema) openAPI.getComponents().getSchemas().get(ref)).getItems();
+          final List<Object> propertyList = new ArrayList<>();
+          propertyMap.put(property.getKey(), processArray(subProperties, propertyList, newObjectName, bodyMatchers, openAPI));
+        }
       } else {
         final String type;
         if (Objects.nonNull(property.getValue().getEnum())) {
