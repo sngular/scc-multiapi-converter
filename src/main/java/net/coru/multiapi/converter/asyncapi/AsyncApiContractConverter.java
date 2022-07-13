@@ -8,6 +8,8 @@ package net.coru.multiapi.converter.asyncapi;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,13 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import net.coru.multiapi.converter.exception.ElementNotFoundException;
+import net.coru.multiapi.converter.exception.MultiApiContractConverterException;
 import net.coru.multiapi.converter.utils.BasicTypeConstants;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -36,19 +37,19 @@ import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 public class AsyncApiContractConverter {
 
   public Collection<Contract> convertFrom(final File file) {
-    Collection<Contract> sccContracts = new ArrayList<>();
+    final Collection<Contract> sccContracts = new ArrayList<>();
 
     try {
-      var node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
-      var channelsNode = node.get(BasicTypeConstants.CHANNELS);
+      final var fileContent = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
+      final var channelsNode = fileContent.get(BasicTypeConstants.CHANNELS);
 
       Iterator<JsonNode> it = channelsNode.elements();
       Iterator<String> topicIterator = channelsNode.fieldNames();
       while (it.hasNext()) {
-        Contract contract = new Contract();
-        JsonNode operationContent;
-        String operationType;
-        Map<String, Object> bodyProcessed;
+        final Contract contract = new Contract();
+        final JsonNode operationContent;
+        final String operationType;
+        final Map<String, Object> bodyProcessed;
 
         JsonNode channel = it.next();
         operationType = channel.fieldNames().next();
@@ -56,7 +57,7 @@ public class AsyncApiContractConverter {
         String operationId = operationContent.get("operationId").asText();
         contract.setName(operationId);
         ResponseBodyMatchers responseBodyMatchers = new ResponseBodyMatchers();
-        bodyProcessed = processMessage(responseBodyMatchers, operationContent, node, operationType);
+        bodyProcessed = processMessage(responseBodyMatchers, operationContent, fileContent, operationType, file);
         contract.label(operationId);
 
         String topicName = topicIterator.next();
@@ -96,49 +97,166 @@ public class AsyncApiContractConverter {
     return sccContracts;
   }
 
-  private Map<String, Object> processMessage(ResponseBodyMatchers responseBodyMatchers, JsonNode operationContent, JsonNode node, String operationType)
-      throws JsonProcessingException {
-    JsonNode message;
-    JsonNode component;
-    JsonNode schema;
+  private Map<String, Object> processMessage(
+      final ResponseBodyMatchers responseBodyMatchers, final JsonNode operationContent, final JsonNode fileContent, final String operationType,
+      final File basePath)
+      throws IOException {
+    final JsonNode message;
     JsonNode propertiesJson;
-    String body;
-    Map<String, Object> messageBody;
+    final String ref;
+    final Map<String, Object> messageBody = new HashMap<>();
 
     message = operationContent.get("message");
+    checkIfReferenceWithProperties(message);
 
     if (message.get(BasicTypeConstants.REF) != null && message.get(BasicTypeConstants.REF).asText().startsWith("#")) {
-      String[] pathToObject = message.get(BasicTypeConstants.REF).asText().split("/");
-      body = pathToObject[pathToObject.length - 1];
-      component = node.get("components");
-      var payload = component.get("messages").get(body).get("payload");
+      final String[] pathToRef = message.get(BasicTypeConstants.REF).asText().split("/");
+      ref = pathToRef[pathToRef.length - 1];
+      final var payload = fileContent.findPath(ref);
 
-      if (payload.get(BasicTypeConstants.REF) != null && payload.get(BasicTypeConstants.REF).asText().startsWith("#")) {
-        String[] pathToObject2 = payload.get(BasicTypeConstants.REF).asText().split("/");
-        body = pathToObject2[pathToObject.length - 1];
-        schema = component.get(BasicTypeConstants.SCHEMAS).get(body);
-        propertiesJson = schema.get(BasicTypeConstants.PROPERTIES);
-        messageBody = fillObjectProperties(responseBodyMatchers, propertiesJson, component.get(BasicTypeConstants.SCHEMAS), "", operationType);
-      } else if (payload.get(BasicTypeConstants.REF) != null) {
-        var fillProperties = processAvro(responseBodyMatchers, payload);
-        messageBody = fillProperties.getValue();
-      } else {
-        propertiesJson = payload.get(payload.fieldNames().next()).get(BasicTypeConstants.PROPERTIES);
-        messageBody = fillObjectProperties(responseBodyMatchers, propertiesJson, component.get(BasicTypeConstants.SCHEMAS), "", operationType);
-      }
+      messageBody.putAll(processSchemas(responseBodyMatchers, operationType, payload.fieldNames().next(), payload, basePath, fileContent, ""));
 
     } else if (message.get(BasicTypeConstants.REF) != null) {
-      var fillProperties = processAvro(responseBodyMatchers, message);
-      messageBody = fillProperties.getValue();
+      final var fillProperties = processAvro(responseBodyMatchers, message);
+      messageBody.putAll(fillProperties.getValue());
     } else {
       propertiesJson = message.get(message.fieldNames().next()).get(BasicTypeConstants.PROPERTIES);
-      messageBody = fillObjectProperties(responseBodyMatchers, propertiesJson, null, "", operationType);
+
+      if (Objects.nonNull(propertiesJson.get(BasicTypeConstants.REF)) && propertiesJson.get(BasicTypeConstants.REF).asText().startsWith("#")) {
+        final String[] pathToRef = propertiesJson.get(BasicTypeConstants.REF).asText().split("/");
+        final var length = pathToRef.length;
+        ref = pathToRef[length - 1];
+        propertiesJson = fileContent.findPath(ref).get(BasicTypeConstants.PROPERTIES);
+        messageBody.putAll(fillObjectProperties(responseBodyMatchers, propertiesJson, "", operationType, basePath, fileContent));
+      } else if (propertiesJson.get(BasicTypeConstants.REF) != null && propertiesJson.get(BasicTypeConstants.REF).asText().contains(".yml")) {
+        final String[] pathToRef = propertiesJson.get(BasicTypeConstants.REF).asText().split("#");
+        messageBody.putAll(processExternalFile(pathToRef[0], pathToRef[1], responseBodyMatchers, operationType, basePath, ""));
+      } else {
+        messageBody.putAll(fillObjectProperties(responseBodyMatchers, propertiesJson, "", operationType, basePath, fileContent));
+      }
+
     }
     return messageBody;
   }
 
-  private JsonNode subscribeOrPublishOperation(JsonNode rootNode) {
-    JsonNode result;
+  private Map<String, Object> processSchemas(
+      final ResponseBodyMatchers responseBodyMatchers, final String operationType, String fieldName,
+      final JsonNode payload, final File basePath, final JsonNode fileContent, final String bodyMatcherPath) throws IOException {
+    final JsonNode properties;
+    final String ref;
+    final Map<String, Object> messageBody = new HashMap<>();
+
+    checkIfReferenceWithProperties(payload.get(fieldName));
+
+    if (Objects.nonNull(payload.get(fieldName).get(BasicTypeConstants.REF)) && payload.get(fieldName).get(BasicTypeConstants.REF).asText().startsWith("#")) {
+      final String[] pathToRef = payload.get(fieldName).get(BasicTypeConstants.REF).asText().split("/");
+      final var length = pathToRef.length;
+      ref = pathToRef[length - 1];
+      properties = fileContent.findPath(ref).get(BasicTypeConstants.PROPERTIES);
+      messageBody.putAll(processProperties(responseBodyMatchers, operationType, basePath, fileContent, bodyMatcherPath, properties));
+
+    } else if (Objects.nonNull(payload.get(fieldName).get(BasicTypeConstants.REF)) && payload.get(fieldName).get(BasicTypeConstants.REF).asText().contains(".yml")) {
+      final String[] pathToRef = payload.get(fieldName).get(BasicTypeConstants.REF).asText().split("#");
+      messageBody.putAll(processExternalFile(pathToRef[0], pathToRef[1], responseBodyMatchers, operationType, basePath, bodyMatcherPath));
+    } else if (payload.get(fieldName).get(BasicTypeConstants.REF) != null) {
+      final var fillProperties = processAvro(responseBodyMatchers, payload);
+      messageBody.putAll(fillProperties.getValue());
+    } else {
+      if (Objects.nonNull(payload.get(BasicTypeConstants.PAYLOAD).get(BasicTypeConstants.PROPERTIES))) {
+        properties = payload.get(BasicTypeConstants.PAYLOAD).get(BasicTypeConstants.PROPERTIES);
+        messageBody.putAll(processProperties(responseBodyMatchers, operationType, basePath, fileContent, bodyMatcherPath, properties));
+
+      } else {
+        if (Objects.nonNull(payload.get(BasicTypeConstants.PAYLOAD))) {
+          properties = payload.get(BasicTypeConstants.PAYLOAD).get(payload.get(BasicTypeConstants.PAYLOAD).fieldNames().next()).get(BasicTypeConstants.PROPERTIES);
+        } else {
+          properties = payload;
+        }
+        messageBody.putAll(fillObjectProperties(responseBodyMatchers, properties, bodyMatcherPath, operationType, basePath, fileContent));
+      }
+
+    }
+    return messageBody;
+  }
+
+  private Map<String, Object> processProperties(
+      final ResponseBodyMatchers responseBodyMatchers, final String operationType, final File basePath, final JsonNode fileContent, final String bodyMatcherPath,
+      final JsonNode properties) throws IOException {
+    var propertiesName = properties.fieldNames();
+    final Map<String, Object> messageBody = new HashMap<>();
+
+    while (propertiesName.hasNext()) {
+      var propertyName = propertiesName.next();
+
+      if (Objects.nonNull(properties.get(propertyName).get(BasicTypeConstants.REF))) {
+        messageBody.put(propertyName, processSchemas(responseBodyMatchers, operationType, propertyName, properties, basePath, fileContent, propertyName + "."));
+      } else {
+        final ObjectNode propertiesToFill = BasicTypeConstants.OBJECT_MAPPER.createObjectNode();
+        propertiesToFill.set(propertyName, properties.get(propertyName));
+        messageBody.putAll(fillObjectProperties(responseBodyMatchers, propertiesToFill, bodyMatcherPath, operationType, basePath, fileContent));
+      }
+    }
+    return messageBody;
+  }
+
+  private Map<String, Object> processExternalFile(
+      final String externalFilePath, final String schemaPath, final ResponseBodyMatchers responseBodyMatchers, final String operationType, final File basePath,
+      String bodyMatcherPath)
+      throws IOException {
+    final Map<String, Object> messageBody = new HashMap<>();
+    final JsonNode schema;
+
+    final Path externalFile = composePath(basePath.toPath(), externalFilePath);
+    var externalFileContent = BasicTypeConstants.OBJECT_MAPPER.readTree(externalFile.toFile());
+
+    final String[] splitSchemaPath = schemaPath.split("/");
+    final var length = splitSchemaPath.length;
+    final String ref = splitSchemaPath[length - 1];
+
+    schema = externalFileContent.findPath(ref).get(BasicTypeConstants.PROPERTIES);
+    var fieldNames = schema.fieldNames();
+
+    while (fieldNames.hasNext()) {
+      var fieldName = fieldNames.next();
+
+      if (Objects.nonNull(schema.get(BasicTypeConstants.REF)) && schema.get(BasicTypeConstants.REF).asText().contains(".yml")) {
+        final String[] pathToRef = schema.get(BasicTypeConstants.REF).asText().split("#");
+        messageBody.putAll(processExternalFile(pathToRef[0], pathToRef[1], responseBodyMatchers, operationType, basePath, bodyMatcherPath));
+      } else if (Objects.nonNull(schema.get(fieldName).get(BasicTypeConstants.REF))) {
+        var bodyMatcherPathObject = bodyMatcherPath + fieldName + ".";
+        messageBody.put(fieldName, processSchemas(responseBodyMatchers, operationType, fieldName, schema, basePath, externalFileContent, bodyMatcherPathObject));
+      } else {
+        final ObjectNode propertiesToFill = BasicTypeConstants.OBJECT_MAPPER.createObjectNode();
+        propertiesToFill.set(fieldName, schema.get(fieldName));
+        messageBody.putAll(fillObjectProperties(responseBodyMatchers, propertiesToFill, bodyMatcherPath, operationType, basePath, externalFileContent));
+      }
+    }
+
+    return messageBody;
+  }
+
+  private void checkIfReferenceWithProperties(final JsonNode jsonNode) {
+    if (jsonNode.size() > 1 && Objects.nonNull(jsonNode.get(BasicTypeConstants.REF))) {
+      throw new MultiApiContractConverterException("If reference exists no other additional properties are allowed");
+    }
+  }
+
+  private Path composePath(final Path basePath, final String uriComponent) {
+    Path finalFilePath = null;
+    if (uriComponent.startsWith(".")) {
+      finalFilePath = Paths.get(basePath.getParent().toAbsolutePath() + "/" + uriComponent.substring(2));
+    } else if (uriComponent.startsWith("/")) {
+      finalFilePath = Paths.get(basePath.getParent().toAbsolutePath() + uriComponent);
+    } else if (uriComponent.startsWith("..")) {
+      finalFilePath = Paths.get(basePath.getParent().getParent().toAbsolutePath() + uriComponent.substring(2));
+    } else if (uriComponent.startsWith("http") || uriComponent.startsWith("https") || uriComponent.startsWith("ftp")) {
+      throw new MultiApiContractConverterException("remote component retrieval");
+    }
+    return finalFilePath;
+  }
+
+  private JsonNode subscribeOrPublishOperation(final JsonNode rootNode) {
+    final JsonNode result;
 
     if (rootNode.has(BasicTypeConstants.SUBSCRIBE)) {
       result = rootNode.get(BasicTypeConstants.SUBSCRIBE);
@@ -148,19 +266,21 @@ public class AsyncApiContractConverter {
     return result;
   }
 
-  private Map<String, Object> fillObjectProperties(ResponseBodyMatchers responseBodyMatchers, JsonNode properties, JsonNode schemas, String rootProperty, String operationType)
-      throws JsonProcessingException {
-    Iterator<String> it = properties.fieldNames();
-    Map<String, Object> messageBody = new HashMap<>();
+  private Map<String, Object> fillObjectProperties(
+      final ResponseBodyMatchers responseBodyMatchers, final JsonNode properties, final String rootProperty, final String operationType,
+      final File basePath, final JsonNode fileContent)
+      throws IOException {
+    Iterator<String> fieldNames = properties.fieldNames();
+    final Map<String, Object> messageBody = new HashMap<>();
 
-    while (it.hasNext()) {
-      var property = it.next();
+    while (fieldNames.hasNext()) {
+      var property = fieldNames.next();
       var path = rootProperty + property;
 
       if (!Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES)) ||
           !Objects.nonNull(properties.get(property).get(BasicTypeConstants.PROPERTIES).get(BasicTypeConstants.REF))) {
         String enumType = "";
-        var type = getType(properties.get(String.valueOf(property)));
+        var type = getType(properties.get(property));
 
         if (isEnum(properties.get(property))) {
           enumType = type;
@@ -206,7 +326,7 @@ public class AsyncApiContractConverter {
             if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
               messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asBoolean());
             } else {
-              responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex("^(true|false)$"));
+              responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
               messageBody.put(property, BasicTypeConstants.RANDOM.nextBoolean());
             }
             break;
@@ -220,19 +340,28 @@ public class AsyncApiContractConverter {
             }
             break;
           case BasicTypeConstants.OBJECT:
-            messageBody.put(property, fillObjectProperties(responseBodyMatchers, properties.get(property).get(BasicTypeConstants.PROPERTIES), schemas, path + ".", operationType));
+            messageBody.put(property, fillObjectProperties(responseBodyMatchers, properties.get(property).get(BasicTypeConstants.PROPERTIES), path + ".", operationType,
+                                                           basePath, fileContent));
             break;
           case BasicTypeConstants.ARRAY:
-            messageBody.put(property, processArray(responseBodyMatchers, property, properties.get(property).get("items"), path, operationType, schemas));
+            messageBody.put(property,
+                            processArray(responseBodyMatchers, property, properties.get(property).get("items"), path, operationType, fileContent, basePath));
             break;
           default:
             throw new ElementNotFoundException(BasicTypeConstants.TYPE);
         }
       } else {
-        String[] pathToObject = properties.get(property).get(BasicTypeConstants.PROPERTIES).get(BasicTypeConstants.REF).asText().split("/");
-        var body = pathToObject[pathToObject.length - 1];
-        var schema = schemas.get(body).get(BasicTypeConstants.PROPERTIES);
-        messageBody.put(property, fillObjectProperties(responseBodyMatchers, schema, schemas, path + ".", operationType));
+        final var subProperties = properties.get(property).get(BasicTypeConstants.PROPERTIES);
+
+        if (subProperties.get(BasicTypeConstants.REF).asText().contains(".yml")) {
+          final String[] pathToRef = subProperties.get(BasicTypeConstants.REF).asText().split("#");
+          messageBody.putAll(processExternalFile(pathToRef[0], pathToRef[1], responseBodyMatchers, operationType, basePath, path));
+        } else {
+          final String[] pathToObject = subProperties.get(BasicTypeConstants.REF).asText().split("/");
+          final var body = pathToObject[pathToObject.length - 1];
+          final var schema = fileContent.findPath(body).get(BasicTypeConstants.PROPERTIES);
+          messageBody.put(property, fillObjectProperties(responseBodyMatchers, schema, path + ".", operationType, basePath, fileContent));
+        }
       }
     }
 
@@ -240,45 +369,58 @@ public class AsyncApiContractConverter {
   }
 
   private List<Object> processArray(
-      ResponseBodyMatchers responseBodyMatchers, String property, JsonNode node, String path,
-      String operationType, JsonNode schemas) throws JsonProcessingException {
+      final ResponseBodyMatchers responseBodyMatchers, String property, final JsonNode properties, final String path,
+      final String operationType, final JsonNode node, final File basePath) throws IOException {
+    List<Object> resultArray = new ArrayList<>();
+    JsonNode internalProperties = properties;
 
-    final List<Object> result = new ArrayList<>();
-    final ObjectMapper objectMapper = new ObjectMapper();
-    String enumType = "";
-    String type;
+    checkIfReferenceWithProperties(properties);
 
-    if (node.get(BasicTypeConstants.REF) != null && node.get(BasicTypeConstants.REF).asText().startsWith("#")) {
-      String[] pathToObject = node.get(BasicTypeConstants.REF).asText().split("/");
-      var body = pathToObject[pathToObject.length - 1];
-      var fieldnames = schemas.fieldNames();
-
-      while (fieldnames.hasNext()) {
-        if (fieldnames.next().equals(body)) {
-          ((ObjectNode) node).remove(BasicTypeConstants.REF);
-          ((ObjectNode) node).set(body, schemas.get(body));
-        }
-      }
-
-      type = BasicTypeConstants.OBJECT;
+    if (properties.get(BasicTypeConstants.REF) != null && properties.get(BasicTypeConstants.REF).asText().contains(".yml")) {
+      final String[] pathToSchema = properties.get(BasicTypeConstants.REF).asText().split("#");
+      resultArray.add(processExternalFile(pathToSchema[0], pathToSchema[1], responseBodyMatchers, operationType, basePath, path));
     } else {
-      type = getType(node);
-
-      if (isEnum(node)) {
-        enumType = type;
-        type = BasicTypeConstants.ENUM;
+      if (properties.get(BasicTypeConstants.REF) != null && properties.get(BasicTypeConstants.REF).asText().startsWith("#")) {
+        final String[] pathToObject = properties.get(BasicTypeConstants.REF).asText().split("/");
+        final var body = pathToObject[pathToObject.length - 1];
+        internalProperties = node.findPath(body);
       }
+      resultArray = processInternalArray(responseBodyMatchers, property, internalProperties, path, operationType, node, basePath);
     }
 
+    return resultArray;
+  }
+
+  private List<Object> processInternalArray(
+      final ResponseBodyMatchers responseBodyMatchers, final String property, final JsonNode properties, final String path, final String operationType, final JsonNode node,
+      final File basePath)
+      throws IOException {
+    final List<Object> arrayValues = new ArrayList<>();
+    String enumType = "";
+    String type;
+    JsonNode internalProperties;
+
+    type = getType(properties);
+
+    if (type.equals(BasicTypeConstants.OBJECT)) {
+      internalProperties = properties.get(BasicTypeConstants.PROPERTIES);
+    } else {
+      internalProperties = properties;
+    }
+
+    if (isEnum(internalProperties)) {
+      enumType = type;
+      type = BasicTypeConstants.ENUM;
+    }
     switch (type) {
       case BasicTypeConstants.STRING:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
-            result.add(arrayNode.get(i).asText());
+            arrayValues.add(arrayNode.get(i).asText());
           }
         } else {
-          result.add(RandomStringUtils.random(5, true, false));
+          arrayValues.add(RandomStringUtils.random(5, true, false));
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
             responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
           }
@@ -287,12 +429,12 @@ public class AsyncApiContractConverter {
       case BasicTypeConstants.INT_32:
       case BasicTypeConstants.NUMBER:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
-            result.add(arrayNode.get(i).asInt());
+            arrayValues.add(arrayNode.get(i).asInt());
           }
         } else {
-          result.add(BasicTypeConstants.RANDOM.nextInt());
+          arrayValues.add(BasicTypeConstants.RANDOM.nextInt());
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
             responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
           }
@@ -301,12 +443,12 @@ public class AsyncApiContractConverter {
       case BasicTypeConstants.INT_64:
       case BasicTypeConstants.FLOAT:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
-            result.add(arrayNode.get(i).asDouble());
+            arrayValues.add(arrayNode.get(i).asDouble());
           }
         } else {
-          result.add(Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
+          arrayValues.add(Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
             responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
           }
@@ -314,12 +456,12 @@ public class AsyncApiContractConverter {
         break;
       case BasicTypeConstants.DOUBLE:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
-            result.add(arrayNode.get(i).asDouble());
+            arrayValues.add(arrayNode.get(i).asDouble());
           }
         } else {
-          result.add(BasicTypeConstants.RANDOM.nextDouble());
+          arrayValues.add(BasicTypeConstants.RANDOM.nextDouble());
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
             responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
           }
@@ -327,12 +469,12 @@ public class AsyncApiContractConverter {
         break;
       case BasicTypeConstants.BOOLEAN:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
-            result.add(arrayNode.get(i).asBoolean());
+            arrayValues.add(arrayNode.get(i).asBoolean());
           }
         } else {
-          result.add(BasicTypeConstants.RANDOM.nextBoolean());
+          arrayValues.add(BasicTypeConstants.RANDOM.nextBoolean());
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
             responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
           }
@@ -340,25 +482,25 @@ public class AsyncApiContractConverter {
         break;
       case BasicTypeConstants.ENUM:
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          var arrayNode = objectMapper.readTree(node.toString()).get(BasicTypeConstants.EXAMPLE);
+          var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
           for (int i = 0; i < arrayNode.size(); i++) {
-            result.add(processEnumTypes(arrayNode.get(i), enumType));
+            arrayValues.add(processEnumTypes(arrayNode.get(i), enumType));
           }
         } else {
-          var enumList = node.get(BasicTypeConstants.ENUM);
-          result.add(processEnumTypes(enumList.get(BasicTypeConstants.RANDOM.nextInt(enumList.size())), enumType));
+          var enumList = internalProperties.get(BasicTypeConstants.ENUM);
+          arrayValues.add(processEnumTypes(enumList.get(BasicTypeConstants.RANDOM.nextInt(enumList.size())), enumType));
           if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
-            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(getEnumRegex(enumType, node, property)));
+            responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(getEnumRegex(enumType, internalProperties, property)));
           }
         }
         break;
       case BasicTypeConstants.OBJECT:
-        result.add(fillObjectProperties(responseBodyMatchers, node.get(node.fieldNames().next()).get(BasicTypeConstants.PROPERTIES), node, path + ".", operationType));
+        arrayValues.add(fillObjectProperties(responseBodyMatchers, internalProperties, path + ".", operationType, basePath, node));
         break;
       default:
         throw new ElementNotFoundException(BasicTypeConstants.TYPE);
     }
-    return result;
+    return arrayValues;
   }
 
   private String getType(final JsonNode node) {
@@ -373,7 +515,7 @@ public class AsyncApiContractConverter {
     return type;
   }
 
-  private Object processEnumTypes(JsonNode value, String type) {
+  private Object processEnumTypes(final JsonNode value, final String type) {
     Object enumValue;
 
     switch (type) {
@@ -441,8 +583,7 @@ public class AsyncApiContractConverter {
   }
 
   private Pair<JsonNode, Map<String, Object>> fillObjectPropertiesFromAvro(ResponseBodyMatchers responseBodyMatchers, ArrayNode properties, String rootProperty) {
-    final ObjectMapper mapper = new ObjectMapper();
-    final ObjectNode result = mapper.createObjectNode();
+    final ObjectNode result = BasicTypeConstants.OBJECT_MAPPER.createObjectNode();
     Map<String, Object> messageBody = new HashMap<>();
 
     for (int i = 0; i < properties.size(); i++) {
@@ -495,10 +636,9 @@ public class AsyncApiContractConverter {
 
   private Pair<JsonNode, Map<String, Object>> processAvro(ResponseBodyMatchers responseBodyMatchers, JsonNode jsonNode) {
     File avroFile = new File(jsonNode.get(BasicTypeConstants.REF).asText());
-    ObjectMapper mapper = new ObjectMapper();
     JsonNode fileTree = null;
     try {
-      fileTree = mapper.readTree(avroFile);
+      fileTree = BasicTypeConstants.OBJECT_MAPPER.readTree(avroFile);
     } catch (IOException e) {
       log.error("Error", e);
     }

@@ -24,6 +24,10 @@ public class AsyncApiContractConverterTestFixtures {
 
   public final String TEST_ENUMS_FILE = "src/test/resources/asyncapi/testEnums.yml";
 
+  public final String TEST_EXTERNAL_FILE = "src/test/resources/asyncapi/testExternalFiles.yml";
+
+  public final String TEST_EXTERNAL_FILE_MULTIPLE_SCHEMAS = "src/test/resources/asyncapi/testExternalFilesWithMultipleSchemas.yml";
+
   public final String PUBLISH_NAME = "publishOperation";
 
   public final String TRIGGERED_BY = "publishOperation()";
@@ -41,6 +45,10 @@ public class AsyncApiContractConverterTestFixtures {
   public final String HEADER_VALUE = "application/json";
 
   public final String ORDER = "order";
+
+  public final String ORDERS = "orders";
+
+  public final String ORDER_LINE = "orderLine";
 
   public final String EMPLOYEES = "employees";
 
@@ -60,6 +68,8 @@ public class AsyncApiContractConverterTestFixtures {
 
   public final String STREET = "street";
 
+  public final String STREET_VALUE = "Calle Sor Joaquina";
+
   public final String AMOUNT = "amount";
 
   public final String INTEGER_TYPE = "integerType";
@@ -75,6 +85,8 @@ public class AsyncApiContractConverterTestFixtures {
   public final String STRING_TYPE = "stringType";
 
   public final String BOOLEAN_TYPE = "booleanType";
+
+  public final String IS_SENT = "isSent";
 
   public final List<Integer> INT_ARRAY_VALUES = List.of(1, 2, 3);
 

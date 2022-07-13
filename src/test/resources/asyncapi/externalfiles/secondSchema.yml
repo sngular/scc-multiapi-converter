@@ -1,0 +1,17 @@
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        companyName:
+          type: string
+          example: Corunet
+        isSent:
+          type: boolean
+          example: true
+        amount:
+          type: array
+          items:
+            type: integer
+            format: int32
+            example: [ 1, 2, 3 ]
