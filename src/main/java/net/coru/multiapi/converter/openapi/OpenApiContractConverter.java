@@ -131,7 +131,11 @@ public class OpenApiContractConverter {
           OpenApiContractConverterUtils.processBasicResponseTypeBody(response, schema);
         } else {
           processBodyAndMatchers(bodyMap, schema, openAPI, responseBodyMatchers);
-          if (schema.getType() != null && schema.getType().equals("array")){
+          Schema<?> checkArraySchema = new Schema<>();
+          if (schema.get$ref() != null){
+            checkArraySchema = openAPI.getComponents().getSchemas().get(OpenApiContractConverterUtils.mapRefName(schema));
+          }
+          if ((schema.getType() != null && "array".equalsIgnoreCase(schema.getType())) || (checkArraySchema.getType() != null && "array".equalsIgnoreCase(checkArraySchema.getType()))){
             response.setBody(new Body(bodyMap.values().toArray()[0]));
           } else {
             response.setBody(new Body(bodyMap));
@@ -201,7 +205,7 @@ public class OpenApiContractConverter {
           }
         }
       } else {
-        writeBodyMatcher(bodyMap, openAPI, bodyMatchers, null, schema, schema.getType());
+        writeBodyMatcher(bodyMap, openAPI, bodyMatchers, "[0]", schema, schema.getType());
       }
     }
     if (Objects.nonNull(schema.get$ref())) {
@@ -238,7 +242,7 @@ public class OpenApiContractConverter {
         }
       } else {
         Schema arraySchema = openAPI.getComponents().getSchemas().get(ref);
-        writeBodyMatcher(bodyMap, openAPI, bodyMatchers, ref, arraySchema, arraySchema.getType());
+        writeBodyMatcher(bodyMap, openAPI, bodyMatchers, "[0]", arraySchema, arraySchema.getType());
       }
     }
   }
@@ -400,7 +404,7 @@ public class OpenApiContractConverter {
     if (Objects.nonNull(arraySchema.get$ref())) {
       final String ref = OpenApiContractConverterUtils.mapRefName(arraySchema);
       final HashMap<String, Schema> subObject = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(ref).getProperties();
-      propertyList.add(processComplexBodyAndMatchers(objectName + "[0]", subObject, openAPI, bodyMatchers));
+      propertyList.add(processComplexBodyAndMatchers("[0]", subObject, openAPI, bodyMatchers));
     } else {
       final String type = arraySchema.getType();
       switch (type) {

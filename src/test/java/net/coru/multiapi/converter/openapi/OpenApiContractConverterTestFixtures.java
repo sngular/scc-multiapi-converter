@@ -4,11 +4,13 @@ import java.util.List;
 
 public class OpenApiContractConverterTestFixtures {
 
+  protected final String AVAILABILITY = "availability";
+
+  protected  final String ID = "id";
+
   public final String[] OPENAPI_TEXT_EXTERNAL_REF_KEYS = {"schemaRegistryName", "topic", "kafkaName", "schemaName", "repetitions"};
 
   public final String PRICE = "price";
-
-  public final String SIMILAR_GAMES = "SimilarGames";
 
   public final String OPENAPI_TEST_REF_INSIDE_ARRAYS_YML = "src/test/resources/openapi/testRefInsideArrays.yml";
 
@@ -45,6 +47,7 @@ public class OpenApiContractConverterTestFixtures {
   public final String OPENAPI_TEST_REQUEST_HEADERS_YML = "src/test/resources/openapi/testRequestHeaders.yml";
 
   public final String OPENAPI_TEST_EXTERNAL_REF = "src/test/resources/openapi/testExternalRef.yml";
+
   public final String APPLICATION_JSON = "application/json";
 
   public final String OPENAPI_TEST_REQUEST_QUERY_PARAMETERS_YML = "src/test/resources/openapi/testRequestQueryParameters.yml";

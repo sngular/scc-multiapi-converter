@@ -331,15 +331,15 @@ class OpenApiContractConverterTest {
     List<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
     Response response = contract.getResponse();
-    final Map<String, Object> bodyServerValueMap = (Map<String, Object>) response.getBody().getServerValue();
-    final List<Map<String, Object>> refMap = (List<Map<String, Object>>) bodyServerValueMap.get(openApiContractConverterTestFixtures.SIMILAR_GAMES);
+    final List<Map<String,Object>> serverValueList = (List<Map<String, Object>>) response.getBody().getServerValue();
+    final Map<String, Object> bodyServerValueMap = serverValueList.get(0);
     assertThat(response).isNotNull();
     assertThat(bodyServerValueMap)
         .isNotNull()
-        .containsKey(openApiContractConverterTestFixtures.SIMILAR_GAMES);
-    assertThat(refMap.get(0))
-        .isNotNull()
-        .containsKey(openApiContractConverterTestFixtures.PRICE)
+        .containsKeys(openApiContractConverterTestFixtures.PRICE,
+                      openApiContractConverterTestFixtures.AVAILABILITY,
+                      openApiContractConverterTestFixtures.ID,
+                      openApiContractConverterTestFixtures.NAME)
         .isInstanceOf(HashMap.class);
   }
 
