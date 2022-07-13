@@ -37,10 +37,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if a contract is returned")
   void convertFromTest() {
-    Collection<Contract> contracts;
-    File file = new File(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
-    contracts = multiApiContractConverter.convertFrom(file);
-    List<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
 
     assertThat(contractList).hasSize(2);
 
@@ -60,9 +57,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if Input is being processed okay")
   void testInput() {
-    File file = new File(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
     Map<String, Object> order = asyncApiContractConverterTestFixtures.createOrder();
 
     Contract publishContract = contractList.get(0);
@@ -79,9 +74,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if OutputMessage is being processed okay")
   void testOutputMessage() {
-    File file = new File(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
     Map<String, Object> order = asyncApiContractConverterTestFixtures.createOrder();
 
     Contract publishContract = contractList.get(0);
@@ -105,9 +98,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if the enum logic is being processed okay")
   void testEnums() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_ENUMS_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_ENUMS_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -128,9 +119,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if complex objects are being processed okay")
   void testComplexObjects() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_COMPLEX_OBJECTS_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_COMPLEX_OBJECTS_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -150,7 +139,7 @@ class AsyncApiContractConverterTest {
       } else {
         assertThat(nameValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
         assertThat(nameValue).containsEntry(asyncApiContractConverterTestFixtures.REFERENCE_NAME, 3324);
-        assertThat(addressValue).containsEntry(asyncApiContractConverterTestFixtures.STREET, "Calle Sor Joaquina");
+        assertThat(addressValue).containsEntry(asyncApiContractConverterTestFixtures.STREET, asyncApiContractConverterTestFixtures.STREET_VALUE);
       }
     }
   }
@@ -158,9 +147,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if arrays are being processed okay")
   void testArrays() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_ARRAYS_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_ARRAYS_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -189,9 +176,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if arrays with reference to an object are being processed okay")
   void testArraysWithRef() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_ARRAYS_REF_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_ARRAYS_REF_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -215,9 +200,7 @@ class AsyncApiContractConverterTest {
   @Test
   @DisplayName("AsyncApi: Check if basic types are being processed okay")
   void testBasicTypes() {
-    File file = new File(asyncApiContractConverterTestFixtures.TEST_BASIC_TYPES_FILE);
-    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-    ArrayList<Contract> contractList = new ArrayList<>(contracts);
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_BASIC_TYPES_FILE);
 
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
@@ -244,7 +227,62 @@ class AsyncApiContractConverterTest {
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.BOOLEAN_TYPE, true);
       }
     }
+  }
 
+  @Test
+  @DisplayName("AsyncApi: Check if references to external files work correctly")
+  void testExternalFiles() {
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_EXTERNAL_FILE);
+
+    for (int i = 0; i < contractList.size(); i++) {
+      Contract contract = contractList.get(i);
+
+      Map<String, Object> bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
+      Map<String, Object> orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
+      List<Integer> amount = (ArrayList<Integer>) orderValue.get(asyncApiContractConverterTestFixtures.AMOUNT);
+
+      if (i == 0) {
+        assertThat(orderValue.get(asyncApiContractConverterTestFixtures.COMPANY_NAME)).isNotNull().isInstanceOf(String.class);
+        assertThat(orderValue.get(asyncApiContractConverterTestFixtures.IS_SENT)).isNotNull().isInstanceOf(Boolean.class);
+        assertThat(amount).isNotNull().isInstanceOf(ArrayList.class);
+      } else {
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.IS_SENT, true);
+        assertThat(amount).isEqualTo(asyncApiContractConverterTestFixtures.INT_ARRAY_VALUES);
+      }
+    }
+  }
+
+  @Test
+  @DisplayName("AsyncApi: Check if references to external files work correctly with multiple schemas")
+  void testExternalFilesWithMultipleSchemas() {
+    List<Contract> contractList = getContracts(asyncApiContractConverterTestFixtures.TEST_EXTERNAL_FILE_MULTIPLE_SCHEMAS);
+
+    for (int i = 0; i < contractList.size(); i++) {
+      Contract contract = contractList.get(i);
+
+      Map<String, Object> bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+      assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDERS)).isNotNull();
+      Map<String, Object> ordersValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDERS);
+      assertThat(ordersValue.get(asyncApiContractConverterTestFixtures.ORDER_LINE)).isNotNull();
+      Map<String, Object> orderLineValue = (Map<String, Object>) ordersValue.get(asyncApiContractConverterTestFixtures.ORDER_LINE);
+      assertThat(orderLineValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
+      Map<String, Object> orderValue = (Map<String, Object>) orderLineValue.get(asyncApiContractConverterTestFixtures.ORDER);
+
+      if (i == 0) {
+        assertThat(orderValue.get(asyncApiContractConverterTestFixtures.COMPANY_NAME)).isNotNull().isInstanceOf(String.class);
+      } else {
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
+      }
+    }
+  }
+
+  private List<Contract> getContracts(String filePath) {
+    File file = new File(filePath);
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    List<Contract> contractList = new ArrayList<>(contracts);
+    return contractList;
   }
 
 }

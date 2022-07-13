@@ -52,6 +52,8 @@ public final class BasicTypeConstants {
 
   public static final String PROPERTIES = "properties";
 
+  public static final String SCHEMA = "schema";
+
   public static final String SCHEMAS = "schemas";
 
   public static final String FORMAT = "format";
@@ -61,6 +63,8 @@ public final class BasicTypeConstants {
   public static final String NAME = "name";
 
   public static final String TYPE = "type";
+
+  public static final String PAYLOAD = "payload";
 
   public static final RegexProperty STRING_REGEX = RegexPatterns.alphaNumeric();
 

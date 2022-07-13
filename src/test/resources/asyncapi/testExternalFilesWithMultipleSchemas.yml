@@ -42,46 +42,13 @@ components:
   messages:
     OrderCreated:
       payload:
-        $ref: '#/components/schemas/OrderCreatedSchema'
+        type: object
+        properties:
+          orders:
+            $ref: './externalfiles/firstSchema.yml#/components/schemas/Orders'
     CreateOrder:
       payload:
-        $ref: '#/components/schemas/CreateOrderSchema'
-  schemas:
-    CreateOrderSchema:
-      type: object
-      properties:
-        order:
-          $ref: '#/components/schemas/Order'
-    OrderCreatedSchema:
-      type: object
-      properties:
-        order:
-          $ref: '#/components/schemas/Order'
-    Order:
-      type: object
-      properties:
-        integerType:
-          type: integer
-          format: int32
-          example: 3
-        integerType2:
-          type: number
-          example: 10
-        floatType:
-          type: integer
-          format: int64
-          example: 3.5
-        floatType2:
-          type: number
-          format: float
-          example: 2.9
-        doubleType:
-          type: number
-          format: double
-          example: 100.55
-        stringType:
-          type: string
-          example: Corunet
-        booleanType:
-          type: boolean
-          example: true
+        type: object
+        properties:
+          orders:
+            $ref: './externalfiles/firstSchema.yml#/components/schemas/Orders'
