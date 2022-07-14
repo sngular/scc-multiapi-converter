@@ -178,6 +178,7 @@ Currently, this plugin has some limitations that will be addressed in the future
 
 - This plugin allows the use of AllOfs and AnyOfs in the Response section. However, OpenApi does not support AllOfs in this section and AnyOf usage might not work depending on the OpenApi version you are using.
 - Some OpenApi functionalities are not implemented yet, such as creating example objects, instead you must use the example tag in every property of the object.
+- Due to the OpenApi Parser code, when you use a $ref that points to an external file, there are some limitations when using $ref again in that same file.
 
 **Async Api implementation**:
 
@@ -191,3 +192,4 @@ Currently, this plugin has some limitations that will be addressed in the future
 - Add support for generating contracts from avro files.
 - Further investigation for OpenApi/AsyncApi and Spring Cloud Contract possibilities.
 - More testing and fixing possible bugs that may occur in the future.
+- Get rid of the OpenApi parser in order to control our own code.
