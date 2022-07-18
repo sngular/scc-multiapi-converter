@@ -6,6 +6,10 @@ public class OpenApiContractConverterTestFixtures {
 
   protected final String[] OPENAPI_TEXT_EXTERNAL_REF_KEYS = {"schemaRegistryName", "topic", "kafkaName", "schemaName", "repetitions"};
 
+  protected final String AVAILABILITY = "availability";
+
+  protected  final String ID = "id";
+
   protected final String PRICE = "price";
 
   protected final String SIMILAR_GAMES = "SimilarGames";

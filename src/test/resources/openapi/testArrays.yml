@@ -27,7 +27,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Game"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Game"
 components:
   schemas:
     Game:
