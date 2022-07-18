@@ -4,11 +4,11 @@ import java.util.List;
 
 public class OpenApiContractConverterTestFixtures {
 
+  protected final String[] OPENAPI_TEXT_EXTERNAL_REF_KEYS = {"schemaRegistryName", "topic", "kafkaName", "schemaName", "repetitions"};
+
   protected final String AVAILABILITY = "availability";
 
   protected  final String ID = "id";
-
-  public final String[] OPENAPI_TEXT_EXTERNAL_REF_KEYS = {"schemaRegistryName", "topic", "kafkaName", "schemaName", "repetitions"};
 
   protected final String PRICE = "price";
 
