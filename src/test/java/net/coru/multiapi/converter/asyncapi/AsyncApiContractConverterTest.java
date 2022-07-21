@@ -220,8 +220,8 @@ class AsyncApiContractConverterTest {
       } else {
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.INTEGER_TYPE, 3);
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.INTEGER_TYPE_2, 10);
-        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.FLOAT_TYPE, 3.5);
-        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.FLOAT_TYPE_2, 2.9);
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.FLOAT_TYPE, 3.5f);
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.FLOAT_TYPE_2, 2.9f);
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.DOUBLE_TYPE, 100.55);
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.STRING_TYPE, asyncApiContractConverterTestFixtures.CORUNET);
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.BOOLEAN_TYPE, true);

@@ -61,7 +61,7 @@ public final class AsyncApiContractConverterUtils {
       final ResponseBodyMatchers responseBodyMatchers, final JsonNode properties, final String operationType, final Map<String, Object> messageBody, final String property,
       final String path) {
     if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-      messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asDouble());
+      messageBody.put(property, Float.parseFloat(properties.get(property).get(BasicTypeConstants.EXAMPLE).asText()));
     } else {
       responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
       messageBody.put(property, Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
@@ -170,29 +170,34 @@ public final class AsyncApiContractConverterUtils {
   public static void processArrayDoubleType(
       final ResponseBodyMatchers responseBodyMatchers, final String path, final String operationType, final List<Object> arrayValues, final JsonNode internalProperties)
       throws JsonProcessingException {
-    if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-      final var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
-      for (int i = 0; i < arrayNode.size(); i++) {
-        arrayValues.add(arrayNode.get(i).asDouble());
-      }
-    } else {
-      arrayValues.add(BasicTypeConstants.RANDOM.nextDouble());
-      if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
-        responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
-      }
-    }
+    processArrayDecimalNumberType(responseBodyMatchers, path, operationType, arrayValues, internalProperties, BasicTypeConstants.DOUBLE);
   }
 
   public static void processArrayFloatType(
       final ResponseBodyMatchers responseBodyMatchers, final String path, final String operationType, final List<Object> arrayValues, final JsonNode internalProperties)
       throws JsonProcessingException {
+    processArrayDecimalNumberType(responseBodyMatchers, path, operationType, arrayValues, internalProperties, BasicTypeConstants.FLOAT);
+  }
+
+  private static void processArrayDecimalNumberType(
+      final ResponseBodyMatchers responseBodyMatchers, final String path, final String operationType, final List<Object> arrayValues, final JsonNode internalProperties,
+      final String type) throws JsonProcessingException {
+
     if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
       final var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
       for (int i = 0; i < arrayNode.size(); i++) {
-        arrayValues.add(arrayNode.get(i).asDouble());
+        if (BasicTypeConstants.DOUBLE.equals(type)) {
+          arrayValues.add(arrayNode.get(i).asDouble());
+        } else {
+          arrayValues.add(Float.parseFloat(arrayNode.get(i).textValue()));
+        }
       }
     } else {
-      arrayValues.add(Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
+      if (BasicTypeConstants.DOUBLE.equals(type)) {
+        arrayValues.add(BasicTypeConstants.RANDOM.nextDouble());
+      } else {
+        arrayValues.add(Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
+      }
       if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
         responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
       }
