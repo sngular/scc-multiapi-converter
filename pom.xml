@@ -6,7 +6,7 @@
 
   <groupId>net.coru</groupId>
   <artifactId>scc-multiapi-converter</artifactId>
-  <version>2.6.2</version>
+  <version>2.7.0</version>
   <name>SCC-MultiApi-Converter</name>
   <description>Generates Spring Cloud Contracts based on an OpenApi and AsyncApi document</description>
   <url>https://github.com/corunet/scc-multiapi-converter</url>
@@ -35,7 +35,7 @@
     <developer>
       <id>jegarcia</id>
       <name>Jose Enrique Garcia Maciñeiras</name>
-      <email>jegarcia@corunet.com</email>
+      <email>joseenrique.garcia@sngular.com</email>
       <organization>Corunet</organization>
       <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
@@ -47,7 +47,7 @@
     <developer>
       <id>cmunozgomez</id>
       <name>Cesar Munoz Gomez</name>
-      <email>cmunoz@corunet.com</email>
+      <email>cesar.munoz@sngular.com</email>
       <organization>Corunet</organization>
       <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
@@ -58,7 +58,7 @@
     <developer>
       <id>Rivarsal</id>
       <name>Pablo José López Rivadulla</name>
-      <email>plopez@corunet.com</email>
+      <email>pablo.lopezr@sngular.com</email>
       <organization>Corunet</organization>
       <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
@@ -69,7 +69,7 @@
     <developer>
       <id>fcampostato</id>
       <name>Fernando Campos Tato</name>
-      <email>fcampos@corunet.com</email>
+      <email>fernando.campos@sngular.com</email>
       <organization>Corunet</organization>
       <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
@@ -80,7 +80,7 @@
     <developer>
       <id>jmejutovazquez</id>
       <name>Javier Mejuto Vázquez</name>
-      <email>jmejuto@corunet.com</email>
+      <email>javier.mejuto@sngular.com</email>
       <organization>Corunet</organization>
       <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
@@ -91,7 +91,7 @@
     <developer>
       <id>mcabezasp</id>
       <name>Miguel Cabezas Puerto</name>
-      <email>mcabezas@corunet.com</email>
+      <email>miguel.cabezas@sngular.com</email>
       <organization>Corunet</organization>
       <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
@@ -192,7 +192,43 @@
     </dependency>
   </dependencies>
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>3.1.2</version>
+          <dependencies>
+            <dependency>
+              <groupId>com.puppycrawl.tools</groupId>
+              <artifactId>checkstyle</artifactId>
+              <version>10.2</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>styles/checkstyle/OSS_checkstyle.xml</configLocation>
+          <encoding>UTF-8</encoding>
+          <consoleOutput>true</consoleOutput>
+          <failsOnError>true</failsOnError>
+          <linkXRef>false</linkXRef>
+        </configuration>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <phase>validate</phase>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-plugin-plugin</artifactId>
@@ -287,4 +323,16 @@
       </plugin>
     </plugins>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <configuration>
+          <configLocation>styles/checkstyle/OSS_checkstyle.xml</configLocation>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
