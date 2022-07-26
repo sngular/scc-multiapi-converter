@@ -4,30 +4,28 @@ header:
 whatfor:
   title: "What for?"
   description:  |
-    SCS MultiApi Plugin is a Maven plugin that allows the **code generation based on an OpenApi or an AsyncApi file** for SpringBoot projects.
+    SCC MultiApi Converter is a Spring Cloud Contract generator plugin extension that allows **contract-testing code generation based on an OpenApi or an AsyncApi file** for SpringBoot projects.
 
-    The main advantage over the official generator is that we can **process multiple files under one execution**.
+    Designed to fully integrate Contract testing for both Producer and Consumer.
 
 mainfeatures:
   title: "Main features"
   description:  |
-    Maven plugin code generator, SCS-Maven-Plugin supports:
+    As a Spring Cloud Contract Generator extension, SCC MultiApi Converter supports:
     
     - Both AsyncApi and OpenApi specifications
-    - Process multiple files under one excution
-    - Generate Clients and Servers from OpenApi
-    - Generate controller and operation interfaces from AsyncApi
-    - Supported operations: Supplier, Stream Bridge and Consumer
-    - Multiple configuration options: Lombock, Reactive...
+    - Process multiple files under one execution
+    - Generate the contracts necessary for Producers and Consumers
+    - Autogenerate tests for Producer Side thanks to Spring Cloud Contract generator.
 
 why:
-  title: "Why SCS-Maven-Plugin?"
+  title: "Why SCC-MultiApi-Converter?"
   description: "You'll be able to easily:"
   whys:
     - icon: "assets/images/ico-why-1.svg"
-      text: "**Create a project** that uses both messaging and REST arquitectures with only one plugin."
+      text: "**Create Contract Code Testing** for both messaging and REST arquitectures with only one plugin."
     - icon: "assets/images/ico-why-2.svg"
-      text: "SCS-Maven-Plugin supports the **official specifications from AsyncApi and OpenApi**, so there is no need to change your files"
+      text: "SCC-MultiApi-Converter supports the **official specifications from AsyncApi and OpenApi**, so there is no need to change your files"
     - icon: "assets/images/ico-why-3.svg"
       text: "Under one execution, **process multiple files** from both AsyncApi and OpenApi."
 

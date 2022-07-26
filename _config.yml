@@ -1,5 +1,5 @@
-title: SCS-Maven-Plugin - Generate code based on AsyncApi and OpenApi specification.
-description: Built by Corunet, SCS-Maven-Plugin is an open-source, Maven plugin that allows generating code based on AsyncApi and OpenApi specifications.
+title: SCC-MultiApi-Converter - Generate contract-testing code based on AsyncApi and OpenApi specification for SpringBoot projects.
+description: Built by Corunet, SCC-Maven-Plugin is an open-source, Spring Cloud Contract generator extension that allows generating contract-testing code based on AsyncApi and OpenApi specifications.
 twitter:
   username: corunet
   card: summary
