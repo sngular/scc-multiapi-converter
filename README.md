@@ -114,8 +114,10 @@ components:
       properties:
         firstname:
           type: string
+          example: John
         lastname:
           type: string
+          example: Doe
 tags:
 - name: games
   description: Test description for SCC MultiApi Plugin.
