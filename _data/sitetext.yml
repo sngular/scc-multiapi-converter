@@ -4,7 +4,7 @@ header:
 whatfor:
   title: "What for?"
   description:  |
-    SCS MultiApi Plugin is a Maven plugin that allows the **code generation based on an OpenApi or an AsyncApi file**.
+    SCS MultiApi Plugin is a Maven plugin that allows the **code generation based on an OpenApi or an AsyncApi file** for SpringBoot projects.
 
     The main advantage over the official generator is that we can **process multiple files under one execution**.
 
@@ -15,7 +15,9 @@ mainfeatures:
     
     - Both AsyncApi and OpenApi specifications
     - Process multiple files under one excution
-    - Generate Web and Rest for OpenApi
+    - Generate Clients and Servers from OpenApi
+    - Generate controller and operation interfaces from AsyncApi
+    - Supported operations: Supplier, Stream Bridge and Consumer
     - Multiple configuration options: Lombock, Reactive...
 
 why:

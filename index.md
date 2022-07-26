@@ -6,4 +6,4 @@ layout: default
 
 **We'll be glad to talk** and discuss how SCS-Maven-Plugin can help you 😊
 
-Reach us through [GitHub issues](https://github.com/corunet/kloadgen/issues), [email](mailto:info@corunet.com)  or [twitter](https://twitter.com/corunet)
+Reach us through [GitHub issues](https://github.com/corunet/scs-multiapi-plugin/issues), [email](mailto:info@corunet.com)  or [twitter](https://twitter.com/corunet)
