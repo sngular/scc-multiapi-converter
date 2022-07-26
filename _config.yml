@@ -1,5 +1,5 @@
-title: KLoadGen - Generate performance and business-logic tests in an easy and maintainable way.
-description: Built by Corunet, Kloadgen is an open-source, JMeter plugin that allows generating and injecting synthetic data into a Kafka-based, event architecture.
+title: SCS-Maven-Plugin - Generate code based on AsyncApi and OpenApi specification.
+description: Built by Corunet, SCS-Maven-Plugin is an open-source, Maven plugin that allows generating code based on AsyncApi and OpenApi specifications.
 twitter:
   username: corunet
   card: summary
