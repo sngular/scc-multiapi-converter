@@ -4,28 +4,28 @@ header:
 whatfor:
   title: "What for?"
   description:  |
-    Kafka Load Generator, aka KLoadGen, is a JMeter plugin that **allows generating and injecting synthetic data into a Kafka-based, event architecture**.
+    SCS MultiApi Plugin is a Maven plugin that allows the **code generation based on an OpenApi or an AsyncApi file**.
 
-    Designed and developed to be fully integrated **without the requirement of any external libraries or dependencies**, it will embed the latest supported version of Kafka libraries.
+    The main advantage over the official generator is that we can **process multiple files under one execution**.
 
 mainfeatures:
   title: "Main features"
   description:  |
-    Best-in-class Kafka performance tests generator, KLoadGen supports:
+    Maven plugin code generator, SCS-Maven-Plugin supports:
     
-    - Both AVRO and JSON schemas
-    - Specifying schemas for Key and Values
-    - Data generation for both basic data types AND complex structures (such as arrays or maps)
-    - Specifying data sets to generate data from them
+    - Both AsyncApi and OpenApi specifications
+    - Process multiple files under one excution
+    - Generate Web and Rest for OpenApi
+    - Multiple configuration options: Lombock, Reactive...
 
 why:
-  title: "Why KLoadGen?"
+  title: "Why SCS-Maven-Plugin?"
   description: "You'll be able to easily:"
   whys:
     - icon: "assets/images/ico-why-1.svg"
-      text: "**Define schemas for your test** through the Schema Registry support or by specifying a file with the schema."
+      text: "**Create a project** that uses both messaging and REST arquitectures with only one plugin."
     - icon: "assets/images/ico-why-2.svg"
-      text: "**Generate synthetic data** through our data generator that can use Schema Constraints (JSON Schema) to generate matching data."
+      text: "SCS-Maven-Plugin supports the **official specifications from AsyncApi and OpenApi**, so there is no need to change your files"
     - icon: "assets/images/ico-why-3.svg"
-      text: "**Generate key values** through our data generator, you can use Schemas to generate matching data for the key while improving your cluster performance."
+      text: "Under one execution, **process multiple files** from both AsyncApi and OpenApi."
 
