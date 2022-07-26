@@ -15,7 +15,7 @@ mainfeatures:
     
     - Both AsyncApi and OpenApi specifications
     - Process multiple files under one execution
-    - Generate the contracts necessary for Producers and Consumers
+    - Generate the required contracts for Producers and Consumers
     - Autogenerate tests for Producer Side thanks to Spring Cloud Contract generator.
 
 why:
@@ -25,7 +25,7 @@ why:
     - icon: "assets/images/ico-why-1.svg"
       text: "**Create Contract Code Testing** for both messaging and REST arquitectures with only one plugin."
     - icon: "assets/images/ico-why-2.svg"
-      text: "SCC-MultiApi-Converter supports the **official specifications from AsyncApi and OpenApi**, so there is no need to change your files"
+      text: "SCC-MultiApi-Converter supports the **official specifications from AsyncApi and OpenApi**, so there is no need to change your files."
     - icon: "assets/images/ico-why-3.svg"
       text: "Under one execution, **process multiple files** from both AsyncApi and OpenApi."
 
