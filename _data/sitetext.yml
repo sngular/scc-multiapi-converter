@@ -6,7 +6,7 @@ whatfor:
   description:  |
     SCC MultiApi Converter is a Spring Cloud Contract generator plugin extension that allows **contract-testing code generation based on an OpenApi or an AsyncApi file** for SpringBoot projects.
 
-    Designed to fully integrate Contract testing for both Producer and Consumer.
+    Designed to fully integrate Contract testing for **both Producer and Consumer.**
 
 mainfeatures:
   title: "Main features"
