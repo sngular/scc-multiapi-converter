@@ -1,0 +1,5 @@
+net\coru\multiapi\converter\openapi\OpenApiContractConverterTestFixtures.class
+net\coru\multiapi\converter\openapi\OpenApiContractConverterUtilsTest.class
+net\coru\multiapi\converter\asyncapi\AsyncApiContractConverterTest.class
+net\coru\multiapi\converter\asyncapi\AsyncApiContractConverterTestFixtures.class
+net\coru\multiapi\converter\openapi\OpenApiContractConverterTest.class

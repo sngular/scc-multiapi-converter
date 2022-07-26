@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: net.coru.multiapi.converter.openapi.OpenApiContractConverterTest
+-------------------------------------------------------------------------------
+Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.578 sec - in net.coru.multiapi.converter.openapi.OpenApiContractConverterTest

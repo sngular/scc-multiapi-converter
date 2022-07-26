@@ -1,0 +1,41 @@
+---
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Corunet Challenge Game Server
+  description: Test File for SCC MultiApi Plugin.
+  contact:
+    name: Corunet
+    url: coru.net
+    email: info@coru.net
+  license:
+    name: MIT
+servers:
+- url: http://localhost:8080/v1
+paths:
+  /games:
+    summary: Hola
+    get:
+      summary: List all available games
+      description: Test File for SCC MultiApi Plugin.
+      tags:
+      - games
+      operationId: listGames
+      responses:
+        '200':
+          description: A paged array of games
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+components:
+  schemas:
+    Game:
+      type: object
+      properties:
+        name:
+          type: string
+          enum: [ hangman, chess ]
+tags:
+- name: games
+  description: Test description for SCC MultiApi Plugin.

@@ -1,0 +1,7 @@
+components:
+  schemas:
+    Orders:
+      type: object
+      properties:
+        orderLine:
+          $ref: './externalfiles/thirdSchema.yml#/components/schemas/OrderLine'

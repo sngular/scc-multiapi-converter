@@ -1,0 +1,14 @@
+components:
+  schemas:
+    OrderLine:
+      type: object
+      properties:
+        order:
+          $ref: '#/components/schemas/Order'
+
+    Order:
+      type: object
+      properties:
+        companyName:
+          type: string
+          example: Corunet

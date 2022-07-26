@@ -1,0 +1,52 @@
+openapi: 3.0.0
+info:
+  title: SimilarProducts
+  version: '1.0'
+  license:
+    name: MPL 2.0
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  '/game/{gameId}/similar':
+    get:
+      parameters:
+      - schema:
+          type: string
+        name: gameId
+        description: Id of the game
+        in: path
+        required: true
+      operationId: getSimilarGame
+      tags:
+      - products
+      summary: Similar Game
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                 $ref: '#/components/schemas/SimilarGames'
+        '404':
+          description: Game Not found
+components:
+  schemas:
+    SimilarGames:
+      type: array
+      description: 'List of similar game to a given one ordered by similarity'
+      minItems: 0
+      uniqueItems: true
+      items:
+        $ref: '#/components/schemas/Game'
+    Game:
+      description: 'Product detail'
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        price:
+          type: number
+        availability:
+          type: boolean

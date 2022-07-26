@@ -1,0 +1,219 @@
+@options
+@packages
+@argfile
+-classpath
+'C:/Users/plopez/.m2/repository/org/springframework/boot/spring-boot/2.6.7/spring-boot-2.6.7.jar;C:/Users/plopez/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/2.6.7/spring-boot-autoconfigure-2.6.7.jar;C:/Users/plopez/.m2/repository/org/springframework/boot/spring-boot-test/2.6.7/spring-boot-test-2.6.7.jar;C:/Users/plopez/.m2/repository/org/springframework/boot/spring-boot-test-autoconfigure/2.6.7/spring-boot-test-autoconfigure-2.6.7.jar;C:/Users/plopez/.m2/repository/com/jayway/jsonpath/json-path/2.6.0/json-path-2.6.0.jar;C:/Users/plopez/.m2/repository/net/minidev/json-smart/2.4.7/json-smart-2.4.7.jar;C:/Users/plopez/.m2/repository/net/minidev/accessors-smart/2.4.7/accessors-smart-2.4.7.jar;C:/Users/plopez/.m2/repository/org/ow2/asm/asm/9.1/asm-9.1.jar;C:/Users/plopez/.m2/repository/jakarta/xml/bind/jakarta.xml.bind-api/2.3.3/jakarta.xml.bind-api-2.3.3.jar;C:/Users/plopez/.m2/repository/jakarta/activation/jakarta.activation-api/1.2.2/jakarta.activation-api-1.2.2.jar;C:/Users/plopez/.m2/repository/org/assertj/assertj-core/3.21.0/assertj-core-3.21.0.jar;C:/Users/plopez/.m2/repository/org/hamcrest/hamcrest/2.2/hamcrest-2.2.jar;C:/Users/plopez/.m2/repository/org/mockito/mockito-core/4.0.0/mockito-core-4.0.0.jar;C:/Users/plopez/.m2/repository/net/bytebuddy/byte-buddy/1.11.19/byte-buddy-1.11.19.jar;C:/Users/plopez/.m2/repository/net/bytebuddy/byte-buddy-agent/1.11.19/byte-buddy-agent-1.11.19.jar;C:/Users/plopez/.m2/repository/org/skyscreamer/jsonassert/1.5.0/jsonassert-1.5.0.jar;C:/Users/plopez/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar;C:/Users/plopez/.m2/repository/org/springframework/spring-core/5.3.19/spring-core-5.3.19.jar;C:/Users/plopez/.m2/repository/org/apache/commons/commons-lang3/3.12.0/commons-lang3-3.12.0.jar;C:/Users/plopez/.m2/repository/org/springframework/cloud/spring-cloud-contract-verifier/3.1.3/spring-cloud-contract-verifier-3.1.3.jar;C:/Users/plopez/.m2/repository/org/springframework/cloud/spring-cloud-contract-spec/3.1.3/spring-cloud-contract-spec-3.1.3.jar;C:/Users/plopez/.m2/repository/org/springframework/cloud/spring-cloud-contract-spec-groovy/3.1.3/spring-cloud-contract-spec-groovy-3.1.3.jar;C:/Users/plopez/.m2/repository/org/springframework/cloud/spring-cloud-contract-shade/3.1.3/spring-cloud-contract-shade-3.1.3.jar;C:/Users/plopez/.m2/repository/org/apache/commons/commons-text/1.9/commons-text-1.9.jar;C:/Users/plopez/.m2/repository/javax/inject/javax.inject/1/javax.inject-1.jar;C:/Users/plopez/.m2/repository/com/github/tomakehurst/wiremock-jre8-standalone/2.33.0/wiremock-jre8-standalone-2.33.0.jar;C:/Users/plopez/.m2/repository/com/toomuchcoding/jsonassert/jsonassert/0.6.2/jsonassert-0.6.2.jar;C:/Users/plopez/.m2/repository/org/apache/maven/resolver/maven-resolver-api/1.4.1/maven-resolver-api-1.4.1.jar;C:/Users/plopez/.m2/repository/com/rackspace/eclipse/webtools/sourceediting/org.eclipse.wst.xml.xpath2.processor/2.1.100/org.eclipse.wst.xml.xpath2.processor-2.1.100.jar;C:/Users/plopez/.m2/repository/edu/princeton/cup/java-cup/10k/java-cup-10k.jar;C:/Users/plopez/.m2/repository/com/ibm/icu/icu4j/4.6/icu4j-4.6.jar;C:/Users/plopez/.m2/repository/org/codehaus/groovy/groovy/3.0.9/groovy-3.0.9.jar;C:/Users/plopez/.m2/repository/org/codehaus/groovy/groovy-nio/3.0.9/groovy-nio-3.0.9.jar;C:/Users/plopez/.m2/repository/org/codehaus/groovy/groovy-json/3.0.9/groovy-json-3.0.9.jar;C:/Users/plopez/.m2/repository/org/codehaus/groovy/groovy-xml/3.0.9/groovy-xml-3.0.9.jar;C:/Users/plopez/.m2/repository/com/github/jknack/handlebars/4.2.0/handlebars-4.2.0.jar;C:/Users/plopez/.m2/repository/commons-beanutils/commons-beanutils/1.9.4/commons-beanutils-1.9.4.jar;C:/Users/plopez/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar;C:/Users/plopez/.m2/repository/commons-collections/commons-collections/3.2.2/commons-collections-3.2.2.jar;C:/Users/plopez/.m2/repository/org/yaml/snakeyaml/1.29/snakeyaml-1.29.jar;C:/Users/plopez/.m2/repository/net/javacrumbs/json-unit/json-unit-assertj/2.27.0/json-unit-assertj-2.27.0.jar;C:/Users/plopez/.m2/repository/net/javacrumbs/json-unit/json-unit-core/2.27.0/json-unit-core-2.27.0.jar;C:/Users/plopez/.m2/repository/org/hamcrest/hamcrest-core/2.2/hamcrest-core-2.2.jar;C:/Users/plopez/.m2/repository/net/javacrumbs/json-unit/json-unit-json-path/2.27.0/json-unit-json-path-2.27.0.jar;C:/Users/plopez/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.8.2/junit-jupiter-api-5.8.2.jar;C:/Users/plopez/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar;C:/Users/plopez/.m2/repository/org/junit/platform/junit-platform-commons/1.8.2/junit-platform-commons-1.8.2.jar;C:/Users/plopez/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar;C:/Users/plopez/.m2/repository/org/springframework/cloud/spring-cloud-function-compiler/3.0.6.RELEASE/spring-cloud-function-compiler-3.0.6.RELEASE.jar;C:/Users/plopez/.m2/repository/io/projectreactor/reactor-core/3.3.3.RELEASE/reactor-core-3.3.3.RELEASE.jar;C:/Users/plopez/.m2/repository/org/reactivestreams/reactive-streams/1.0.3/reactive-streams-1.0.3.jar;C:/Users/plopez/.m2/repository/org/eclipse/jdt/core/compiler/ecj/4.4.2/ecj-4.4.2.jar;C:/Users/plopez/.m2/repository/org/springframework/spring-context/5.2.4.RELEASE/spring-context-5.2.4.RELEASE.jar;C:/Users/plopez/.m2/repository/org/springframework/spring-aop/5.2.4.RELEASE/spring-aop-5.2.4.RELEASE.jar;C:/Users/plopez/.m2/repository/org/springframework/spring-beans/5.2.4.RELEASE/spring-beans-5.2.4.RELEASE.jar;C:/Users/plopez/.m2/repository/org/springframework/spring-expression/5.2.4.RELEASE/spring-expression-5.2.4.RELEASE.jar;C:/Users/plopez/.m2/repository/javax/annotation/javax.annotation-api/1.3.2/javax.annotation-api-1.3.2.jar;C:/Users/plopez/.m2/repository/org/sonatype/plexus/plexus-build-api/0.0.7/plexus-build-api-0.0.7.jar;C:/Users/plopez/.m2/repository/org/codehaus/plexus/plexus-utils/1.5.8/plexus-utils-1.5.8.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-plugin-api/3.8.5/maven-plugin-api-3.8.5.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-model/3.8.5/maven-model-3.8.5.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-artifact/3.8.5/maven-artifact-3.8.5.jar;C:/Users/plopez/.m2/repository/org/eclipse/sisu/org.eclipse.sisu.plexus/0.3.5/org.eclipse.sisu.plexus-0.3.5.jar;C:/Users/plopez/.m2/repository/org/codehaus/plexus/plexus-classworlds/2.6.0/plexus-classworlds-2.6.0.jar;C:/Users/plopez/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-annotations/3.6.4/maven-plugin-annotations-3.6.4.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-project/2.2.1/maven-project-2.2.1.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-settings/2.2.1/maven-settings-2.2.1.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-profile/2.2.1/maven-profile-2.2.1.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-artifact-manager/2.2.1/maven-artifact-manager-2.2.1.jar;C:/Users/plopez/.m2/repository/org/apache/maven/wagon/wagon-provider-api/1.0-beta-6/wagon-provider-api-1.0-beta-6.jar;C:/Users/plopez/.m2/repository/backport-util-concurrent/backport-util-concurrent/3.1/backport-util-concurrent-3.1.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-plugin-registry/2.2.1/maven-plugin-registry-2.2.1.jar;C:/Users/plopez/.m2/repository/org/codehaus/plexus/plexus-interpolation/1.11/plexus-interpolation-1.11.jar;C:/Users/plopez/.m2/repository/org/codehaus/plexus/plexus-container-default/1.0-alpha-9-stable-1/plexus-container-default-1.0-alpha-9-stable-1.jar;C:/Users/plopez/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar;C:/Users/plopez/.m2/repository/classworlds/classworlds/1.1-alpha-2/classworlds-1.1-alpha-2.jar;C:/Users/plopez/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.13.3/jackson-dataformat-yaml-2.13.3.jar;C:/Users/plopez/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.13.3/jackson-core-2.13.3.jar;C:/Users/plopez/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.13.3/jackson-databind-2.13.3.jar;C:/Users/plopez/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.13.3/jackson-annotations-2.13.3.jar;C:/Users/plopez/.m2/repository/org/projectlombok/lombok/1.18.24/lombok-1.18.24.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-core/3.8.5/maven-core-3.8.5.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-settings-builder/3.8.5/maven-settings-builder-3.8.5.jar;C:/Users/plopez/.m2/repository/org/codehaus/plexus/plexus-sec-dispatcher/2.0/plexus-sec-dispatcher-2.0.jar;C:/Users/plopez/.m2/repository/org/codehaus/plexus/plexus-cipher/2.0/plexus-cipher-2.0.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-builder-support/3.8.5/maven-builder-support-3.8.5.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-repository-metadata/3.8.5/maven-repository-metadata-3.8.5.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-model-builder/3.8.5/maven-model-builder-3.8.5.jar;C:/Users/plopez/.m2/repository/org/apache/maven/maven-resolver-provider/3.8.5/maven-resolver-provider-3.8.5.jar;C:/Users/plopez/.m2/repository/org/apache/maven/resolver/maven-resolver-impl/1.6.3/maven-resolver-impl-1.6.3.jar;C:/Users/plopez/.m2/repository/org/apache/maven/resolver/maven-resolver-spi/1.6.3/maven-resolver-spi-1.6.3.jar;C:/Users/plopez/.m2/repository/org/apache/maven/resolver/maven-resolver-util/1.6.3/maven-resolver-util-1.6.3.jar;C:/Users/plopez/.m2/repository/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.jar;C:/Users/plopez/.m2/repository/org/eclipse/sisu/org.eclipse.sisu.inject/0.3.5/org.eclipse.sisu.inject-0.3.5.jar;C:/Users/plopez/.m2/repository/com/google/inject/guice/4.2.2/guice-4.2.2-no_aop.jar;C:/Users/plopez/.m2/repository/aopalliance/aopalliance/1.0/aopalliance-1.0.jar;C:/Users/plopez/.m2/repository/org/codehaus/plexus/plexus-component-annotations/2.1.0/plexus-component-annotations-2.1.0.jar;C:/Users/plopez/.m2/repository/org/slf4j/slf4j-api/1.7.32/slf4j-api-1.7.32.jar;C:/Users/plopez/.m2/repository/org/openapitools/openapi-generator/5.4.0/openapi-generator-5.4.0.jar;C:/Users/plopez/.m2/repository/io/swagger/core/v3/swagger-core/2.1.2/swagger-core-2.1.2.jar;C:/Users/plopez/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.10.1/jackson-datatype-jsr310-2.10.1.jar;C:/Users/plopez/.m2/repository/io/swagger/core/v3/swagger-annotations/2.1.2/swagger-annotations-2.1.2.jar;C:/Users/plopez/.m2/repository/io/swagger/core/v3/swagger-models/2.1.2/swagger-models-2.1.2.jar;C:/Users/plopez/.m2/repository/jakarta/validation/jakarta.validation-api/2.0.2/jakarta.validation-api-2.0.2.jar;C:/Users/plopez/.m2/repository/io/swagger/parser/v3/swagger-parser/2.0.26/swagger-parser-2.0.26.jar;C:/Users/plopez/.m2/repository/io/swagger/parser/v3/swagger-parser-v2-converter/2.0.26/swagger-parser-v2-converter-2.0.26.jar;C:/Users/plopez/.m2/repository/io/swagger/swagger-core/1.6.2/swagger-core-1.6.2.jar;C:/Users/plopez/.m2/repository/io/swagger/swagger-models/1.6.2/swagger-models-1.6.2.jar;C:/Users/plopez/.m2/repository/io/swagger/swagger-annotations/1.6.2/swagger-annotations-1.6.2.jar;C:/Users/plopez/.m2/repository/javax/validation/validation-api/1.1.0.Final/validation-api-1.1.0.Final.jar;C:/Users/plopez/.m2/repository/io/swagger/swagger-parser/1.0.55/swagger-parser-1.0.55.jar;C:/Users/plopez/.m2/repository/io/swagger/swagger-compat-spec-parser/1.0.55/swagger-compat-spec-parser-1.0.55.jar;C:/Users/plopez/.m2/repository/com/github/java-json-tools/json-schema-validator/2.2.14/json-schema-validator-2.2.14.jar;C:/Users/plopez/.m2/repository/com/github/java-json-tools/jackson-coreutils-equivalence/1.0/jackson-coreutils-equivalence-1.0.jar;C:/Users/plopez/.m2/repository/com/github/java-json-tools/json-schema-core/1.2.14/json-schema-core-1.2.14.jar;C:/Users/plopez/.m2/repository/com/github/java-json-tools/uri-template/0.10/uri-template-0.10.jar;C:/Users/plopez/.m2/repository/org/mozilla/rhino/1.7.7.2/rhino-1.7.7.2.jar;C:/Users/plopez/.m2/repository/com/sun/mail/mailapi/1.6.2/mailapi-1.6.2.jar;C:/Users/plopez/.m2/repository/com/googlecode/libphonenumber/libphonenumber/8.11.1/libphonenumber-8.11.1.jar;C:/Users/plopez/.m2/repository/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar;C:/Users/plopez/.m2/repository/com/github/java-json-tools/json-patch/1.13/json-patch-1.13.jar;C:/Users/plopez/.m2/repository/com/github/java-json-tools/msg-simple/1.2/msg-simple-1.2.jar;C:/Users/plopez/.m2/repository/com/github/java-json-tools/btf/1.3/btf-1.3.jar;C:/Users/plopez/.m2/repository/com/github/java-json-tools/jackson-coreutils/2.0/jackson-coreutils-2.0.jar;C:/Users/plopez/.m2/repository/org/apache/httpcomponents/httpclient/4.5.2/httpclient-4.5.2.jar;C:/Users/plopez/.m2/repository/org/apache/httpcomponents/httpcore/4.4.4/httpcore-4.4.4.jar;C:/Users/plopez/.m2/repository/commons-codec/commons-codec/1.9/commons-codec-1.9.jar;C:/Users/plopez/.m2/repository/io/swagger/parser/v3/swagger-parser-core/2.0.26/swagger-parser-core-2.0.26.jar;C:/Users/plopez/.m2/repository/io/swagger/parser/v3/swagger-parser-v3/2.0.26/swagger-parser-v3-2.0.26.jar;C:/Users/plopez/.m2/repository/com/samskivert/jmustache/1.14/jmustache-1.14.jar;C:/Users/plopez/.m2/repository/com/github/jknack/handlebars-jackson2/4.2.1/handlebars-jackson2-4.2.1.jar;C:/Users/plopez/.m2/repository/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar;C:/Users/plopez/.m2/repository/org/slf4j/slf4j-ext/1.7.32/slf4j-ext-1.7.32.jar;C:/Users/plopez/.m2/repository/org/slf4j/slf4j-simple/1.7.32/slf4j-simple-1.7.32.jar;C:/Users/plopez/.m2/repository/commons-cli/commons-cli/1.4/commons-cli-1.4.jar;C:/Users/plopez/.m2/repository/com/google/guava/guava/30.1.1-jre/guava-30.1.1-jre.jar;C:/Users/plopez/.m2/repository/com/google/guava/failureaccess/1.0.1/failureaccess-1.0.1.jar;C:/Users/plopez/.m2/repository/com/google/guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:/Users/plopez/.m2/repository/com/google/code/findbugs/jsr305/3.0.2/jsr305-3.0.2.jar;C:/Users/plopez/.m2/repository/org/checkerframework/checker-qual/3.8.0/checker-qual-3.8.0.jar;C:/Users/plopez/.m2/repository/com/google/errorprone/error_prone_annotations/2.5.1/error_prone_annotations-2.5.1.jar;C:/Users/plopez/.m2/repository/com/google/j2objc/j2objc-annotations/1.3/j2objc-annotations-1.3.jar;C:/Users/plopez/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-guava/2.10.2/jackson-datatype-guava-2.10.2.jar;C:/Users/plopez/.m2/repository/com/atlassian/commonmark/commonmark/0.11.0/commonmark-0.11.0.jar;C:/Users/plopez/.m2/repository/com/github/mifmif/generex/1.0.2/generex-1.0.2.jar;C:/Users/plopez/.m2/repository/com/github/curious-odd-man/rgxgen/1.3/rgxgen-1.3.jar;C:/Users/plopez/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-joda/2.10.2/jackson-datatype-joda-2.10.2.jar;C:/Users/plopez/.m2/repository/joda-time/joda-time/2.9.9/joda-time-2.9.9.jar;C:/Users/plopez/.m2/repository/com/github/joschi/jackson/jackson-datatype-threetenbp/2.10.0/jackson-datatype-threetenbp-2.10.0.jar;C:/Users/plopez/.m2/repository/org/threeten/threetenbp/1.4.0/threetenbp-1.4.0.jar;C:/Users/plopez/.m2/repository/org/openapitools/openapi-generator-core/5.4.0/openapi-generator-core-5.4.0.jar;C:/Users/plopez/.m2/repository/net/java/dev/jna/jna/5.5.0/jna-5.5.0.jar;C:/Users/plopez/.m2/repository/com/github/ben-manes/caffeine/caffeine/2.8.1/caffeine-2.8.1.jar;C:/Users/plopez/.m2/repository/org/springframework/cloud/spring-cloud-contract-spec-java/3.1.3/spring-cloud-contract-spec-java-3.1.3.jar;C:/Users/plopez/.m2/repository/dk/brics/automaton/automaton/1.11-8/automaton-1.11-8.jar;C:/Users/plopez/.m2/repository/org/springframework/spring-jcl/5.3.20/spring-jcl-5.3.20.jar'
+-encoding
+'UTF-8'
+-protected
+-source
+'11'
+-sourcepath
+'C:/Users/plopez/Documents/scc-multiapi-converter/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2022. All rights reserved.'
+-charset
+'UTF-8'
+-d
+'C:/Users/plopez/Documents/scc-multiapi-converter/target/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'SCC-MultiApi-Converter 2.6.3 API'
+-linkoffline
+'https://docs.oracle.com/en/java/javase/11/docs/api' 'C:/Users/plopez/Documents/scc-multiapi-converter/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'SCC-MultiApi-Converter 2.6.3 API'
+net.coru.multiapi.converter.asyncapi
+net.coru.multiapi.converter.exception
+net.coru.multiapi.converter
+net.coru.multiapi.converter.openapi
+net.coru.multiapi.converter.utils
+'C:/Users/plopez/Documents/scc-multiapi-converter/src/main/java/net/coru/multiapi/converter/asyncapi/AsyncApiContractConverter.java'
+'C:/Users/plopez/Documents/scc-multiapi-converter/src/main/java/net/coru/multiapi/converter/exception/ElementNotFoundException.java'
+'C:/Users/plopez/Documents/scc-multiapi-converter/src/main/java/net/coru/multiapi/converter/exception/MultiApiContractConverterException.java'
+'C:/Users/plopez/Documents/scc-multiapi-converter/src/main/java/net/coru/multiapi/converter/MultiApiContractConverter.java'
+'C:/Users/plopez/Documents/scc-multiapi-converter/src/main/java/net/coru/multiapi/converter/openapi/OpenApiContractConverter.java'
+'C:/Users/plopez/Documents/scc-multiapi-converter/src/main/java/net/coru/multiapi/converter/openapi/OpenApiContractConverterUtils.java'
+'C:/Users/plopez/Documents/scc-multiapi-converter/src/main/java/net/coru/multiapi/converter/utils/BasicTypeConstants.java'
+C:\Users\plopez\.m2\repository\org\springframework\boot\spring-boot\2.6.7\spring-boot-2.6.7.jar = 1655982219084
+C:\Users\plopez\.m2\repository\org\springframework\boot\spring-boot-autoconfigure\2.6.7\spring-boot-autoconfigure-2.6.7.jar = 1655982218765
+C:\Users\plopez\.m2\repository\org\springframework\boot\spring-boot-test\2.6.7\spring-boot-test-2.6.7.jar = 1655982218787
+C:\Users\plopez\.m2\repository\org\springframework\boot\spring-boot-test-autoconfigure\2.6.7\spring-boot-test-autoconfigure-2.6.7.jar = 1655982218727
+C:\Users\plopez\.m2\repository\com\jayway\jsonpath\json-path\2.6.0\json-path-2.6.0.jar = 1655981678211
+C:\Users\plopez\.m2\repository\net\minidev\json-smart\2.4.7\json-smart-2.4.7.jar = 1655981155136
+C:\Users\plopez\.m2\repository\net\minidev\accessors-smart\2.4.7\accessors-smart-2.4.7.jar = 1655981114403
+C:\Users\plopez\.m2\repository\org\ow2\asm\asm\9.1\asm-9.1.jar = 1655981114404
+C:\Users\plopez\.m2\repository\jakarta\xml\bind\jakarta.xml.bind-api\2.3.3\jakarta.xml.bind-api-2.3.3.jar = 1655980988950
+C:\Users\plopez\.m2\repository\jakarta\activation\jakarta.activation-api\1.2.2\jakarta.activation-api-1.2.2.jar = 1655980988983
+C:\Users\plopez\.m2\repository\org\assertj\assertj-core\3.21.0\assertj-core-3.21.0.jar = 1655981156256
+C:\Users\plopez\.m2\repository\org\hamcrest\hamcrest\2.2\hamcrest-2.2.jar = 1655980989137
+C:\Users\plopez\.m2\repository\org\mockito\mockito-core\4.0.0\mockito-core-4.0.0.jar = 1655982219305
+C:\Users\plopez\.m2\repository\net\bytebuddy\byte-buddy\1.11.19\byte-buddy-1.11.19.jar = 1655982219427
+C:\Users\plopez\.m2\repository\net\bytebuddy\byte-buddy-agent\1.11.19\byte-buddy-agent-1.11.19.jar = 1655982218950
+C:\Users\plopez\.m2\repository\org\skyscreamer\jsonassert\1.5.0\jsonassert-1.5.0.jar = 1655980989634
+C:\Users\plopez\.m2\repository\com\vaadin\external\google\android-json\0.0.20131108.vaadin1\android-json-0.0.20131108.vaadin1.jar = 1655980988531
+C:\Users\plopez\.m2\repository\org\springframework\spring-core\5.3.19\spring-core-5.3.19.jar = 1655982219506
+C:\Users\plopez\.m2\repository\org\apache\commons\commons-lang3\3.12.0\commons-lang3-3.12.0.jar = 1655981133751
+C:\Users\plopez\.m2\repository\org\springframework\cloud\spring-cloud-contract-verifier\3.1.3\spring-cloud-contract-verifier-3.1.3.jar = 1655982219586
+C:\Users\plopez\.m2\repository\org\springframework\cloud\spring-cloud-contract-spec\3.1.3\spring-cloud-contract-spec-3.1.3.jar = 1655982219597
+C:\Users\plopez\.m2\repository\org\springframework\cloud\spring-cloud-contract-spec-groovy\3.1.3\spring-cloud-contract-spec-groovy-3.1.3.jar = 1655982219606
+C:\Users\plopez\.m2\repository\org\springframework\cloud\spring-cloud-contract-shade\3.1.3\spring-cloud-contract-shade-3.1.3.jar = 1655982220085
+C:\Users\plopez\.m2\repository\org\apache\commons\commons-text\1.9\commons-text-1.9.jar = 1655980985876
+C:\Users\plopez\.m2\repository\javax\inject\javax.inject\1\javax.inject-1.jar = 1655981025758
+C:\Users\plopez\.m2\repository\com\github\tomakehurst\wiremock-jre8-standalone\2.33.0\wiremock-jre8-standalone-2.33.0.jar = 1655982224275
+C:\Users\plopez\.m2\repository\com\toomuchcoding\jsonassert\jsonassert\0.6.2\jsonassert-0.6.2.jar = 1655982219760
+C:\Users\plopez\.m2\repository\org\apache\maven\resolver\maven-resolver-api\1.4.1\maven-resolver-api-1.4.1.jar = 1655980987390
+C:\Users\plopez\.m2\repository\com\rackspace\eclipse\webtools\sourceediting\org.eclipse.wst.xml.xpath2.processor\2.1.100\org.eclipse.wst.xml.xpath2.processor-2.1.100.jar = 1655980987651
+C:\Users\plopez\.m2\repository\edu\princeton\cup\java-cup\10k\java-cup-10k.jar = 1655980987478
+C:\Users\plopez\.m2\repository\com\ibm\icu\icu4j\4.6\icu4j-4.6.jar = 1655980988062
+C:\Users\plopez\.m2\repository\org\codehaus\groovy\groovy\3.0.9\groovy-3.0.9.jar = 1655981130559
+C:\Users\plopez\.m2\repository\org\codehaus\groovy\groovy-nio\3.0.9\groovy-nio-3.0.9.jar = 1655981117016
+C:\Users\plopez\.m2\repository\org\codehaus\groovy\groovy-json\3.0.9\groovy-json-3.0.9.jar = 1655981130025
+C:\Users\plopez\.m2\repository\org\codehaus\groovy\groovy-xml\3.0.9\groovy-xml-3.0.9.jar = 1655981130221
+C:\Users\plopez\.m2\repository\com\github\jknack\handlebars\4.2.0\handlebars-4.2.0.jar = 1655980988724
+C:\Users\plopez\.m2\repository\commons-beanutils\commons-beanutils\1.9.4\commons-beanutils-1.9.4.jar = 1655980988671
+C:\Users\plopez\.m2\repository\commons-logging\commons-logging\1.2\commons-logging-1.2.jar = 1655980988686
+C:\Users\plopez\.m2\repository\commons-collections\commons-collections\3.2.2\commons-collections-3.2.2.jar = 1655980990753
+C:\Users\plopez\.m2\repository\org\yaml\snakeyaml\1.29\snakeyaml-1.29.jar = 1655982220100
+C:\Users\plopez\.m2\repository\net\javacrumbs\json-unit\json-unit-assertj\2.27.0\json-unit-assertj-2.27.0.jar = 1655982219996
+C:\Users\plopez\.m2\repository\net\javacrumbs\json-unit\json-unit-core\2.27.0\json-unit-core-2.27.0.jar = 1655982220229
+C:\Users\plopez\.m2\repository\org\hamcrest\hamcrest-core\2.2\hamcrest-core-2.2.jar = 1655981156237
+C:\Users\plopez\.m2\repository\net\javacrumbs\json-unit\json-unit-json-path\2.27.0\json-unit-json-path-2.27.0.jar = 1655982220153
+C:\Users\plopez\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.8.2\junit-jupiter-api-5.8.2.jar = 1655981679133
+C:\Users\plopez\.m2\repository\org\opentest4j\opentest4j\1.2.0\opentest4j-1.2.0.jar = 1655980990446
+C:\Users\plopez\.m2\repository\org\junit\platform\junit-platform-commons\1.8.2\junit-platform-commons-1.8.2.jar = 1655981679127
+C:\Users\plopez\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar = 1655981679128
+C:\Users\plopez\.m2\repository\org\springframework\cloud\spring-cloud-function-compiler\3.0.6.RELEASE\spring-cloud-function-compiler-3.0.6.RELEASE.jar = 1655980990553
+C:\Users\plopez\.m2\repository\io\projectreactor\reactor-core\3.3.3.RELEASE\reactor-core-3.3.3.RELEASE.jar = 1655982220436
+C:\Users\plopez\.m2\repository\org\reactivestreams\reactive-streams\1.0.3\reactive-streams-1.0.3.jar = 1655980990578
+C:\Users\plopez\.m2\repository\org\eclipse\jdt\core\compiler\ecj\4.4.2\ecj-4.4.2.jar = 1655980990712
+C:\Users\plopez\.m2\repository\org\springframework\spring-context\5.2.4.RELEASE\spring-context-5.2.4.RELEASE.jar = 1655982220582
+C:\Users\plopez\.m2\repository\org\springframework\spring-aop\5.2.4.RELEASE\spring-aop-5.2.4.RELEASE.jar = 1655982220476
+C:\Users\plopez\.m2\repository\org\springframework\spring-beans\5.2.4.RELEASE\spring-beans-5.2.4.RELEASE.jar = 1655982220540
+C:\Users\plopez\.m2\repository\org\springframework\spring-expression\5.2.4.RELEASE\spring-expression-5.2.4.RELEASE.jar = 1655982220708
+C:\Users\plopez\.m2\repository\javax\annotation\javax.annotation-api\1.3.2\javax.annotation-api-1.3.2.jar = 1655980990676
+C:\Users\plopez\.m2\repository\org\sonatype\plexus\plexus-build-api\0.0.7\plexus-build-api-0.0.7.jar = 1655981029745
+C:\Users\plopez\.m2\repository\org\codehaus\plexus\plexus-utils\1.5.8\plexus-utils-1.5.8.jar = 1655980980399
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-plugin-api\3.8.5\maven-plugin-api-3.8.5.jar = 1655982041207
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-model\3.8.5\maven-model-3.8.5.jar = 1655982041379
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-artifact\3.8.5\maven-artifact-3.8.5.jar = 1655982041198
+C:\Users\plopez\.m2\repository\org\eclipse\sisu\org.eclipse.sisu.plexus\0.3.5\org.eclipse.sisu.plexus-0.3.5.jar = 1655982041934
+C:\Users\plopez\.m2\repository\org\codehaus\plexus\plexus-classworlds\2.6.0\plexus-classworlds-2.6.0.jar = 1655981181869
+C:\Users\plopez\.m2\repository\org\apache\maven\plugin-tools\maven-plugin-annotations\3.6.4\maven-plugin-annotations-3.6.4.jar = 1655982041043
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-project\2.2.1\maven-project-2.2.1.jar = 1655981192478
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-settings\2.2.1\maven-settings-2.2.1.jar = 1655981192482
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-profile\2.2.1\maven-profile-2.2.1.jar = 1655981192602
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-artifact-manager\2.2.1\maven-artifact-manager-2.2.1.jar = 1655981192593
+C:\Users\plopez\.m2\repository\org\apache\maven\wagon\wagon-provider-api\1.0-beta-6\wagon-provider-api-1.0-beta-6.jar = 1655981705780
+C:\Users\plopez\.m2\repository\backport-util-concurrent\backport-util-concurrent\3.1\backport-util-concurrent-3.1.jar = 1655981192600
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-plugin-registry\2.2.1\maven-plugin-registry-2.2.1.jar = 1655981192603
+C:\Users\plopez\.m2\repository\org\codehaus\plexus\plexus-interpolation\1.11\plexus-interpolation-1.11.jar = 1655981192603
+C:\Users\plopez\.m2\repository\org\codehaus\plexus\plexus-container-default\1.0-alpha-9-stable-1\plexus-container-default-1.0-alpha-9-stable-1.jar = 1655981192477
+C:\Users\plopez\.m2\repository\junit\junit\3.8.1\junit-3.8.1.jar = 1655981201849
+C:\Users\plopez\.m2\repository\classworlds\classworlds\1.1-alpha-2\classworlds-1.1-alpha-2.jar = 1655981201834
+C:\Users\plopez\.m2\repository\com\fasterxml\jackson\dataformat\jackson-dataformat-yaml\2.13.3\jackson-dataformat-yaml-2.13.3.jar = 1655981188083
+C:\Users\plopez\.m2\repository\com\fasterxml\jackson\core\jackson-core\2.13.3\jackson-core-2.13.3.jar = 1655981188197
+C:\Users\plopez\.m2\repository\com\fasterxml\jackson\core\jackson-databind\2.13.3\jackson-databind-2.13.3.jar = 1655981188189
+C:\Users\plopez\.m2\repository\com\fasterxml\jackson\core\jackson-annotations\2.13.3\jackson-annotations-2.13.3.jar = 1655981188213
+C:\Users\plopez\.m2\repository\org\projectlombok\lombok\1.18.24\lombok-1.18.24.jar = 1655981188452
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-core\3.8.5\maven-core-3.8.5.jar = 1655982041099
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-settings-builder\3.8.5\maven-settings-builder-3.8.5.jar = 1655982041118
+C:\Users\plopez\.m2\repository\org\codehaus\plexus\plexus-sec-dispatcher\2.0\plexus-sec-dispatcher-2.0.jar = 1655982041141
+C:\Users\plopez\.m2\repository\org\codehaus\plexus\plexus-cipher\2.0\plexus-cipher-2.0.jar = 1655982041170
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-builder-support\3.8.5\maven-builder-support-3.8.5.jar = 1655982041320
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-repository-metadata\3.8.5\maven-repository-metadata-3.8.5.jar = 1655982041422
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-model-builder\3.8.5\maven-model-builder-3.8.5.jar = 1655982041418
+C:\Users\plopez\.m2\repository\org\apache\maven\maven-resolver-provider\3.8.5\maven-resolver-provider-3.8.5.jar = 1655982041340
+C:\Users\plopez\.m2\repository\org\apache\maven\resolver\maven-resolver-impl\1.6.3\maven-resolver-impl-1.6.3.jar = 1655982041581
+C:\Users\plopez\.m2\repository\org\apache\maven\resolver\maven-resolver-spi\1.6.3\maven-resolver-spi-1.6.3.jar = 1655982041651
+C:\Users\plopez\.m2\repository\org\apache\maven\resolver\maven-resolver-util\1.6.3\maven-resolver-util-1.6.3.jar = 1655982041879
+C:\Users\plopez\.m2\repository\org\apache\maven\shared\maven-shared-utils\3.3.4\maven-shared-utils-3.3.4.jar = 1655982041912
+C:\Users\plopez\.m2\repository\org\eclipse\sisu\org.eclipse.sisu.inject\0.3.5\org.eclipse.sisu.inject-0.3.5.jar = 1655982042054
+C:\Users\plopez\.m2\repository\com\google\inject\guice\4.2.2\guice-4.2.2-no_aop.jar = 1655982042029
+C:\Users\plopez\.m2\repository\aopalliance\aopalliance\1.0\aopalliance-1.0.jar = 1655981181805
+C:\Users\plopez\.m2\repository\org\codehaus\plexus\plexus-component-annotations\2.1.0\plexus-component-annotations-2.1.0.jar = 1655982042225
+C:\Users\plopez\.m2\repository\org\slf4j\slf4j-api\1.7.32\slf4j-api-1.7.32.jar = 1655981155227
+C:\Users\plopez\.m2\repository\org\openapitools\openapi-generator\5.4.0\openapi-generator-5.4.0.jar = 1655980980876
+C:\Users\plopez\.m2\repository\io\swagger\core\v3\swagger-core\2.1.2\swagger-core-2.1.2.jar = 1655980980968
+C:\Users\plopez\.m2\repository\com\fasterxml\jackson\datatype\jackson-datatype-jsr310\2.10.1\jackson-datatype-jsr310-2.10.1.jar = 1655982221120
+C:\Users\plopez\.m2\repository\io\swagger\core\v3\swagger-annotations\2.1.2\swagger-annotations-2.1.2.jar = 1655980981085
+C:\Users\plopez\.m2\repository\io\swagger\core\v3\swagger-models\2.1.2\swagger-models-2.1.2.jar = 1655980981130
+C:\Users\plopez\.m2\repository\jakarta\validation\jakarta.validation-api\2.0.2\jakarta.validation-api-2.0.2.jar = 1655980981193
+C:\Users\plopez\.m2\repository\io\swagger\parser\v3\swagger-parser\2.0.26\swagger-parser-2.0.26.jar = 1655980981223
+C:\Users\plopez\.m2\repository\io\swagger\parser\v3\swagger-parser-v2-converter\2.0.26\swagger-parser-v2-converter-2.0.26.jar = 1655980981223
+C:\Users\plopez\.m2\repository\io\swagger\swagger-core\1.6.2\swagger-core-1.6.2.jar = 1655980981227
+C:\Users\plopez\.m2\repository\io\swagger\swagger-models\1.6.2\swagger-models-1.6.2.jar = 1655980981432
+C:\Users\plopez\.m2\repository\io\swagger\swagger-annotations\1.6.2\swagger-annotations-1.6.2.jar = 1655980981487
+C:\Users\plopez\.m2\repository\javax\validation\validation-api\1.1.0.Final\validation-api-1.1.0.Final.jar = 1655981188518
+C:\Users\plopez\.m2\repository\io\swagger\swagger-parser\1.0.55\swagger-parser-1.0.55.jar = 1655980981731
+C:\Users\plopez\.m2\repository\io\swagger\swagger-compat-spec-parser\1.0.55\swagger-compat-spec-parser-1.0.55.jar = 1655980981676
+C:\Users\plopez\.m2\repository\com\github\java-json-tools\json-schema-validator\2.2.14\json-schema-validator-2.2.14.jar = 1655980981752
+C:\Users\plopez\.m2\repository\com\github\java-json-tools\jackson-coreutils-equivalence\1.0\jackson-coreutils-equivalence-1.0.jar = 1655980982162
+C:\Users\plopez\.m2\repository\com\github\java-json-tools\json-schema-core\1.2.14\json-schema-core-1.2.14.jar = 1655980981929
+C:\Users\plopez\.m2\repository\com\github\java-json-tools\uri-template\0.10\uri-template-0.10.jar = 1655980982216
+C:\Users\plopez\.m2\repository\org\mozilla\rhino\1.7.7.2\rhino-1.7.7.2.jar = 1655980982408
+C:\Users\plopez\.m2\repository\com\sun\mail\mailapi\1.6.2\mailapi-1.6.2.jar = 1655980982493
+C:\Users\plopez\.m2\repository\com\googlecode\libphonenumber\libphonenumber\8.11.1\libphonenumber-8.11.1.jar = 1655980982516
+C:\Users\plopez\.m2\repository\net\sf\jopt-simple\jopt-simple\5.0.4\jopt-simple-5.0.4.jar = 1655980982554
+C:\Users\plopez\.m2\repository\com\github\java-json-tools\json-patch\1.13\json-patch-1.13.jar = 1655980982607
+C:\Users\plopez\.m2\repository\com\github\java-json-tools\msg-simple\1.2\msg-simple-1.2.jar = 1655980983064
+C:\Users\plopez\.m2\repository\com\github\java-json-tools\btf\1.3\btf-1.3.jar = 1655980982697
+C:\Users\plopez\.m2\repository\com\github\java-json-tools\jackson-coreutils\2.0\jackson-coreutils-2.0.jar = 1655980982862
+C:\Users\plopez\.m2\repository\org\apache\httpcomponents\httpclient\4.5.2\httpclient-4.5.2.jar = 1655981695471
+C:\Users\plopez\.m2\repository\org\apache\httpcomponents\httpcore\4.4.4\httpcore-4.4.4.jar = 1655981695381
+C:\Users\plopez\.m2\repository\commons-codec\commons-codec\1.9\commons-codec-1.9.jar = 1655981695322
+C:\Users\plopez\.m2\repository\io\swagger\parser\v3\swagger-parser-core\2.0.26\swagger-parser-core-2.0.26.jar = 1655980983521
+C:\Users\plopez\.m2\repository\io\swagger\parser\v3\swagger-parser-v3\2.0.26\swagger-parser-v3-2.0.26.jar = 1655980983429
+C:\Users\plopez\.m2\repository\com\samskivert\jmustache\1.14\jmustache-1.14.jar = 1655982221975
+C:\Users\plopez\.m2\repository\com\github\jknack\handlebars-jackson2\4.2.1\handlebars-jackson2-4.2.1.jar = 1655980983903
+C:\Users\plopez\.m2\repository\commons-io\commons-io\2.11.0\commons-io-2.11.0.jar = 1655980983974
+C:\Users\plopez\.m2\repository\org\slf4j\slf4j-ext\1.7.32\slf4j-ext-1.7.32.jar = 1655982222128
+C:\Users\plopez\.m2\repository\org\slf4j\slf4j-simple\1.7.32\slf4j-simple-1.7.32.jar = 1655982222153
+C:\Users\plopez\.m2\repository\commons-cli\commons-cli\1.4\commons-cli-1.4.jar = 1655980984274
+C:\Users\plopez\.m2\repository\com\google\guava\guava\30.1.1-jre\guava-30.1.1-jre.jar = 1655980985487
+C:\Users\plopez\.m2\repository\com\google\guava\failureaccess\1.0.1\failureaccess-1.0.1.jar = 1655980984295
+C:\Users\plopez\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar = 1655980984320
+C:\Users\plopez\.m2\repository\com\google\code\findbugs\jsr305\3.0.2\jsr305-3.0.2.jar = 1655980984352
+C:\Users\plopez\.m2\repository\org\checkerframework\checker-qual\3.8.0\checker-qual-3.8.0.jar = 1655980985107
+C:\Users\plopez\.m2\repository\com\google\errorprone\error_prone_annotations\2.5.1\error_prone_annotations-2.5.1.jar = 1655980984400
+C:\Users\plopez\.m2\repository\com\google\j2objc\j2objc-annotations\1.3\j2objc-annotations-1.3.jar = 1655980984416
+C:\Users\plopez\.m2\repository\com\fasterxml\jackson\datatype\jackson-datatype-guava\2.10.2\jackson-datatype-guava-2.10.2.jar = 1655982222186
+C:\Users\plopez\.m2\repository\com\atlassian\commonmark\commonmark\0.11.0\commonmark-0.11.0.jar = 1655980984605
+C:\Users\plopez\.m2\repository\com\github\mifmif\generex\1.0.2\generex-1.0.2.jar = 1655980984648
+C:\Users\plopez\.m2\repository\com\github\curious-odd-man\rgxgen\1.3\rgxgen-1.3.jar = 1655980984669
+C:\Users\plopez\.m2\repository\com\fasterxml\jackson\datatype\jackson-datatype-joda\2.10.2\jackson-datatype-joda-2.10.2.jar = 1655982222250
+C:\Users\plopez\.m2\repository\joda-time\joda-time\2.9.9\joda-time-2.9.9.jar = 1655980984818
+C:\Users\plopez\.m2\repository\com\github\joschi\jackson\jackson-datatype-threetenbp\2.10.0\jackson-datatype-threetenbp-2.10.0.jar = 1655980984844
+C:\Users\plopez\.m2\repository\org\threeten\threetenbp\1.4.0\threetenbp-1.4.0.jar = 1655980984938
+C:\Users\plopez\.m2\repository\org\openapitools\openapi-generator-core\5.4.0\openapi-generator-core-5.4.0.jar = 1655980984902
+C:\Users\plopez\.m2\repository\net\java\dev\jna\jna\5.5.0\jna-5.5.0.jar = 1655980985072
+C:\Users\plopez\.m2\repository\com\github\ben-manes\caffeine\caffeine\2.8.1\caffeine-2.8.1.jar = 1655982222513
+C:\Users\plopez\.m2\repository\org\springframework\cloud\spring-cloud-contract-spec-java\3.1.3\spring-cloud-contract-spec-java-3.1.3.jar = 1655982222518
+C:\Users\plopez\.m2\repository\dk\brics\automaton\automaton\1.11-8\automaton-1.11-8.jar = 1655980985344
+C:\Users\plopez\.m2\repository\org\springframework\spring-jcl\5.3.20\spring-jcl-5.3.20.jar = 1655982222611
+C:\Users\plopez\Documents\scc-multiapi-converter\src\main\java = 1654094548085
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\allclasses-index.html = 1658415617975
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\allclasses.html = 1658415617984
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\allpackages-index.html = 1658415617977
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\constant-values.html = 1658415617880
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\deprecated-list.html = 1658415617982
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\element-list = 1658415617816
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\help-doc.html = 1658415618007
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\index-all.html = 1658415617967
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\index.html = 1658415617999
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\member-search-index.js = 1658415617963
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\member-search-index.zip = 1658415617965
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\overview-summary.html = 1658415618002
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\overview-tree.html = 1658415617937
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\package-search-index.js = 1658415617954
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\package-search-index.zip = 1658415617957
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\script.js = 1658415618012
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\search.js = 1658415618015
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\serialized-form.html = 1658415617887
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\stylesheet.css = 1658415618010
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\type-search-index.js = 1658415617959
+C:\Users\plopez\Documents\scc-multiapi-converter\target\apidocs\type-search-index.zip = 1658415617961
