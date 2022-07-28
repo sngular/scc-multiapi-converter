@@ -409,7 +409,7 @@ public final class OpenApiContractConverter {
     if (Objects.nonNull(arraySchema.get$ref())) {
       final String ref = OpenApiContractConverterUtils.mapRefName(arraySchema);
       final HashMap<String, Schema> subObject = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(ref).getProperties();
-      propertyList.add(processComplexBodyAndMatchers("[0]", subObject, openAPI, bodyMatchers));
+      propertyList.add(processComplexBodyAndMatchers(objectName, subObject, openAPI, bodyMatchers));
     } else {
       final String type = arraySchema.getType();
       switch (type) {
