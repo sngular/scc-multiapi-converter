@@ -389,7 +389,7 @@ public final class OpenApiContractConverter {
         } else {
           final var subProperties = ((ArraySchema) openAPI.getComponents().getSchemas().get(ref)).getItems();
           final List<Object> propertyList = new ArrayList<>();
-          propertyMap.put(property.getKey(), processArray(subProperties, propertyList, newObjectName, bodyMatchers, openAPI));
+          propertyMap.put(property.getKey(), processArray(subProperties, propertyList, objectName, bodyMatchers, openAPI));
         }
       } else {
         final String type;
@@ -441,7 +441,7 @@ public final class OpenApiContractConverter {
 
   private void processObjectArray(final Schema<?> arraySchema, final List<Object> propertyList, final String objectName, final BodyMatchers bodyMatchers, final OpenAPI openAPI) {
     final HashMap<String, Schema> subObject = (HashMap<String, Schema>) arraySchema.getProperties();
-    propertyList.add(processComplexBodyAndMatchers(objectName + "[0]", subObject, openAPI, bodyMatchers));
+    propertyList.add(processComplexBodyAndMatchers(objectName, subObject, openAPI, bodyMatchers));
   }
 
   private void processArrayArray(final ArraySchema arraySchema, final List<Object> propertyList, final String objectName, final BodyMatchers bodyMatchers, final OpenAPI openAPI) {
@@ -450,7 +450,7 @@ public final class OpenApiContractConverter {
       propertyList.add(subArray.getExample());
     } else {
       final List<Object> subPropertyList = new ArrayList<>();
-      propertyList.add(processArray(subArray, subPropertyList, objectName, bodyMatchers, openAPI));
+      propertyList.add(processArray(subArray, subPropertyList, objectName + "[0]", bodyMatchers, openAPI));
     }
   }
 
