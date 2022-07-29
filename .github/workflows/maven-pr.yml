@@ -22,7 +22,7 @@ jobs:
         echo "::warning::To update your version, you should use https://semver.org specifications"
         exit 1
     - name: New software version
-      if: ${{ job.check-version.actions_project_version_check.status }} == 'failure'
+      if: ${{ job.check-version.actions_project_version_check.status }} == 'success'
       run: echo "New software version is " ${{ steps.actions_project_version_check.outputs.version }}
         
   build:
