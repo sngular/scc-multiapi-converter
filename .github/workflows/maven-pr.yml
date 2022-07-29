@@ -17,6 +17,8 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         file-to-check: pom.xml
+    - name: New software version
+      run: echo "New software version is " ${{ steps.actions_project_version_check.outputs.version }}
         
   build:
     runs-on: ubuntu-latest
