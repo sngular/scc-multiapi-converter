@@ -87,12 +87,16 @@ public final class OpenApiContractConverter {
 
   private void processContract(final List<Contract> contracts, final OpenAPI openAPI, final Entry<String, PathItem> pathItem, final Operation operation, final String name) {
     for (Entry<String, ApiResponse> response : operation.getResponses().entrySet()) {
-      final Contract contract = new Contract();
       final String fileName = name + pathItem.getKey().replaceAll("[{}]", "") + response.getKey().substring(0, 1).toUpperCase() + response.getKey().substring(1) + "Response";
-      contract.setName(fileName.replace("/", ""));
-      contract.setDescription(pathItem.getValue().getSummary());
-      contract.setRequest(processRequest(openAPI, pathItem, operation, name));
-      contract.setResponse(processResponse(openAPI, response.getKey(), response.getValue()));
+      final String contractName = fileName.replace("/", "");
+      final String contractDescription = pathItem.getValue().getSummary();
+      var requestList = processRequest(openAPI, pathItem, operation, name);
+      var responseList = processResponse(openAPI, response.getKey(), response.getValue());
+      final Contract contract = new Contract();
+      contract.setName(contractName);
+      contract.setDescription(contractDescription);
+      contract.setRequest(requestList);
+      contract.setResponse(responseList);
       contracts.add(contract);
     }
   }
@@ -112,7 +116,6 @@ public final class OpenApiContractConverter {
 
   private void processResponseContent(final OpenAPI openAPI, final ApiResponse apiResponse, final Response response) {
     final ResponseBodyMatchers responseBodyMatchers = new ResponseBodyMatchers();
-    final HashMap<String, Object> bodyMap = new HashMap<>();
     if (Objects.nonNull(apiResponse.getContent())) {
       for (Entry<String, MediaType> content : apiResponse.getContent().entrySet()) {
         final Schema schema = content.getValue().getSchema();
@@ -120,7 +123,7 @@ public final class OpenApiContractConverter {
         headers.contentType(content.getKey());
         headers.accept();
         response.setHeaders(headers);
-        processResponseBody(openAPI, response, responseBodyMatchers, bodyMap, content, schema);
+        processResponseBody(openAPI, response, responseBodyMatchers, content, schema);
       }
     } else {
       response.body(response.anyAlphaNumeric());
@@ -128,18 +131,18 @@ public final class OpenApiContractConverter {
   }
 
   private void processResponseBody(
-      final OpenAPI openAPI, final Response response, final ResponseBodyMatchers responseBodyMatchers, final HashMap<String, Object> bodyMap,
+      final OpenAPI openAPI, final Response response, final ResponseBodyMatchers responseBodyMatchers,
       final Entry<String, MediaType> content, final Schema schema) {
 
     if (content.getValue().getSchema() instanceof ComposedSchema) {
       final ComposedSchema composedSchema = (ComposedSchema) content.getValue().getSchema();
-      processComposedSchema(openAPI, responseBodyMatchers, bodyMap, composedSchema);
+      final var bodyMap = processComposedSchema(openAPI, responseBodyMatchers, composedSchema);
       response.setBody(new Body(bodyMap));
       response.setBodyMatchers(responseBodyMatchers);
     } else if (Objects.nonNull(schema.getType()) && BasicTypeConstants.BASIC_OBJECT_TYPE.contains(schema.getType())) {
       OpenApiContractConverterUtils.processBasicResponseTypeBody(response, schema);
     } else {
-      processBodyAndMatchers(bodyMap, schema, openAPI, responseBodyMatchers);
+      final var bodyMap =processBodyAndMatchers(schema, openAPI, responseBodyMatchers);
       Schema<?> checkArraySchema = new Schema<>();
       if (Objects.nonNull(schema.get$ref())) {
         checkArraySchema = openAPI.getComponents().getSchemas().get(OpenApiContractConverterUtils.mapRefName(schema));
@@ -181,36 +184,39 @@ public final class OpenApiContractConverter {
       request.setHeaders(headers);
       if (content.getValue().getSchema() instanceof ComposedSchema) {
         final ComposedSchema composedSchema = (ComposedSchema) content.getValue().getSchema();
-        processComposedSchema(openAPI, bodyMatchers, bodyMap, composedSchema);
+        bodyMap.putAll(processComposedSchema(openAPI, bodyMatchers, composedSchema));
         request.body(bodyMap);
         request.setBodyMatchers(bodyMatchers);
       } else if (Objects.nonNull(schema.getType()) && BasicTypeConstants.BASIC_OBJECT_TYPE.contains(schema.getType())) {
         OpenApiContractConverterUtils.processBasicRequestTypeBody(request, schema);
       } else {
-        processBodyAndMatchers(bodyMap, schema, openAPI, bodyMatchers);
+        bodyMap.putAll(processBodyAndMatchers(schema, openAPI, bodyMatchers));
         request.body(bodyMap);
         request.setBodyMatchers(bodyMatchers);
       }
     }
   }
 
-  private void processBodyAndMatchers(final Map<String, Object> bodyMap, final Schema schema, final OpenAPI openAPI, final BodyMatchers bodyMatchers) {
+  private Map<String, Object> processBodyAndMatchers(final Schema schema, final OpenAPI openAPI, final BodyMatchers bodyMatchers) {
 
+    final Map<String, Object> result = new HashMap<>();
     if (Objects.nonNull(schema.getType())) {
-      processBodyAndMatchersByType(bodyMap, schema, openAPI, bodyMatchers);
+      result.putAll(processBodyAndMatchersByType(schema, openAPI, bodyMatchers));
     }
     if (Objects.nonNull(schema.get$ref())) {
-      processBodyAndMatchersByRef(bodyMap, schema, openAPI, bodyMatchers);
+      result.putAll(processBodyAndMatchersByRef(schema, openAPI, bodyMatchers));
     }
+    return result;
   }
 
-  private void processBodyAndMatchersByRef(final Map<String, Object> bodyMap, final Schema schema, final OpenAPI openAPI, final BodyMatchers bodyMatchers) {
+  private Map<String, Object> processBodyAndMatchersByRef(final Schema schema, final OpenAPI openAPI, final BodyMatchers bodyMatchers) {
     final String ref = OpenApiContractConverterUtils.mapRefName(schema);
+    final var bodyMap = new HashMap<String, Object>();
     if (Objects.nonNull(openAPI.getComponents().getSchemas().get(ref).getProperties())) {
       final HashMap<String, Schema> properties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(ref).getProperties();
       for (Entry<String, Schema> property : properties.entrySet()) {
         if (property.getValue() instanceof ComposedSchema) {
-          processComposedSchema(openAPI, bodyMatchers, bodyMap, (ComposedSchema) property.getValue());
+          bodyMap.putAll(processComposedSchema(openAPI, bodyMatchers, (ComposedSchema) property.getValue()));
         } else if (Objects.nonNull(property.getValue().get$ref())) {
           final String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
           final Schema<?> subSchema = openAPI.getComponents().getSchemas().get(subRef);
@@ -218,26 +224,28 @@ public final class OpenApiContractConverter {
             bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subSchema.getProperties(), openAPI, bodyMatchers));
           } else if (((ArraySchema) subSchema).getItems() instanceof ComposedSchema) {
             final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
-            processComposedSchema(openAPI, bodyMatchers, bodyMap, (ComposedSchema) arraySchema);
+            bodyMap.putAll(processComposedSchema(openAPI, bodyMatchers, (ComposedSchema) arraySchema));
           } else {
             final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
-            writeBodyMatcher(bodyMap, openAPI, bodyMatchers, null, ref, arraySchema, arraySchema.getType());
+            bodyMap.put(ref, writeBodyMatcher(openAPI, bodyMatchers, null, ref, arraySchema, arraySchema.getType()));
           }
         } else {
           if (Objects.nonNull(property.getValue().getEnum())) {
-            writeBodyMatcher(bodyMap, openAPI, bodyMatchers, null, property.getKey(), property.getValue(), BasicTypeConstants.ENUM);
+            bodyMap.put(property.getKey(), writeBodyMatcher(openAPI, bodyMatchers, null, property.getKey(), property.getValue(), BasicTypeConstants.ENUM));
           } else {
-            writeBodyMatcher(bodyMap, openAPI, bodyMatchers, null, property.getKey(), property.getValue(), property.getValue().getType());
+            bodyMap.put(property.getKey(), writeBodyMatcher(openAPI, bodyMatchers, null, property.getKey(), property.getValue(), property.getValue().getType()));
           }
         }
       }
     } else {
       final Schema arraySchema = openAPI.getComponents().getSchemas().get(ref);
-      writeBodyMatcher(bodyMap, openAPI, bodyMatchers, null, "[0]", arraySchema, arraySchema.getType());
+      bodyMap.put("[0]", writeBodyMatcher(openAPI, bodyMatchers, null, "[0]", arraySchema, arraySchema.getType()));
     }
+    return bodyMap;
   }
 
-  private void processBodyAndMatchersByType(final Map<String, Object> bodyMap, final Schema schema, final OpenAPI openAPI, final BodyMatchers bodyMatchers) {
+  private Map<String, Object> processBodyAndMatchersByType(final Schema schema, final OpenAPI openAPI, final BodyMatchers bodyMatchers) {
+    final Map<String, Object> bodyMap = new HashMap<>();
     if (Objects.nonNull(schema.getProperties())) {
       final Map<String, Schema> basicObjectProperties = schema.getProperties();
       for (Entry<String, Schema> property : basicObjectProperties.entrySet()) {
@@ -246,120 +254,131 @@ public final class OpenApiContractConverter {
           final HashMap<String, Schema> subProperties = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
           bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, openAPI, bodyMatchers));
         } else {
-          writeBodyMatcher(bodyMap, openAPI, bodyMatchers, null, property.getKey(), property.getValue(), property.getValue().getType());
+          bodyMap.put(property.getKey(), writeBodyMatcher(openAPI, bodyMatchers, null, property.getKey(), property.getValue(), property.getValue().getType()));
         }
       }
     } else {
-      writeBodyMatcher(bodyMap, openAPI, bodyMatchers, null, "[0]", schema, schema.getType());
+      bodyMap.put("[0]", writeBodyMatcher(openAPI, bodyMatchers, null, "[0]", schema, schema.getType()));
     }
+    return bodyMap;
   }
 
-  private void writeBodyMatcher(
-      final Map<String, Object> bodyMap, final OpenAPI openAPI, final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName, final Schema schema,
+  private Object writeBodyMatcher(
+      final OpenAPI openAPI, final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName, final Schema schema,
       final String type) {
     final var example = Objects.nonNull(property) ? property.getValue().getExample() : schema.getExample();
-
+    final Object result;
     if (Objects.nonNull(example)) {
-      bodyMap.put(fieldName, schema.getExample());
+      result = schema.getExample();
     } else {
       final String mapKey = Objects.nonNull(property) ? property.getKey() : fieldName;
 
       switch (type) {
         case BasicTypeConstants.STRING:
           bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
-          bodyMap.put(mapKey, RandomStringUtils.random(5, true, true));
+          result = RandomStringUtils.random(5, true, true);
           break;
         case BasicTypeConstants.INTEGER:
-          processIntegerBodyMatcher(bodyMap, bodyMatchers, property, fieldName, schema);
+          result = processIntegerBodyMatcher(bodyMatchers, property, fieldName, schema);
           break;
         case BasicTypeConstants.NUMBER:
-          processNumberBodyMatcher(bodyMap, bodyMatchers, property, fieldName, schema);
+          result = processNumberBodyMatcher(bodyMatchers, property, fieldName, schema);
           break;
         case BasicTypeConstants.BOOLEAN:
           bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
-          bodyMap.put(mapKey, BasicTypeConstants.RANDOM.nextBoolean());
+          result = BasicTypeConstants.RANDOM.nextBoolean();
           break;
         case BasicTypeConstants.OBJECT:
-          processObjectBodyMatcher(bodyMap, openAPI, property, bodyMatchers, fieldName, schema);
+          result = processObjectBodyMatcher(openAPI, property, bodyMatchers, fieldName, schema);
           break;
         case BasicTypeConstants.ARRAY:
           final var arraySchema = Objects.nonNull(property) ? null : (ArraySchema) schema;
-          processArrayBodyMatcher(bodyMap, openAPI, bodyMatchers, property, fieldName, arraySchema);
+          result = processArrayBodyMatcher(openAPI, bodyMatchers, property, fieldName, arraySchema);
           break;
         case BasicTypeConstants.ENUM:
-          processEnum(bodyMap, bodyMatchers, mapKey, Objects.nonNull(property) ? property.getValue() : schema);
+          result = processEnum(bodyMatchers, mapKey, Objects.nonNull(property) ? property.getValue() : schema);
           break;
         default:
           bodyMatchers.jsonPath(mapKey, bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX));
-          bodyMap.put(mapKey, RandomStringUtils.random(5, true, true));
+          result =  RandomStringUtils.random(5, true, true);
           break;
       }
     }
+    return result;
   }
 
-  private void processArrayBodyMatcher(
-      final Map<String, Object> bodyMap, final OpenAPI openAPI, final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName,
+  private Object processArrayBodyMatcher(
+      final OpenAPI openAPI, final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName,
       final ArraySchema schema) {
-    final String mapKey = Objects.nonNull(property) ? property.getKey() : fieldName;
+    final Object result;
     final Schema<?> arraySchema = Objects.nonNull(property) ? ((ArraySchema) property.getValue()).getItems() : schema.getItems();
     if (Objects.nonNull(arraySchema.getExample())) {
-      bodyMap.put(mapKey, arraySchema.getExample());
+      result = arraySchema.getExample();
     } else {
-      bodyMap.put(mapKey, processArray(arraySchema, new ArrayList<>(), fieldName, bodyMatchers, openAPI));
+      result = processArray(arraySchema, new ArrayList<>(), fieldName, bodyMatchers, openAPI);
     }
+    return result;
   }
 
-  private void processObjectBodyMatcher(
-      final Map<String, Object> bodyMap, final OpenAPI openAPI, final Entry<String, Schema> property, final BodyMatchers bodyMatchers, final String fieldName,
+  private Object processObjectBodyMatcher(
+      final OpenAPI openAPI, final Entry<String, Schema> property, final BodyMatchers bodyMatchers, final String fieldName,
       final Schema schema) {
+    final Object result;
     final String ref = Objects.nonNull(property) ? property.getValue().get$ref() : schema.get$ref();
     final Schema internalRef = Objects.nonNull(property) ? property.getValue() : schema;
     final String subRef = OpenApiContractConverterUtils.mapRefName(internalRef);
-    final String mapKey = Objects.nonNull(property) ? property.getKey() : fieldName;
 
     if (Objects.nonNull(ref)) {
       final HashMap<String, Schema> subPropertiesWithRef = (HashMap<String, Schema>) openAPI.getComponents().getSchemas().get(subRef).getProperties();
-      bodyMap.put(mapKey, processComplexBodyAndMatchers(fieldName, subPropertiesWithRef, openAPI, bodyMatchers));
+      result = processComplexBodyAndMatchers(fieldName, subPropertiesWithRef, openAPI, bodyMatchers);
     } else {
       final HashMap<String, Schema> subProperties = (HashMap<String, Schema>) internalRef.getProperties();
-      bodyMap.put(mapKey, processComplexBodyAndMatchers(fieldName, subProperties, openAPI, bodyMatchers));
+      result = processComplexBodyAndMatchers(fieldName, subProperties, openAPI, bodyMatchers);
     }
+    return result;
   }
 
-  private void processNumberBodyMatcher(
-      final Map<String, Object> bodyMap, final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName,
+  private Object processNumberBodyMatcher(
+      final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName,
       final Schema schema) {
+
+    final Object result;
     final String format = Objects.nonNull(property) ? property.getValue().getFormat() : schema.getFormat();
-    final String mapKey = Objects.nonNull(property) ? property.getKey() : fieldName;
 
     if (BasicTypeConstants.FLOAT.equalsIgnoreCase(format)) {
       bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
-      bodyMap.put(mapKey, Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
+      result = Math.abs(BasicTypeConstants.RANDOM.nextFloat());
     } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(format)) {
       bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
-      bodyMap.put(mapKey, Math.abs(BasicTypeConstants.RANDOM.nextDouble()));
+      result = Math.abs(BasicTypeConstants.RANDOM.nextDouble());
     } else if (!Objects.nonNull(format) || format.isEmpty()) {
       bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
-      bodyMap.put(mapKey, BasicTypeConstants.RANDOM.nextInt());
+      result = BasicTypeConstants.RANDOM.nextInt();
+    } else {
+      result = null;
     }
+    return result;
   }
 
-  private void processIntegerBodyMatcher(
-      final Map<String, Object> bodyMap, final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName,
+  private Object processIntegerBodyMatcher(
+      final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName,
       final Schema schema) {
+    final Object result;
     final String format = Objects.nonNull(property) ? property.getValue().getFormat() : schema.getFormat();
-    final String mapKey = Objects.nonNull(property) ? property.getKey() : fieldName;
 
     if (BasicTypeConstants.INT_32.equalsIgnoreCase(format) || !Objects.nonNull(format)) {
       bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
-      bodyMap.put(mapKey, BasicTypeConstants.RANDOM.nextInt());
+      result = BasicTypeConstants.RANDOM.nextInt();
     } else if (BasicTypeConstants.INT_64.equalsIgnoreCase(format)) {
       bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
-      bodyMap.put(mapKey, BasicTypeConstants.RANDOM.nextFloat());
+      result = BasicTypeConstants.RANDOM.nextFloat();
+    } else {
+      result = null;
     }
+    return result;
   }
 
-  private void processEnum(final Map<String, Object> bodyMap, final BodyMatchers bodyMatchers, final String enumName, final Schema property) {
+  private Object processEnum(final BodyMatchers bodyMatchers, final String enumName, final Schema property) {
     String regex = "";
     final Iterator enumObjects = property.getEnum().iterator();
     while (enumObjects.hasNext()) {
@@ -371,7 +390,7 @@ public final class OpenApiContractConverter {
       }
     }
     bodyMatchers.jsonPath(enumName, bodyMatchers.byRegex(regex));
-    bodyMap.put(enumName, property.getEnum().get(BasicTypeConstants.RANDOM.nextInt(property.getEnum().size())));
+    return property.getEnum().get(BasicTypeConstants.RANDOM.nextInt(property.getEnum().size()));
   }
 
   private HashMap<String, Object> processComplexBodyAndMatchers(
@@ -398,7 +417,7 @@ public final class OpenApiContractConverter {
         } else {
           type = property.getValue().getType();
         }
-        writeBodyMatcher(propertyMap, openAPI, bodyMatchers, property, newObjectName, null, type);
+        propertyMap.put(property.getKey(), writeBodyMatcher(openAPI, bodyMatchers, property, newObjectName, null, type));
       }
     }
     return propertyMap;
@@ -549,19 +568,21 @@ public final class OpenApiContractConverter {
     return openAPI;
   }
 
-  private void processComposedSchema(final OpenAPI openAPI, final BodyMatchers bodyMatchers, final Map<String, Object> bodyMap, final ComposedSchema composedSchema) {
+  private Map<String, Object> processComposedSchema(final OpenAPI openAPI, final BodyMatchers bodyMatchers, final ComposedSchema composedSchema) {
+    final Map<String, Object> result = new HashMap<>();
     if (Objects.nonNull(composedSchema.getAllOf())) {
       for (Schema schema : composedSchema.getAllOf()) {
-        processBodyAndMatchers(bodyMap, schema, openAPI, bodyMatchers);
+        result.putAll(processBodyAndMatchers(schema, openAPI, bodyMatchers));
       }
     } else if (Objects.nonNull(composedSchema.getOneOf())) {
       final int oneOfNumber = BasicTypeConstants.RANDOM.nextInt(composedSchema.getOneOf().size());
-      processBodyAndMatchers(bodyMap, composedSchema.getOneOf().get(oneOfNumber), openAPI, bodyMatchers);
+      result.putAll(processBodyAndMatchers(composedSchema.getOneOf().get(oneOfNumber), openAPI, bodyMatchers));
     } else if (Objects.nonNull(composedSchema.getAnyOf())) {
       for (int i = 0; i < BasicTypeConstants.RANDOM.nextInt(composedSchema.getAnyOf().size()) + 1; i++) {
-        processBodyAndMatchers(bodyMap, composedSchema.getAnyOf().get(i), openAPI, bodyMatchers);
+        result.putAll(processBodyAndMatchers(composedSchema.getAnyOf().get(i), openAPI, bodyMatchers));
       }
     }
+    return result;
   }
 
 }
