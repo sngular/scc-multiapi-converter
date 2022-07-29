@@ -9,15 +9,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Versioning specifications
-      run: echo "::warning::To update your version, you should use https://semver.org specifications"
     - name: Check if version is updated
       uses: avides/actions-project-version-check@v1.3.0
       id: actions_project_version_check
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         file-to-check: pom.xml
+      continue-on-error: true
+    - name: Versioning specifications
+      if: ${{ failure() }}
+      run: |
+        echo "::warning::To update your version, you should use https://semver.org specifications"
+        exit 1
     - name: New software version
+      if: ${{ success() }}
       run: echo "New software version is " ${{ steps.actions_project_version_check.outputs.version }}
         
   build:
