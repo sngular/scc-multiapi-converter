@@ -78,6 +78,8 @@ public class OpenApiContractConverterTestFixtures {
 
   protected final String OPENAPI_TEST_EXAMPLES_YML = "src/test/resources/openapi/testExamples.yml";
 
+  protected final String OPENAPI_TEST_SCHEMA_EXAMPLES_YML = "src/test/resources/openapi/testExamplesGlobal.yml";
+
   protected final String NAME = "name";
 
   protected final String CONTENT_TYPE = "Content-Type";
