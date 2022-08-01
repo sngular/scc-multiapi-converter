@@ -324,6 +324,26 @@ class OpenApiContractConverterTest {
   }
 
   @Test
+  @DisplayName("OpenApi: Check that Schema Examples are being processed okay")
+  void testScheaExamples() {
+    final File file = new File(openApiContractConverterTestFixtures.OPENAPI_TEST_SCHEMA_EXAMPLES_YML);
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    List<Contract> contractList = new ArrayList<>(contracts);
+    Contract contract = contractList.get(0);
+    QueryParameters queryParameters = contract.getRequest().getUrlPath().getQueryParameters();
+    QueryParameter parameter = queryParameters.getParameters().get(0);
+    assertThat(parameter.getName()).isEqualTo(openApiContractConverterTestFixtures.GAME_ID);
+    final MatchingStrategy matchingStrategy = (MatchingStrategy) parameter.getServerValue();
+    assertThat(matchingStrategy.getType().toString()).hasToString("EQUAL_TO");
+    assertThat(matchingStrategy.getServerValue()).isEqualTo(1);
+    assertThat(matchingStrategy.getClientValue()).isEqualTo(1);
+    final HashMap<String, Object> serverValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    assertThat(serverValueMap)
+        .containsEntry(openApiContractConverterTestFixtures.ROOMS, 1)
+        .containsEntry(openApiContractConverterTestFixtures.GAME_NAME, openApiContractConverterTestFixtures.HANGMAN);
+  }
+
+  @Test
   @DisplayName("OpenApi: Check that Refs inside arrays are being processed okay")
   void testRefsInsideArrays() {
     final File file = new File(openApiContractConverterTestFixtures.OPENAPI_TEST_REF_INSIDE_ARRAYS_YML);
