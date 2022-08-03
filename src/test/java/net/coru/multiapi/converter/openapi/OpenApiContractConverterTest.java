@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import lombok.extern.slf4j.Slf4j;
@@ -104,7 +105,7 @@ class OpenApiContractConverterTest {
     List<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
     final Body body = contract.getRequest().getBody();
-    final Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) body.getServerValue();
+    final Map<String, Object> bodyServerValueMap = (Map<String, Object>) body.getServerValue();
     assertThat(bodyServerValueMap).isNotEmpty();
     assertThat(bodyServerValueMap.get(openApiContractConverterTestFixtures.GAME_ID)).isInstanceOf(Integer.class);
     assertThat(bodyServerValueMap.get(openApiContractConverterTestFixtures.PLAYER_NAME)).isInstanceOf(String.class);
@@ -133,7 +134,7 @@ class OpenApiContractConverterTest {
     List<Contract> contractList = new ArrayList<>(contracts);
     Contract contract = contractList.get(0);
     final Body body = contract.getResponse().getBody();
-    HashMap<String, Object> bodyServerValueMap = (HashMap<String, Object>) body.getServerValue();
+    Map<String, Object> bodyServerValueMap = (Map<String, Object>) body.getServerValue();
     assertThat(bodyServerValueMap).isNotEmpty();
     final String name = (String) bodyServerValueMap.get(openApiContractConverterTestFixtures.NAME);
     assertThat(name)
@@ -154,12 +155,12 @@ class OpenApiContractConverterTest {
     assertThat(contract.getRequest()).isNotNull();
     assertThat(contract.getResponse()).isNotNull();
     Body body = contract.getResponse().getBody();
-    HashMap<String, Object> bodyServerValueMap = (HashMap<String, Object>) body.getServerValue();
+    Map<String, Object> bodyServerValueMap = (Map<String, Object>) body.getServerValue();
     assertThat(bodyServerValueMap)
         .isNotNull()
         .containsKey(openApiContractConverterTestFixtures.NAME)
         .hasSize(2);
-    final HashMap<String, Object> nameSubMap = (HashMap<String, Object>) bodyServerValueMap.get(openApiContractConverterTestFixtures.NAME);
+    final Map<String, Object> nameSubMap = (Map<String, Object>) bodyServerValueMap.get(openApiContractConverterTestFixtures.NAME);
     assertThat(nameSubMap)
         .containsKey(openApiContractConverterTestFixtures.LASTNAME)
         .hasSize(2);
@@ -202,10 +203,10 @@ class OpenApiContractConverterTest {
     assertThat(contract).isNotNull();
     assertThat(contract.getRequest()).isNotNull();
     assertThat(contract.getResponse()).isNotNull();
-    Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
     assertThat(bodyServerValueMap)
         .containsKey("player");
-    final Map<String, Object> playerMap = (HashMap<String, Object>) bodyServerValueMap.get("player");
+    final Map<String, Object> playerMap = (Map<String, Object>) bodyServerValueMap.get("player");
     assertThat(playerMap)
         .containsKey(openApiContractConverterTestFixtures.NAME);
     final Map<String, Object> nameMap = (Map<String, Object>) playerMap.get(openApiContractConverterTestFixtures.NAME);
@@ -218,10 +219,36 @@ class OpenApiContractConverterTest {
 
   @Test
   @DisplayName("OpenApi: Check if oneOfs are being processed okay")
-  void testOneOfsAndAnyOfs() {
+  void testOneOfs() {
+
+    final var file = new File(openApiContractConverterTestFixtures.OPENAPI_TEST_ONE_OFS_YML);
+    final var contracts = multiApiContractConverter.convertFrom(file);
+    final var contractList = new ArrayList<>(contracts);
+    assertThat(contractList).hasSize(2);
+    Contract contract = contractList.get(0);
+    assertThat(contract.getResponse()).isNotNull();
+    List bodyServerValueList = (List) contract.getResponse().getBody().getServerValue();
+    assertThat(bodyServerValueList)
+      .hasSize(2);
+    List<Map> bodyServerValueMap1 = (List<Map>) bodyServerValueList;
+    assertThat(bodyServerValueMap1)
+      .map(Map::keySet)
+      .containsExactlyInAnyOrder(Set.of(openApiContractConverterTestFixtures.GAME_ID),
+                                                                               Set.of(openApiContractConverterTestFixtures.PLAYER_NAME));
+
+    contract = contractList.get(1);
+    assertThat(contract.getResponse()).isNotNull();
+    List bodyServerValueMap2 = (List) contract.getResponse().getBody().getServerValue();
+    assertThat(bodyServerValueMap2).hasSize(2);
+    assertThat(bodyServerValueMap2.get(0)).isInstanceOf(List.class);
+    assertThat(bodyServerValueMap2.get(1)).isInstanceOf(Map.class);
+  }
+
+  @Test
+  @DisplayName("OpenApi: Check if oneOfs are being processed okay")
+  void testAnyOfs() {
 
     final List<File> fileList = new ArrayList<>();
-    fileList.add(new File(openApiContractConverterTestFixtures.OPENAPI_TEST_ONE_OFS_YML));
     fileList.add(new File(openApiContractConverterTestFixtures.TEST_ANY_OFS_YML));
     for (File file : fileList) {
       Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
@@ -230,7 +257,7 @@ class OpenApiContractConverterTest {
       assertThat(contract).isNotNull();
       assertThat(contract.getResponse()).isNotNull();
       final List<String> assertKeys = new ArrayList<>();
-      Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+      Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
       bodyServerValueMap.forEach((key, value) ->
                                  {
                                    assertKeys.add(key);
@@ -254,7 +281,7 @@ class OpenApiContractConverterTest {
     assertThat(contract).isNotNull();
     assertThat(contract.getResponse()).isNotNull();
     List<String> assertKeys = new ArrayList<>();
-    Map<String, Object> bodyServerValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
     bodyServerValueMap.forEach((key, value) ->
                                {
                                  assertKeys.add(key);
@@ -317,15 +344,15 @@ class OpenApiContractConverterTest {
     assertThat(matchingStrategy.getType().toString()).hasToString("EQUAL_TO");
     assertThat(matchingStrategy.getServerValue()).isEqualTo(1);
     assertThat(matchingStrategy.getClientValue()).isEqualTo(1);
-    final HashMap<String, Object> serverValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    final List<Map> serverValueMap = (List<Map>) contract.getResponse().getBody().getServerValue();
     assertThat(serverValueMap)
-        .containsEntry(openApiContractConverterTestFixtures.ROOMS, 1)
-        .containsEntry(openApiContractConverterTestFixtures.GAME_NAME, openApiContractConverterTestFixtures.HANGMAN);
+        .contains(Map.of(openApiContractConverterTestFixtures.ROOMS, 1))
+        .contains(Map.of(openApiContractConverterTestFixtures.GAME_NAME, openApiContractConverterTestFixtures.HANGMAN));
   }
 
   @Test
   @DisplayName("OpenApi: Check that Schema Examples are being processed okay")
-  void testScheaExamples() {
+  void testSchemaExamples() {
     final File file = new File(openApiContractConverterTestFixtures.OPENAPI_TEST_SCHEMA_EXAMPLES_YML);
     Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
     List<Contract> contractList = new ArrayList<>(contracts);
@@ -337,10 +364,10 @@ class OpenApiContractConverterTest {
     assertThat(matchingStrategy.getType().toString()).hasToString("EQUAL_TO");
     assertThat(matchingStrategy.getServerValue()).isEqualTo(1);
     assertThat(matchingStrategy.getClientValue()).isEqualTo(1);
-    final HashMap<String, Object> serverValueMap = (HashMap<String, Object>) contract.getResponse().getBody().getServerValue();
+    final List<Map> serverValueMap = (List<Map>) contract.getResponse().getBody().getServerValue();
     assertThat(serverValueMap)
-        .containsEntry(openApiContractConverterTestFixtures.ROOMS, 1)
-        .containsEntry(openApiContractConverterTestFixtures.GAME_NAME, openApiContractConverterTestFixtures.HANGMAN);
+      .contains(Map.of(openApiContractConverterTestFixtures.ROOMS, 1))
+      .contains(Map.of(openApiContractConverterTestFixtures.GAME_NAME, openApiContractConverterTestFixtures.HANGMAN));
   }
 
   @Test
