@@ -43,6 +43,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.cloud.contract.spec.Contract;
 import org.springframework.cloud.contract.spec.internal.Body;
 import org.springframework.cloud.contract.spec.internal.BodyMatchers;
+import org.springframework.cloud.contract.spec.internal.DslProperty;
 import org.springframework.cloud.contract.spec.internal.Headers;
 import org.springframework.cloud.contract.spec.internal.QueryParameters;
 import org.springframework.cloud.contract.spec.internal.Request;
@@ -268,7 +269,7 @@ public final class OpenApiContractConverter {
       bodyMap.forEach(body -> {
         final Request request = new Request();
         request.setHeaders(headers);
-        request.body(bodyMap);
+        request.body(body);
         request.setBodyMatchers(bodyMatchers);
         requestList.add(request);
       });
@@ -329,8 +330,8 @@ public final class OpenApiContractConverter {
       bodyList.add(getBody(property, valueBodyList));
     } else {
       for (var orgBody : originalBodyList) {
-        for (var valueBody : valueBodyList) {
-          bodyList.add(new Body(List.of(orgBody.getClientValue(), getBody(property, valueBody).getClientValue())));
+        for (var bodyValue : valueBodyList) {
+          bodyList.add(combineProperties(orgBody, property, bodyValue));
         }
       }
     }
@@ -343,10 +344,28 @@ public final class OpenApiContractConverter {
       bodyList.add(getBody(property, bodyValue));
     } else {
       for (var orgBody : originalBodyList) {
-        bodyList.add(new Body(List.of(orgBody, getBody(property, bodyValue))));
+        bodyList.add(combineProperties(orgBody, property, bodyValue));
       }
     }
     return bodyList;
+  }
+
+  private Body combineProperties(final Body orgBody, final String property, final Object bodyValue) {
+    return new Body(new DslProperty(addProperty(orgBody.getClientValue(), property, bodyValue), addProperty(orgBody.getServerValue(), property, bodyValue)));
+  }
+
+  private Object addProperty(final Object dslValue, final String property, final Object bodyValue) {
+    Object result;
+    if (dslValue instanceof Map) {
+      result = new HashMap<String, Object>((Map) dslValue);
+      ((Map) result).put(property, bodyValue);
+    } else if (dslValue instanceof List) {
+      result = new ArrayList<>((List) dslValue);
+      ((List)result).add(Map.of(property, bodyValue));
+    } else {
+      result = Map.of(property, bodyValue);
+    }
+    return result;
   }
 
   private List<Body> applyMultiBody(final List<Body> originalBodyList, final String property, final Map<String, Object> valueBodyMap) {
@@ -355,15 +374,16 @@ public final class OpenApiContractConverter {
       bodyList.add(getBody(property, valueBodyMap));
     } else {
       for (var orgBody : originalBodyList) {
-        bodyList.add(new Body(List.of(orgBody, getBody(property, valueBodyMap))));
+        bodyList.add(combineProperties(orgBody, property, valueBodyMap));
       }
     }
     return bodyList;
   }
 
   private Body processBodyAndMatchersByType(final Schema schema, final BodyMatchers bodyMatchers) {
-    final Map<String, Object> bodyMap = new HashMap<>();
+    Body body;
     if (Objects.nonNull(schema.getProperties())) {
+      final Map<String, Object> bodyMap = new HashMap<>();
       final Map<String, Schema> basicObjectProperties = schema.getProperties();
       for (Entry<String, Schema> property : basicObjectProperties.entrySet()) {
         if (Objects.nonNull(property.getValue().get$ref())) {
@@ -374,10 +394,11 @@ public final class OpenApiContractConverter {
           bodyMap.put(property.getKey(), writeBodyMatcher(bodyMatchers, null, property.getKey(), property.getValue(), property.getValue().getType()));
         }
       }
+      body = new Body(bodyMap);
     } else {
-      bodyMap.put("[0]", writeBodyMatcher(bodyMatchers, null, "[0]", schema, schema.getType()));
+      body = new Body(writeBodyMatcher(bodyMatchers, null, "[0]", schema, schema.getType()));
     }
-    return new Body(bodyMap);
+    return body;
   }
 
   private Object writeBodyMatcher(final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName, final Schema schema, final String type) {
