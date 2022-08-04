@@ -207,11 +207,9 @@ class OpenApiContractConverterTest {
     assertThat(bodyServerValueMap)
         .containsKey("player");
     final Map<String, Object> playerMap = (Map<String, Object>) bodyServerValueMap.get("player");
-    assertThat(playerMap)
-        .containsKey(openApiContractConverterTestFixtures.NAME);
+    assertThat(playerMap).containsKey(openApiContractConverterTestFixtures.NAME);
     final Map<String, Object> nameMap = (Map<String, Object>) playerMap.get(openApiContractConverterTestFixtures.NAME);
-    assertThat(nameMap)
-        .containsKey(openApiContractConverterTestFixtures.FIRSTNAME)
+    assertThat(nameMap).containsKey(openApiContractConverterTestFixtures.FIRSTNAME)
         .containsKey(openApiContractConverterTestFixtures.LASTNAME);
     assertThat(nameMap.get(openApiContractConverterTestFixtures.FIRSTNAME)).isInstanceOf(String.class);
     assertThat(nameMap.get(openApiContractConverterTestFixtures.LASTNAME)).isInstanceOf(String.class);
@@ -228,8 +226,7 @@ class OpenApiContractConverterTest {
     Contract contract = contractList.get(0);
     assertThat(contract.getResponse()).isNotNull();
     List bodyServerValueList = (List) contract.getResponse().getBody().getServerValue();
-    assertThat(bodyServerValueList)
-      .hasSize(2);
+    assertThat(bodyServerValueList).hasSize(2);
     List<Map> bodyServerValueMap1 = (List<Map>) bodyServerValueList;
     assertThat(bodyServerValueMap1)
       .map(Map::keySet)
@@ -245,30 +242,28 @@ class OpenApiContractConverterTest {
   }
 
   @Test
-  @DisplayName("OpenApi: Check if oneOfs are being processed okay")
+  @DisplayName("OpenApi: Check if anyOfs are being processed okay")
   void testAnyOfs() {
 
-    final List<File> fileList = new ArrayList<>();
-    fileList.add(new File(openApiContractConverterTestFixtures.TEST_ANY_OFS_YML));
-    for (File file : fileList) {
-      Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
-      List<Contract> contractList = new ArrayList<>(contracts);
-      Contract contract = contractList.get(0);
-      assertThat(contract).isNotNull();
-      assertThat(contract.getResponse()).isNotNull();
-      final List<String> assertKeys = new ArrayList<>();
-      Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
-      bodyServerValueMap.forEach((key, value) ->
-                                 {
-                                   assertKeys.add(key);
-                                 }
-      );
-      assertThat(assertKeys).containsAnyOf(openApiContractConverterTestFixtures.GAME_ID,
-                                           openApiContractConverterTestFixtures.GAME_NAME,
-                                           openApiContractConverterTestFixtures.ROOM_ID,
-                                           openApiContractConverterTestFixtures.NEW_GAME_ID,
-                                           openApiContractConverterTestFixtures.PLAYER_NAME);
-    }
+    File file = new File(openApiContractConverterTestFixtures.TEST_ANY_OFS_YML);
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    List<Contract> contractList = new ArrayList<>(contracts);
+    Contract contract = contractList.get(0);
+    assertThat(contract).isNotNull();
+    assertThat(contract.getResponse()).isNotNull();
+    final List<String> assertKeys = new ArrayList<>();
+    Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
+    bodyServerValueMap.forEach((key, value) ->
+                               {
+                                 assertKeys.add(key);
+                               }
+    );
+    assertThat(assertKeys).containsAnyOf(openApiContractConverterTestFixtures.GAME_ID,
+                                         openApiContractConverterTestFixtures.GAME_NAME,
+                                         openApiContractConverterTestFixtures.ROOM_ID,
+                                         openApiContractConverterTestFixtures.NEW_GAME_ID,
+                                         openApiContractConverterTestFixtures.PLAYER_NAME);
+
   }
 
   @Test

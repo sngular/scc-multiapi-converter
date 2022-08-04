@@ -11,7 +11,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -41,7 +40,6 @@ import net.coru.multiapi.converter.openapi.model.ConverterPathItem;
 import net.coru.multiapi.converter.openapi.model.OperationType;
 import net.coru.multiapi.converter.utils.BasicTypeConstants;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.springframework.cloud.contract.spec.Contract;
 import org.springframework.cloud.contract.spec.internal.Body;
 import org.springframework.cloud.contract.spec.internal.BodyMatchers;
@@ -294,7 +292,7 @@ public final class OpenApiContractConverter {
     final String ref = OpenApiContractConverterUtils.mapRefName(schema);
     List<Body> bodyList = new LinkedList<>();
     if (existSchemaWithPropertiesInComponent(ref)) {
-      final HashMap<String, Schema> properties = (HashMap<String, Schema>) getSchemaFromComponent(ref).getProperties();
+      final Map<String, Schema> properties = getSchemaFromComponent(ref).getProperties();
       for (Entry<String, Schema> property : properties.entrySet()) {
         if (property.getValue() instanceof ComposedSchema) {
           bodyList = applyMultiBody(bodyList, property.getKey(), processComposedSchema(bodyMatchers, (ComposedSchema) property.getValue()));
@@ -442,10 +440,10 @@ public final class OpenApiContractConverter {
     final String subRef = OpenApiContractConverterUtils.mapRefName(internalRef);
 
     if (Objects.nonNull(ref)) {
-      final HashMap<String, Schema> subPropertiesWithRef = (HashMap<String, Schema>) getSchemaFromComponent(subRef).getProperties();
+      final Map<String, Schema> subPropertiesWithRef = getSchemaFromComponent(subRef).getProperties();
       result = processComplexBodyAndMatchers(fieldName, subPropertiesWithRef, bodyMatchers);
     } else {
-      final HashMap<String, Schema> subProperties = (HashMap<String, Schema>) internalRef.getProperties();
+      final Map<String, Schema> subProperties = internalRef.getProperties();
       result = processComplexBodyAndMatchers(fieldName, subProperties, bodyMatchers);
     }
     return result;
@@ -489,7 +487,7 @@ public final class OpenApiContractConverter {
 
   private Object processEnum(final BodyMatchers bodyMatchers, final String enumName, final Schema property) {
     String regex = "";
-    final Iterator enumObjects = property.getEnum().iterator();
+    final Iterator<?> enumObjects = property.getEnum().iterator();
     while (enumObjects.hasNext()) {
       final Object nextObject = enumObjects.next();
       if (!enumObjects.hasNext()) {
@@ -507,10 +505,10 @@ public final class OpenApiContractConverter {
     final HashMap<String, Object> propertyMap = new HashMap<>();
     for (Entry<String, Schema> property : properties.entrySet()) {
       final String newObjectName = objectName + "." + property.getKey();
-      if (Objects.nonNull(property.getValue().get$ref())) {
+      if (isReferenced(property.getValue())) {
         final String ref = OpenApiContractConverterUtils.mapRefName(property.getValue());
         if (existSchemaWithPropertiesInComponent(ref)) {
-          final HashMap<String, Schema> subProperties = (HashMap<String, Schema>) getSchemaFromComponent(ref).getProperties();
+          final Map<String, Schema> subProperties = getSchemaFromComponent(ref).getProperties();
           propertyMap.put(property.getKey(), processComplexBodyAndMatchers(newObjectName, subProperties, bodyMatchers));
         } else {
           final var subProperties = ((ArraySchema) getSchemaFromComponent(ref)).getItems();
@@ -525,11 +523,25 @@ public final class OpenApiContractConverter {
     return propertyMap;
   }
 
+  private static boolean isReferenced(final Schema schema) {
+    return Objects.nonNull(schema.get$ref());
+  }
+
+  private Schema<?> getReferencedProperties(final Schema<?> schema) {
+    Schema<?> referencedSchema;
+    final String ref = OpenApiContractConverterUtils.mapRefName(schema);
+    referencedSchema = getSchemaFromComponent(ref);
+    if (!existSchemaWithPropertiesInComponent(ref)) {
+      referencedSchema = ((ArraySchema) referencedSchema).getItems();
+    }
+    return referencedSchema;
+  }
+
   private List<Object> processArray(final Schema<?> arraySchema, final String objectName, final BodyMatchers bodyMatchers) {
     final List<Object> propertyList = new LinkedList<>();
     if (Objects.nonNull(arraySchema.get$ref())) {
       final String ref = OpenApiContractConverterUtils.mapRefName(arraySchema);
-      final Map<String, Schema> subObject = (Map<String, Schema>) getSchemaFromComponent(ref).getProperties();
+      final Map<String, Schema> subObject = getSchemaFromComponent(ref).getProperties();
       propertyList.add(processComplexBodyAndMatchers("[0]", subObject, bodyMatchers));
     } else {
       final String type = arraySchema.getType();
@@ -683,7 +695,7 @@ public final class OpenApiContractConverter {
     final List<Body> result = new ArrayList<>();
     if (Objects.nonNull(composedSchema.getAllOf())) {
       final List<Body> tempBody = new ArrayList<>();
-      for (Schema schema : composedSchema.getAllOf()) {
+      for (Schema<?> schema : composedSchema.getAllOf()) {
         tempBody.addAll(processBodyAndMatchers(schema, bodyMatchers));
       }
       result.add(new Body(tempBody));
@@ -692,39 +704,46 @@ public final class OpenApiContractConverter {
         result.addAll(processBodyAndMatchers(oneSchema, bodyMatchers));
       }
     } else if (Objects.nonNull(composedSchema.getAnyOf())) {
-      for (var oneSchema : combineSchema(composedSchema.getAnyOf())) {
-        result.addAll(processBodyAndMatchers(oneSchema, bodyMatchers));
+      for (var anySchema : combineSchema(composedSchema.getAnyOf())) {
+        result.addAll(processBodyAndMatchers(anySchema, bodyMatchers));
       }
     }
     return result;
   }
 
-  private List<Schema> combineSchema(final List<Schema> anyOfThis) {
-    final var schemaList = new HashSet<>(anyOfThis);
-    final var tempList = new ArrayList<>(anyOfThis);
-    for (var i = 0; i < CombinatoricsUtils.factorial(anyOfThis.size()); i++) {
-      for (var schema : tempList) {
-        final var finalSchema = new Schema();
-        finalSchema.setProperties(schema.getProperties());
-        for (var tempSchema : anyOfThis) {
-          finalSchema.getProperties().putAll(tempSchema.getProperties());
-        }
-        tempList.add(finalSchema);
-        schemaList.add(finalSchema);
+  private List<Schema<?>> combineSchema(final List<Schema> anyOfThis) {
+    final List<Schema<?>> finalList = new LinkedList<>();
+    var anySchema = solveReferenced(anyOfThis.remove(0));
+    if (anyOfThis.isEmpty()) {
+      finalList.add(anySchema);
+    } else {
+      final List<Schema<?>> tempList = combineSchema(anyOfThis);
+      finalList.addAll(tempList);
+      for (var temp : tempList) {
+        temp.getProperties().putAll(anySchema.getProperties());
       }
+      finalList.addAll(tempList);
     }
-    return new ArrayList<>(schemaList);
+
+    return finalList;
   }
 
+  private Schema solveReferenced(final Schema schema) {
+    Schema solvedSchema = schema;
+    if (isReferenced(schema)) {
+      solvedSchema = getReferencedProperties(schema);
+    }
+    return solvedSchema;
+  }
   private boolean existSchemaWithPropertiesInComponent(final String ref) {
     return Objects.nonNull(componentsMap.get(ref).getProperties());
   }
 
-  private Schema getSchemaFromComponent(final String ref) {
+  private Schema<?> getSchemaFromComponent(final String ref) {
     return componentsMap.get(ref);
   }
 
-  private Example getExampleFromComponent(String ref) {
+  private Example getExampleFromComponent(final String ref) {
     return examplesMap.get(ref);
   }
 }
