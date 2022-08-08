@@ -59,10 +59,6 @@ public final class OpenApiContractConverter {
 
   private final Map<String, Example> examplesMap = new LinkedHashMap<>();
 
-  private static boolean isArray(final Schema schema) {
-    return Objects.nonNull(schema.getType()) && "array".equalsIgnoreCase(schema.getType());
-  }
-
   private static Body getBody(final String property, final Object bodyValue) {
     final Body body;
     if (Objects.nonNull(property)) {
@@ -143,17 +139,17 @@ public final class OpenApiContractConverter {
   }
 
   private void processContract(final List<Contract> contracts, final Entry<String, PathItem> pathItem, final Operation operation, final OperationType name) {
-    for (Entry<String, ApiResponse> response : operation.getResponses().entrySet()) {
-      final String fileName = name + pathItem.getKey().replaceAll("[{}]", "") + response.getKey().substring(0, 1).toUpperCase() + response.getKey().substring(1) + "Response";
+    for (Entry<String, ApiResponse> apiResponse : operation.getResponses().entrySet()) {
+      final String fileName = name + pathItem.getKey().replaceAll("[{}]", "") + apiResponse.getKey().substring(0, 1).toUpperCase() + apiResponse.getKey().substring(1) + "Response";
       final String contractName = fileName.replace("/", "");
       final String contractDescription = pathItem.getValue().getSummary();
-      final var requestListIt = processRequest(pathItem, operation, name.name()).listIterator();
-      final var responseListIt = processResponse(response.getKey(), response.getValue()).listIterator();
-      while (requestListIt.hasNext() && responseListIt.hasNext()) {
-        contracts.add(createContract(contractName, contractDescription, requestListIt.next(), responseListIt.next()));
+      final var requestList = processRequest(pathItem, operation, name.name());
+      final var responseList = processResponse(apiResponse.getKey(), apiResponse.getValue());
+      for (var request : requestList) {
+        for (var response : responseList) {
+          contracts.add(createContract(contractName, contractDescription, request, response));
+        }
       }
-      requestListIt.forEachRemaining(request -> contracts.add(createContract(contractName, contractDescription, request, null)));
-      responseListIt.forEachRemaining(resp -> contracts.add(createContract(contractName, contractDescription, null, resp)));
     }
   }
 
@@ -736,17 +732,64 @@ public final class OpenApiContractConverter {
     final List<Schema<?>> finalList = new LinkedList<>();
     var anySchema = solveReferenced(anyOfThis.remove(0));
     if (anyOfThis.isEmpty()) {
-      finalList.add(anySchema);
+      finalList.add(cloneSchema(anySchema));
     } else {
+      finalList.add(anySchema);
       final List<Schema<?>> tempList = combineSchema(anyOfThis);
       finalList.addAll(tempList);
       for (var temp : tempList) {
-        temp.getProperties().putAll(anySchema.getProperties());
+        var swap = cloneSchema(temp);
+        swap.getProperties().putAll(anySchema.getProperties());
+        finalList.add(swap);
       }
-      finalList.addAll(tempList);
     }
 
     return finalList;
+  }
+
+  private Schema cloneSchema(final Schema origSchema) {
+    var schema = new Schema();
+    schema.setDefault(origSchema.getDefault());
+    schema.setDeprecated(origSchema.getDeprecated());
+    schema.setDescription(origSchema.getDescription());
+    schema.setDiscriminator(origSchema.getDiscriminator());
+    schema.setEnum(origSchema.getEnum());
+    schema.setExample(origSchema.getExample());
+    schema.setExclusiveMaximum(origSchema.getExclusiveMaximum());
+    schema.setExclusiveMinimum(origSchema.getExclusiveMinimum());
+    schema.setExtensions(origSchema.getExtensions());
+    schema.setExternalDocs(origSchema.getExternalDocs());
+    schema.setFormat(origSchema.getFormat());
+    schema.setMaximum(origSchema.getMaximum());
+    schema.setMaxItems(origSchema.getMaxItems());
+    schema.setMaxLength(origSchema.getMaxLength());
+    schema.setMaxProperties(origSchema.getMaxProperties());
+    schema.setMinimum(origSchema.getMinimum());
+    schema.setMinItems(origSchema.getMinItems());
+    schema.setMinLength(origSchema.getMinLength());
+    schema.setMinProperties(origSchema.getMinProperties());
+    schema.setMultipleOf(origSchema.getMultipleOf());
+    schema.setName(origSchema.getName());
+    schema.setNot(origSchema.getNot());
+    schema.setNullable(origSchema.getNullable());
+    schema.setPattern(origSchema.getPattern());
+    schema.setProperties(cloneProperties(origSchema.getProperties()));
+    schema.setReadOnly(origSchema.getReadOnly());
+    schema.setRequired(origSchema.getRequired());
+    schema.setTitle(origSchema.getTitle());
+    schema.setType(origSchema.getType());
+    schema.setUniqueItems(origSchema.getUniqueItems());
+    schema.setWriteOnly(origSchema.getWriteOnly());
+    schema.xml(origSchema.getXml());
+    return schema;
+  }
+
+  private Map<String, Schema> cloneProperties(final Map<String, Schema> properties) {
+    var propertiesMap = new LinkedHashMap<String, Schema>();
+    if (Objects.nonNull(properties)) {
+      properties.forEach((key, property) -> propertiesMap.put(key, cloneSchema(property)));
+    }
+    return propertiesMap;
   }
 
   private Schema solveReferenced(final Schema schema) {
