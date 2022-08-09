@@ -33,7 +33,7 @@ class OpenApiContractConverterUtilsTest {
     final Response response = new Response();
     Schema schema = new Schema ();
     schema.setType("string");
-    response.setBody(OpenApiContractConverterUtils.processBasicResponseTypeBody(schema));
+    response.setBody(OpenApiContractConverterUtils.processBasicTypeBody(schema).getLeft());
     assertThat(response.getBody().getClientValue()).isInstanceOf(String.class);
     assertThat(response.getBody().getServerValue()).isInstanceOf(Pattern.class);
   }
@@ -44,9 +44,9 @@ class OpenApiContractConverterUtilsTest {
     final Request request = new Request();
     Schema schema = new Schema ();
     schema.setType("string");
-    request.setBody(OpenApiContractConverterUtils.processBasicRequestTypeBody(schema));
-    assertThat(request.getBody().getServerValue()).isInstanceOf(String.class);
-    assertThat(request.getBody().getClientValue()).isInstanceOf(Pattern.class);
+    request.setBody(OpenApiContractConverterUtils.processBasicTypeBody(schema).getLeft());
+    assertThat(request.getBody().getServerValue()).isInstanceOf(Pattern.class);
+    assertThat(request.getBody().getClientValue()).isInstanceOf(String.class);
   }
 
 }
