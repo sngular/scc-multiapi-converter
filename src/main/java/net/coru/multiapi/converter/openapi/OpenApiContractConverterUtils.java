@@ -14,12 +14,12 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import net.coru.multiapi.converter.utils.BasicTypeConstants;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cloud.contract.spec.internal.Body;
-import org.springframework.cloud.contract.spec.internal.ClientDslProperty;
+import org.springframework.cloud.contract.spec.internal.BodyMatchers;
 import org.springframework.cloud.contract.spec.internal.MatchingStrategy;
 import org.springframework.cloud.contract.spec.internal.MatchingStrategy.Type;
 import org.springframework.cloud.contract.spec.internal.QueryParameters;
-import org.springframework.cloud.contract.spec.internal.Request;
 import org.springframework.cloud.contract.spec.internal.Response;
 
 public final class OpenApiContractConverterUtils {
@@ -41,56 +41,36 @@ public final class OpenApiContractConverterUtils {
     return refName;
   }
 
-  public static Body processBasicResponseTypeBody(final Schema schema) {
+  public static Pair<Body, BodyMatchers> processBasicTypeBody(final Schema schema) {
     final Body body;
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     if (Objects.nonNull(schema.getExample())) {
       body = new Body(schema.getExample());
     } else {
       switch (schema.getType()) {
         case BasicTypeConstants.STRING:
           body = new Body(new Response().anyAlphaNumeric());
+          bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX);
           break;
         case BasicTypeConstants.INTEGER:
           body = new Body(processIntegerFormat(schema));
+          bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX);
           break;
         case BasicTypeConstants.NUMBER:
           body = new Body(processNumberFormat(schema));
+          bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX);
           break;
         case BasicTypeConstants.BOOLEAN:
           body = new Body(new Response().anyBoolean());
+          bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX);
           break;
         default:
           body = new Body("Error");
+          bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX);
           break;
       }
     }
-    return body;
-  }
-
-  public static Body processBasicRequestTypeBody(final Schema schema) {
-    final Body result;
-    if (Objects.nonNull(schema.getExample())) {
-      result = new Body(schema.getExample());
-    } else {
-      switch (schema.getType()) {
-        case BasicTypeConstants.STRING:
-          result = new Body(new Request().anyAlphaNumeric());
-          break;
-        case BasicTypeConstants.INTEGER:
-          result = new Body(new ClientDslProperty(processIntegerFormat(schema)));
-          break;
-        case BasicTypeConstants.NUMBER:
-          result = new Body(new ClientDslProperty(processNumberFormat(schema)));
-          break;
-        case BasicTypeConstants.BOOLEAN:
-          result = new Body(new ClientDslProperty(new Request().anyBoolean()));
-          break;
-        default:
-          result = new Body("Error");
-          break;
-      }
-    }
-    return result;
+    return Pair.of(body, bodyMatchers);
   }
 
   public static void processBasicQueryParameterTypeBody(final QueryParameters queryParameters, final Parameter parameter) {

@@ -19,7 +19,6 @@ import java.util.regex.Pattern;
 
 import lombok.extern.slf4j.Slf4j;
 import net.coru.multiapi.converter.MultiApiContractConverter;
-import org.assertj.core.data.Index;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -283,14 +282,14 @@ class OpenApiContractConverterTest {
     assertThat(contract).isNotNull();
     assertThat(contract.getResponse()).isNotNull();
     List<String> assertKeys = new ArrayList<>();
-    List<Body> bodyServerValueMap = (List<Body>) contract.getResponse().getBody().getServerValue();
+    Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
     assertThat(bodyServerValueMap)
-      .hasSize(2)
-      .extracting(Body::getServerValue)
-      .satisfies(validateKeys(OpenApiContractConverterTestFixtures.GAME_ID, OpenApiContractConverterTestFixtures.PLAYER_NAME), Index.atIndex(0))
-      .satisfies(validateKeys(OpenApiContractConverterTestFixtures.GAME_NAME,
-                              OpenApiContractConverterTestFixtures.ROOM_ID,
-                              OpenApiContractConverterTestFixtures.NEW_GAME_ID),  Index.atIndex(1));
+      .hasSize(5)
+      .containsOnlyKeys(OpenApiContractConverterTestFixtures.GAME_ID,
+                        OpenApiContractConverterTestFixtures.PLAYER_NAME,
+                        OpenApiContractConverterTestFixtures.GAME_NAME,
+                        OpenApiContractConverterTestFixtures.ROOM_ID,
+                        OpenApiContractConverterTestFixtures.NEW_GAME_ID);
   }
 
   private Consumer<Object> validateKeys(final String... keys) {

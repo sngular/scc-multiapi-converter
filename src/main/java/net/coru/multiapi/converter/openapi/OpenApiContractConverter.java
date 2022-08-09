@@ -10,6 +10,7 @@ package net.coru.multiapi.converter.openapi;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -40,8 +41,10 @@ import net.coru.multiapi.converter.openapi.model.ConverterPathItem;
 import net.coru.multiapi.converter.openapi.model.OperationType;
 import net.coru.multiapi.converter.utils.BasicTypeConstants;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cloud.contract.spec.Contract;
 import org.springframework.cloud.contract.spec.internal.Body;
+import org.springframework.cloud.contract.spec.internal.BodyMatcher;
 import org.springframework.cloud.contract.spec.internal.BodyMatchers;
 import org.springframework.cloud.contract.spec.internal.DslProperty;
 import org.springframework.cloud.contract.spec.internal.Headers;
@@ -59,24 +62,40 @@ public final class OpenApiContractConverter {
 
   private final Map<String, Example> examplesMap = new LinkedHashMap<>();
 
-  private static Body getBody(final String property, final Object bodyValue) {
+  private static Pair<Body, BodyMatchers> getBodyFomMap(final String property, final Map<String, Object> bodyProperties, final BodyMatchers bodyMatchers) {
     final Body body;
     if (Objects.nonNull(property)) {
-      body = new Body(Map.of(property, bodyValue));
+      body = new Body(Map.of(property, bodyProperties));
     } else {
-      body = new Body(bodyValue);
+      body = new Body(bodyProperties);
     }
-    return body;
+    return Pair.of(body, bodyMatchers);
   }
 
-  private static Body getBody(final String property, final List<Body> bodyValue) {
+  private static Pair<Body, BodyMatchers> getBody(final String property, final Pair<Object, BodyMatchers> bodyValue) {
     final Body body;
     if (Objects.nonNull(property)) {
-      body = new Body(Map.of(property, bodyValue));
+      body = new Body(Map.of(property, bodyValue.getLeft()));
     } else {
-      body = new Body(bodyValue);
+      body = new Body(bodyValue.getLeft());
     }
-    return body;
+    return Pair.of(body, bodyValue.getRight());
+  }
+
+  private static Pair<Body, BodyMatchers> getBody(final String property, final List<Pair<Body, BodyMatchers>> bodyValue) {
+    final Body body;
+    List<Body> bodies = new LinkedList<>();
+    BodyMatchers bodyMatchers = new BodyMatchers();
+    for (var propBody : bodyValue) {
+      bodies.add(propBody.getLeft());
+      bodyMatchers.matchers().addAll(propBody.getRight().matchers());
+    }
+    if (Objects.nonNull(property)) {
+      body = new Body(Map.of(property, bodies));
+    } else {
+      body = new Body(bodies);
+    }
+    return Pair.of(body, bodyMatchers);
   }
 
   private static String getPropertyType(final Entry<String, Schema> property) {
@@ -169,52 +188,57 @@ public final class OpenApiContractConverter {
   private List<Response> processResponse(final String name, final ApiResponse apiResponse) {
     final var responseList = new ArrayList<Response>();
     if (Objects.nonNull(apiResponse)) {
-      final var responseBodyMatchers = new ResponseBodyMatchers();
       if (Objects.nonNull(apiResponse.getContent())) {
         for (Entry<String, MediaType> content : apiResponse.getContent().entrySet()) {
-          final Schema schema = content.getValue().getSchema();
+          final MediaType mediaType = content.getValue();
           final Headers headers = new Headers();
           headers.contentType(content.getKey());
           headers.accept();
-          final var bodyList = processResponseBody(responseBodyMatchers, content, schema);
+          final var bodyList = processResponseBody(mediaType.getSchema());
+          if (Objects.nonNull(mediaType.getExample())) {
+            bodyList.add(buildFromExample(mediaType.getExample()));
+          } else if (Objects.nonNull(mediaType.getExamples())) {
+            mediaType.getExamples().forEach((key, example) -> bodyList.add(buildFromExample(example)));
+          }
           for (var body : bodyList) {
             final var response = new Response();
-
+            final var responseBodyMatcher = new ResponseBodyMatchers();
+            responseBodyMatcher.matchers().addAll(body.getRight().matchers());
             response.status(solveStatus(name));
             response.setHeaders(headers);
-            response.setBody(body);
-            response.setBodyMatchers(responseBodyMatchers);
+            response.setBody(body.getLeft());
+            response.setBodyMatchers(responseBodyMatcher);
             responseList.add(response);
           }
         }
       } else {
         final var response = new Response();
         response.body(response.anyAlphaNumeric());
+        response.setBodyMatchers(new ResponseBodyMatchers());
         responseList.add(response);
       }
     }
     return responseList;
   }
 
+  private static Pair<Body, BodyMatchers> buildFromExample(final Object mediaType) {
+    return Pair.of(new Body(mediaType), new BodyMatchers());
+  }
+
   private Integer solveStatus(String name) {
     return "default".equalsIgnoreCase(name) ? 200 : Integer.parseInt(name);
   }
-  private List<Body> processResponseBody(
-      final ResponseBodyMatchers responseBodyMatchers,
-      final Entry<String, MediaType> content, final Schema schema) {
-    final var bodyList = new ArrayList<Body>();
-    if (content.getValue().getSchema() instanceof ComposedSchema) {
-      final ComposedSchema composedSchema = (ComposedSchema) content.getValue().getSchema();
-      final var bodyMap = processComposedSchema(responseBodyMatchers, composedSchema);
+  private List<Pair<Body, BodyMatchers>> processResponseBody(
+      final Schema schema) {
+    final var bodyList = new ArrayList<Pair<Body, BodyMatchers>>();
+    if (schema instanceof ComposedSchema) {
+      final ComposedSchema composedSchema = (ComposedSchema) schema;
+      final var bodyMap = processComposedSchema(composedSchema);
       bodyList.addAll(bodyMap);
     } else if (Objects.nonNull(schema.getType()) && BasicTypeConstants.BASIC_OBJECT_TYPE.contains(schema.getType())) {
-      bodyList.add(OpenApiContractConverterUtils.processBasicResponseTypeBody(schema));
+      bodyList.add(OpenApiContractConverterUtils.processBasicTypeBody(schema));
     } else {
-      final var bodyMap = processBodyAndMatchers(schema, responseBodyMatchers);
-      /*Schema<?> checkArraySchema = new Schema<>();
-      if (Objects.nonNull(schema.get$ref())) {
-        checkArraySchema = getSchemaFromComponent(OpenApiContractConverterUtils.mapRefName(schema));
-      }*/
+      final var bodyMap = processBodyAndMatchers(schema);
       bodyList.addAll(bodyMap);
     }
     return bodyList;
@@ -248,80 +272,89 @@ public final class OpenApiContractConverter {
 
   private List<Request> processRequestContent(final Operation operation) {
     final List<Request> requestList = new LinkedList<>();
-    final BodyMatchers bodyMatchers = new BodyMatchers();
     for (Entry<String, MediaType> content : operation.getRequestBody().getContent().entrySet()) {
-      final List<Body> bodyMap;
-      final Schema schema = content.getValue().getSchema();
+      final List<Pair<Body,BodyMatchers>> bodyMap;
+      final MediaType mediaType = content.getValue();
       final Headers headers = new Headers();
       headers.header("Content-Type", content.getKey());
-      if (content.getValue().getSchema() instanceof ComposedSchema) {
-        final ComposedSchema composedSchema = (ComposedSchema) content.getValue().getSchema();
-        bodyMap = new ArrayList<>(processComposedSchema(bodyMatchers, composedSchema));
-      } else if (Objects.nonNull(schema.getType()) && BasicTypeConstants.BASIC_OBJECT_TYPE.contains(schema.getType())) {
-        bodyMap = List.of(OpenApiContractConverterUtils.processBasicRequestTypeBody(schema));
-      } else {
-        bodyMap = new ArrayList<>(processBodyAndMatchers(schema, bodyMatchers));
+      bodyMap = processRequestBody(mediaType.getSchema());
+      if (Objects.nonNull(mediaType.getExample())) {
+        bodyMap.add(buildFromExample(mediaType.getExample()));
+      } else if (Objects.nonNull(mediaType.getExamples())) {
+        mediaType.getExamples().forEach((key, example) -> bodyMap.add(buildFromExample(example)));
       }
       bodyMap.forEach(body -> {
         final Request request = new Request();
         request.setHeaders(headers);
-        request.body(body);
-        request.setBodyMatchers(bodyMatchers);
+        request.body(body.getLeft());
+        request.setBodyMatchers(body.getRight());
         requestList.add(request);
       });
     }
     return requestList;
   }
 
-  private List<Body> processBodyAndMatchers(final Schema schema, final BodyMatchers bodyMatchers) {
+  private List<Pair<Body, BodyMatchers>> processRequestBody(final Schema schema) {
+    final List<Pair<Body, BodyMatchers>> requestBody = new LinkedList<>();
+    if (schema instanceof ComposedSchema) {
+      final ComposedSchema composedSchema = (ComposedSchema) schema;
+      requestBody.addAll(processComposedSchema(composedSchema));
+    } else if (Objects.nonNull(schema.getType()) && BasicTypeConstants.BASIC_OBJECT_TYPE.contains(schema.getType())) {
+      requestBody.add(OpenApiContractConverterUtils.processBasicTypeBody(schema));
+    } else {
+      requestBody.addAll(processBodyAndMatchers(schema));
+    }
+    return requestBody;
+  }
+  private List<Pair<Body,BodyMatchers>> processBodyAndMatchers(final Schema schema) {
 
-    final var result = new ArrayList<Body>();
+    final var result = new LinkedList<Pair<Body,BodyMatchers>>();
     if (Objects.nonNull(schema.getType())) {
-      result.add(processBodyAndMatchersByType(schema, bodyMatchers));
+      result.add(processBodyAndMatchersByType(schema));
     }
     if (Objects.nonNull(schema.get$ref())) {
-      result.addAll(processBodyAndMatchersByRef(schema, bodyMatchers));
+      result.addAll(processBodyAndMatchersByRef(schema));
     }
     return result;
   }
 
-  private List<Body> processBodyAndMatchersByRef(final Schema schema, final BodyMatchers bodyMatchers) {
+  private List<Pair<Body, BodyMatchers>> processBodyAndMatchersByRef(final Schema schema) {
     final String ref = OpenApiContractConverterUtils.mapRefName(schema);
-    List<Body> bodyList = new LinkedList<>();
+    List<Pair<Body, BodyMatchers>> bodyList = new LinkedList<>();
     if (existSchemaWithPropertiesInComponent(ref)) {
       final Map<String, Schema> properties = getSchemaFromComponent(ref).getProperties();
       for (Entry<String, Schema> property : properties.entrySet()) {
         if (property.getValue() instanceof ComposedSchema) {
-          bodyList = applyMultiBody(bodyList, property.getKey(), processComposedSchema(bodyMatchers, (ComposedSchema) property.getValue()));
+          bodyList = applyBodyToList(bodyList, property.getKey(), processComposedSchema((ComposedSchema) property.getValue()));
         } else if (Objects.nonNull(property.getValue().get$ref())) {
           final String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
           final Schema<?> subSchema = getSchemaFromComponent(subRef);
           if (Objects.nonNull(subSchema.getProperties())) {
-            bodyList = applyMultiBody(bodyList, property.getKey(), processComplexBodyAndMatchers(property.getKey(), subSchema.getProperties(), bodyMatchers));
+            bodyList = applyMapToBodyList(bodyList, property.getKey(), processComplexBodyAndMatchers(property.getKey(), subSchema.getProperties()));
           } else if (((ArraySchema) subSchema).getItems() instanceof ComposedSchema) {
             final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
-            bodyList = applyMultiBody(bodyList, property.getKey(), processComposedSchema(bodyMatchers, (ComposedSchema) arraySchema));
+            bodyList = applyBodyToList(bodyList, property.getKey(), processComposedSchema((ComposedSchema) arraySchema));
           } else {
             final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
-            bodyList = applyMultiBody(bodyList, ref, writeBodyMatcher(bodyMatchers, null, ref, arraySchema, arraySchema.getType()));
+            bodyList = this.applyObjectToBodyList(bodyList, ref, writeBodyMatcher(null, ref, arraySchema, arraySchema.getType()));
           }
         } else {
           if (Objects.nonNull(property.getValue().getEnum())) {
-            bodyList = applyMultiBody(bodyList, property.getKey(), writeBodyMatcher(bodyMatchers, null, property.getKey(), property.getValue(), BasicTypeConstants.ENUM));
+            bodyList = this.applyObjectToBodyList(bodyList, property.getKey(), writeBodyMatcher(null, property.getKey(), property.getValue(), BasicTypeConstants.ENUM));
           } else {
-            bodyList = applyMultiBody(bodyList, property.getKey(), writeBodyMatcher(bodyMatchers, null, property.getKey(), property.getValue(), property.getValue().getType()));
+            bodyList = this.applyObjectToBodyList(bodyList, property.getKey(), writeBodyMatcher(null, property.getKey(), property.getValue(), property.getValue().getType()));
           }
         }
       }
     } else {
       final Schema arraySchema = getSchemaFromComponent(ref);
-      bodyList = applyMultiBody(bodyList, null, writeBodyMatcher(bodyMatchers, null, "[0]", arraySchema, arraySchema.getType()));
+      bodyList = this.applyObjectToBodyList(bodyList, null, writeBodyMatcher(null, "[0]", arraySchema, arraySchema.getType()));
     }
     return bodyList;
   }
 
-  private List<Body> applyMultiBody(final List<Body> originalBodyList, final String property, final List<Body> valueBodyList) {
-    final var bodyList = new LinkedList<Body>();
+  private List<Pair<Body, BodyMatchers>> applyBodyToList(final List<Pair<Body, BodyMatchers>> originalBodyList, final String property, final List<Pair<Body, BodyMatchers>> valueBodyList) {
+    final var bodyList = new LinkedList<Pair<Body, BodyMatchers>>();
     if (originalBodyList.isEmpty()) {
       bodyList.add(getBody(property, valueBodyList));
     } else {
@@ -334,20 +367,63 @@ public final class OpenApiContractConverter {
     return bodyList;
   }
 
-  private List<Body> applyMultiBody(final List<Body> originalBodyList, final String property, final Object bodyValue) {
-    final var bodyList = new LinkedList<Body>();
+  private List<Pair<Body, BodyMatchers>> applyObjectToBodyList(final List<Pair<Body, BodyMatchers>> originalBodyList, final String property, final Pair<Object, BodyMatchers> bodyValue) {
+    final var bodyList = new LinkedList<Pair<Body, BodyMatchers>>();
     if (originalBodyList.isEmpty()) {
       bodyList.add(getBody(property, bodyValue));
     } else {
       for (var orgBody : originalBodyList) {
-        bodyList.add(combineProperties(orgBody, property, bodyValue));
+        bodyList.add(combineProperties(orgBody, property, Pair.of(new Body(bodyValue.getLeft()), bodyValue.getRight())));
       }
     }
     return bodyList;
   }
 
-  private Body combineProperties(final Body orgBody, final String property, final Object bodyValue) {
-    return new Body(new DslProperty(addProperty(orgBody.getClientValue(), property, bodyValue), addProperty(orgBody.getServerValue(), property, bodyValue)));
+  private List<Pair<Body, BodyMatchers>> applyMapToBodyList(final List<Pair<Body, BodyMatchers>> originalBodyList, final String property,
+    final Pair<Object, BodyMatchers> valueBodyMap) {
+    final var bodyList = new LinkedList<Pair<Body, BodyMatchers>>();
+    if (originalBodyList.isEmpty()) {
+      if (valueBodyMap.getLeft() instanceof Map) {
+        bodyList.add(getBodyFomMap(property, (Map<String, Object>) valueBodyMap.getLeft(), valueBodyMap.getRight()));
+      }
+    } else {
+      for (var orgBody : originalBodyList) {
+        bodyList.add(combineProperties(orgBody, property, Pair.of(new Body(valueBodyMap.getLeft()), valueBodyMap.getRight())));
+      }
+    }
+    return bodyList;
+  }
+
+  private Pair<Body, BodyMatchers> combineProperties(final Pair<Body, BodyMatchers> orgBodyMatcher, final String property, final Pair<Body, BodyMatchers> bodyValue) {
+    var orgBody = orgBodyMatcher.getLeft();
+    var orgMatchers = orgBodyMatcher.getRight();
+    orgMatchers.matchers().addAll(bodyValue.getRight().matchers());
+    return Pair.of(
+      new Body(new DslProperty(addProperty(orgBody.getClientValue(), property, bodyValue.getLeft().getClientValue()), addProperty(orgBody.getServerValue(), property,
+                                                                                                                                  bodyValue.getLeft().getServerValue()))),
+      orgMatchers);
+  }
+
+  private Body combineProperties(final Body orgBody, final Body newBody) {
+    Object clientValue = combineProperties(orgBody.getClientValue(), newBody.getClientValue());
+    Object serverValue = combineProperties(orgBody.getServerValue(), newBody.getServerValue());
+    return new Body(new DslProperty(clientValue, serverValue));
+  }
+
+  private Object combineProperties(final Object clientValueOrig, final Object clientValueNew) {
+    Object property;
+    if (clientValueOrig instanceof Map) {
+      property = new HashMap<>((Map) clientValueOrig);
+      ((Map) property).putAll((Map) clientValueNew);
+    } else if (clientValueOrig instanceof List) {
+      property = new LinkedList<>((List) clientValueOrig);
+      ((List) property).addAll((List) clientValueNew);
+    } else if (clientValueOrig instanceof DslProperty) {
+      property = combineProperties(((DslProperty<?>) clientValueOrig).getClientValue(), clientValueNew);
+    } else {
+      property = List.of(clientValueOrig, clientValueNew);
+    }
+    return property;
   }
 
   private Object addProperty(final Object dslValue, final String property, final Object bodyValue) {
@@ -364,20 +440,9 @@ public final class OpenApiContractConverter {
     return result;
   }
 
-  private List<Body> applyMultiBody(final List<Body> originalBodyList, final String property, final Map<String, Object> valueBodyMap) {
-    final var bodyList = new LinkedList<Body>();
-    if (originalBodyList.isEmpty()) {
-      bodyList.add(getBody(property, valueBodyMap));
-    } else {
-      for (var orgBody : originalBodyList) {
-        bodyList.add(combineProperties(orgBody, property, valueBodyMap));
-      }
-    }
-    return bodyList;
-  }
-
-  private Body processBodyAndMatchersByType(final Schema schema, final BodyMatchers bodyMatchers) {
+  private Pair<Body, BodyMatchers> processBodyAndMatchersByType(final Schema schema) {
     Body body;
+    BodyMatchers bodyMatchers = new BodyMatchers();
     if (Objects.nonNull(schema.getProperties())) {
       final Map<String, Object> bodyMap = new HashMap<>();
       final Map<String, Schema> basicObjectProperties = schema.getProperties();
@@ -385,90 +450,98 @@ public final class OpenApiContractConverter {
         if (Objects.nonNull(property.getValue().get$ref())) {
           final String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
           final HashMap<String, Schema> subProperties = (HashMap<String, Schema>) getSchemaFromComponent(subRef).getProperties();
-          bodyMap.put(property.getKey(), processComplexBodyAndMatchers(property.getKey(), subProperties, bodyMatchers));
+          var result = processComplexBodyAndMatchers(property.getKey(), subProperties);
+          bodyMap.put(property.getKey(), result.getLeft());
+          bodyMatchers.matchers().addAll(result.getRight().matchers());
         } else {
-          bodyMap.put(property.getKey(), writeBodyMatcher(bodyMatchers, null, property.getKey(), property.getValue(), property.getValue().getType()));
+          var result = writeBodyMatcher(null, property.getKey(), property.getValue(), property.getValue().getType());
+          bodyMap.put(property.getKey(), result.getLeft());
+          bodyMatchers.matchers().addAll(result.getRight().matchers());
         }
       }
       body = new Body(bodyMap);
     } else {
-      body = new Body(writeBodyMatcher(bodyMatchers, null, "[0]", schema, schema.getType()));
+      var result = writeBodyMatcher(null, "[0]", schema, schema.getType());
+      body = new Body(result.getLeft());
+      bodyMatchers.matchers().addAll(result.getRight().matchers());
     }
-    return body;
+    return Pair.of(body, bodyMatchers);
   }
 
-  private Object writeBodyMatcher(final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName, final Schema schema, final String type) {
+  private Pair<Object, BodyMatchers> writeBodyMatcher(final Entry<String, Schema> property, final String fieldName, final Schema schema, final String type) {
     final var example = Objects.nonNull(property) ? property.getValue().getExample() : schema.getExample();
-    final Object result;
+    final var bodyMatchers = new BodyMatchers();
+    final Pair<Object, BodyMatchers> result;
     if (Objects.nonNull(example)) {
-      result = schema.getExample();
+      result = Pair.of(schema.getExample(), bodyMatchers);
     } else {
       final String mapKey = Objects.nonNull(property) ? property.getKey() : fieldName;
 
       switch (type) {
         case BasicTypeConstants.STRING:
           bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
-          result = RandomStringUtils.random(5, true, true);
+          result = Pair.of(RandomStringUtils.random(5, true, true), bodyMatchers);
           break;
         case BasicTypeConstants.INTEGER:
-          result = processIntegerBodyMatcher(bodyMatchers, property, fieldName, schema);
+          result = processIntegerBodyMatcher(property, fieldName, schema);
           break;
         case BasicTypeConstants.NUMBER:
-          result = processNumberBodyMatcher(bodyMatchers, property, fieldName, schema);
+          result = processNumberBodyMatcher(property, fieldName, schema);
           break;
         case BasicTypeConstants.BOOLEAN:
           bodyMatchers.jsonPath(fieldName, bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
-          result = BasicTypeConstants.RANDOM.nextBoolean();
+          result = Pair.of(BasicTypeConstants.RANDOM.nextBoolean(), bodyMatchers);
           break;
         case BasicTypeConstants.OBJECT:
-          result = processObjectBodyMatcher(property, bodyMatchers, fieldName, schema);
+          result = processObjectBodyMatcher(property, fieldName, schema);
           break;
         case BasicTypeConstants.ARRAY:
           final var arraySchema = Objects.nonNull(property) ? null : (ArraySchema) schema;
-          result = processArrayBodyMatcher(bodyMatchers, property, fieldName, arraySchema);
+          result = processArrayBodyMatcher(property, fieldName, arraySchema);
           break;
         case BasicTypeConstants.ENUM:
-          result = processEnum(bodyMatchers, mapKey, Objects.nonNull(property) ? property.getValue() : schema);
+          result = processEnum(mapKey, Objects.nonNull(property) ? property.getValue() : schema);
           break;
         default:
           bodyMatchers.jsonPath(mapKey, bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX));
-          result = RandomStringUtils.random(5, true, true);
+          result = Pair.of(RandomStringUtils.random(5, true, true), bodyMatchers);
           break;
       }
     }
     return result;
   }
 
-  private Object processArrayBodyMatcher(final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName, final ArraySchema schema) {
+  private Pair<Object, BodyMatchers> processArrayBodyMatcher(final Entry<String, Schema> property, final String fieldName, final ArraySchema schema) {
     final Object result;
     final Schema<?> arraySchema = Objects.nonNull(property) ? ((ArraySchema) property.getValue()).getItems() : schema.getItems();
     if (Objects.nonNull(arraySchema.getExample())) {
-      result = arraySchema.getExample();
+      result = Pair.of(arraySchema.getExample(), new BodyMatchers());
     } else {
-      result = processArray(arraySchema, fieldName, bodyMatchers);
+      result = processArray(arraySchema, fieldName);
     }
-    return result;
+    return (Pair<Object, BodyMatchers>) result;
   }
 
-  private Object processObjectBodyMatcher(final Entry<String, Schema> property, final BodyMatchers bodyMatchers, final String fieldName, final Schema schema) {
-    final Object result;
+  private Pair<Object, BodyMatchers> processObjectBodyMatcher(final Entry<String, Schema> property, final String fieldName, final Schema schema) {
+    final Pair<Object, BodyMatchers> result;
     final String ref = Objects.nonNull(property) ? property.getValue().get$ref() : schema.get$ref();
     final Schema internalRef = Objects.nonNull(property) ? property.getValue() : schema;
     final String subRef = OpenApiContractConverterUtils.mapRefName(internalRef);
 
     if (Objects.nonNull(ref)) {
       final Map<String, Schema> subPropertiesWithRef = getSchemaFromComponent(subRef).getProperties();
-      result = processComplexBodyAndMatchers(fieldName, subPropertiesWithRef, bodyMatchers);
+      result = processComplexBodyAndMatchers(fieldName, subPropertiesWithRef);
     } else {
       final Map<String, Schema> subProperties = internalRef.getProperties();
-      result = processComplexBodyAndMatchers(fieldName, subProperties, bodyMatchers);
+      result = processComplexBodyAndMatchers(fieldName, subProperties);
     }
     return result;
   }
 
-  private Object processNumberBodyMatcher(final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName, final Schema schema) {
+  private Pair<Object, BodyMatchers> processNumberBodyMatcher(final Entry<String, Schema> property, final String fieldName, final Schema schema) {
 
     final Object result;
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     final String format = Objects.nonNull(property) ? property.getValue().getFormat() : schema.getFormat();
 
     if (BasicTypeConstants.FLOAT.equalsIgnoreCase(format)) {
@@ -483,11 +556,12 @@ public final class OpenApiContractConverter {
     } else {
       result = null;
     }
-    return result;
+    return Pair.of(result, bodyMatchers);
   }
 
-  private Object processIntegerBodyMatcher(final BodyMatchers bodyMatchers, final Entry<String, Schema> property, final String fieldName, final Schema schema) {
+  private Pair<Object, BodyMatchers> processIntegerBodyMatcher(final Entry<String, Schema> property, final String fieldName, final Schema schema) {
     final Object result;
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     final String format = Objects.nonNull(property) ? property.getValue().getFormat() : schema.getFormat();
 
     if (BasicTypeConstants.INT_32.equalsIgnoreCase(format) || !Objects.nonNull(format)) {
@@ -499,11 +573,12 @@ public final class OpenApiContractConverter {
     } else {
       result = null;
     }
-    return result;
+    return Pair.of(result, bodyMatchers);
   }
 
-  private Object processEnum(final BodyMatchers bodyMatchers, final String enumName, final Schema property) {
+  private Pair<Object, BodyMatchers> processEnum(final String enumName, final Schema property) {
     String regex = "";
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     final Iterator<?> enumObjects = property.getEnum().iterator();
     while (enumObjects.hasNext()) {
       final Object nextObject = enumObjects.next();
@@ -514,30 +589,37 @@ public final class OpenApiContractConverter {
       }
     }
     bodyMatchers.jsonPath(enumName, bodyMatchers.byRegex(regex));
-    return property.getEnum().get(BasicTypeConstants.RANDOM.nextInt(property.getEnum().size()));
+    return Pair.of(property.getEnum().get(BasicTypeConstants.RANDOM.nextInt(property.getEnum().size())), bodyMatchers);
   }
 
-  private Map<String, Object> processComplexBodyAndMatchers(final String objectName, final Map<String, Schema> properties, final BodyMatchers bodyMatchers) {
+  private Pair<Object, BodyMatchers> processComplexBodyAndMatchers(final String objectName, final Map<String, Schema> properties) {
 
     final HashMap<String, Object> propertyMap = new HashMap<>();
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     for (Entry<String, Schema> property : properties.entrySet()) {
       final String newObjectName = objectName + "." + property.getKey();
       if (isReferenced(property.getValue())) {
         final String ref = OpenApiContractConverterUtils.mapRefName(property.getValue());
         if (existSchemaWithPropertiesInComponent(ref)) {
           final Map<String, Schema> subProperties = getSchemaFromComponent(ref).getProperties();
-          propertyMap.put(property.getKey(), processComplexBodyAndMatchers(newObjectName, subProperties, bodyMatchers));
+          var processedBody = processComplexBodyAndMatchers(newObjectName, subProperties);
+          propertyMap.put(property.getKey(), processedBody.getLeft());
+          bodyMatchers.matchers().addAll(processedBody.getRight().matchers());
         } else {
           final var subProperties = ((ArraySchema) getSchemaFromComponent(ref)).getItems();
-          propertyMap.put(property.getKey(), processArray(subProperties, objectName, bodyMatchers));
+          Pair<List<Object>, BodyMatchers> processedArray = processArray(subProperties, objectName);
+          propertyMap.put(property.getKey(), processedArray.getLeft());
+          bodyMatchers.matchers().addAll(processedArray.getRight().matchers());
         }
       } else {
         final String type;
         type = getPropertyType(property);
-        propertyMap.put(property.getKey(), writeBodyMatcher(bodyMatchers, property, newObjectName, null, type));
+        var prop =  writeBodyMatcher(property, newObjectName, null, type);
+        propertyMap.put(property.getKey(), prop.getLeft());
+        bodyMatchers.matchers().addAll(prop.getRight().matchers());
       }
     }
-    return propertyMap;
+    return Pair.of(propertyMap, bodyMatchers);
   }
 
   private static boolean isReferenced(final Schema schema) {
@@ -554,49 +636,64 @@ public final class OpenApiContractConverter {
     return referencedSchema;
   }
 
-  private List<Object> processArray(final Schema<?> arraySchema, final String objectName, final BodyMatchers bodyMatchers) {
+  private Pair<List<Object>, BodyMatchers> processArray(final Schema<?> arraySchema, final String objectName) {
     final List<Object> propertyList = new LinkedList<>();
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     if (Objects.nonNull(arraySchema.get$ref())) {
       final String ref = OpenApiContractConverterUtils.mapRefName(arraySchema);
       final Map<String, Schema> subObject = getSchemaFromComponent(ref).getProperties();
-      propertyList.add(processComplexBodyAndMatchers(objectName, subObject, bodyMatchers));
+      var generatedObject = processComplexBodyAndMatchers(objectName, subObject);
+      propertyList.add(generatedObject.getLeft());
+      bodyMatchers.matchers().addAll(generatedObject.getRight().matchers());
     } else {
       final String type = arraySchema.getType();
+      final Pair tempValue;
       switch (type) {
         case BasicTypeConstants.STRING:
-          propertyList.add(processStringArray(arraySchema, objectName, bodyMatchers));
+          tempValue = processStringArray(arraySchema, objectName);
           break;
         case BasicTypeConstants.INTEGER:
-          propertyList.add(processIntegerArray(arraySchema, objectName, bodyMatchers));
+          tempValue = processIntegerArray(arraySchema, objectName);
           break;
         case BasicTypeConstants.NUMBER:
-          propertyList.add(processNumberArray(arraySchema, objectName, bodyMatchers));
+          tempValue = processNumberArray(arraySchema, objectName);
           break;
         case BasicTypeConstants.BOOLEAN:
-          propertyList.add(processBooleanArray(arraySchema, objectName, bodyMatchers));
+          tempValue = processBooleanArray(arraySchema, objectName);
           break;
         case BasicTypeConstants.ARRAY:
-          propertyList.add(processArrayArray((ArraySchema) arraySchema, objectName, bodyMatchers));
+          tempValue = processArrayArray((ArraySchema) arraySchema, objectName);
           break;
         case BasicTypeConstants.OBJECT:
-          propertyList.add(processObjectArray(arraySchema, objectName, bodyMatchers));
+          tempValue = processObjectArray(arraySchema, objectName);
           break;
         default:
+          tempValue = null;
           log.error("Format not supported");
           break;
       }
+      if (Objects.nonNull(tempValue)) {
+        propertyList.add(tempValue.getLeft());
+        if (tempValue.getRight() instanceof BodyMatchers) {
+          bodyMatchers.matchers().addAll(((BodyMatchers) tempValue.getRight()).matchers());
+        } else {
+          bodyMatchers.matchers().add((BodyMatcher) tempValue.getRight());
+
+        }
+      }
     }
-    return propertyList;
+    return Pair.of(propertyList, bodyMatchers);
   }
 
-  private Object processObjectArray(final Schema<?> arraySchema, final String objectName, final BodyMatchers bodyMatchers) {
+  private Pair<Object, BodyMatchers> processObjectArray(final Schema<?> arraySchema, final String objectName) {
     final HashMap<String, Schema> subObject = (HashMap<String, Schema>) arraySchema.getProperties();
-    return processComplexBodyAndMatchers(objectName, subObject, bodyMatchers);
+    return processComplexBodyAndMatchers(objectName, subObject);
   }
 
-  private List<Object> processArrayArray(final ArraySchema arraySchema, final String objectName, final BodyMatchers bodyMatchers) {
+  private Pair<List<Object>, BodyMatchers> processArrayArray(final ArraySchema arraySchema, final String objectName) {
     final List<Object> result = new ArrayList<>();
     final Schema<?> subArray = arraySchema.getItems();
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     if (Objects.nonNull(subArray.getExample())) {
       if (subArray.getExample() instanceof List) {
         result.addAll((List<Object>) subArray.getExample());
@@ -604,22 +701,26 @@ public final class OpenApiContractConverter {
         result.add(subArray.getExample());
       }
     } else {
-      result.addAll(processArray(subArray, objectName + "[0]", bodyMatchers));
+      var temp = processArray(subArray, objectName  + "[0]");
+      result.addAll(temp.getLeft());
+      bodyMatchers.matchers().addAll(temp.getRight().matchers());
     }
-    return result;
+    return Pair.of(result, bodyMatchers);
   }
 
-  private Object processBooleanArray(final Schema<?> arraySchema, final String objectName, final BodyMatchers bodyMatchers) {
+  private Pair<Object, BodyMatcher> processBooleanArray(final Schema<?> arraySchema, final String objectName) {
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     if (Objects.nonNull(arraySchema.getName())) {
       bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
     } else {
       bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX));
     }
-    return BasicTypeConstants.RANDOM.nextBoolean();
+    return Pair.of(BasicTypeConstants.RANDOM.nextBoolean(), bodyMatchers.matchers().get(0));
   }
 
-  private Object processNumberArray(final Schema<?> arraySchema, final String objectName, final BodyMatchers bodyMatchers) {
+  private Pair<Object, BodyMatcher> processNumberArray(final Schema<?> arraySchema, final String objectName) {
     final Object result;
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     if (BasicTypeConstants.FLOAT.equalsIgnoreCase(arraySchema.getFormat())) {
       if (Objects.nonNull(arraySchema.getName())) {
         bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
@@ -642,11 +743,12 @@ public final class OpenApiContractConverter {
       }
       result = BasicTypeConstants.RANDOM.nextInt();
     }
-    return result;
+    return Pair.of(result, bodyMatchers.matchers().get(0));
   }
 
-  private Object processIntegerArray(final Schema<?> arraySchema, final String objectName, final BodyMatchers bodyMatchers) {
+  private Pair<Object, BodyMatcher> processIntegerArray(final Schema<?> arraySchema, final String objectName) {
     final Object result;
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     if (BasicTypeConstants.INT_32.equalsIgnoreCase(arraySchema.getFormat()) || !Objects.nonNull(arraySchema.getFormat())) {
       if (Objects.nonNull(arraySchema.getName())) {
         bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
@@ -662,16 +764,17 @@ public final class OpenApiContractConverter {
       }
       result = Math.abs(BasicTypeConstants.RANDOM.nextFloat());
     }
-    return result;
+    return Pair.of(result, bodyMatchers.matchers().get(0));
   }
 
-  private Object processStringArray(final Schema<?> arraySchema, final String objectName, final BodyMatchers bodyMatchers) {
+  private Pair<Object, BodyMatcher> processStringArray(final Schema<?> arraySchema, final String objectName) {
+    final var bodyMatcher = new BodyMatchers();
     if (Objects.nonNull(arraySchema.getName())) {
-      bodyMatchers.jsonPath(arraySchema.getName() + "[0]", bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
+      bodyMatcher.jsonPath(arraySchema.getName() + "[0]", bodyMatcher.byRegex(BasicTypeConstants.STRING_REGEX));
     } else {
-      bodyMatchers.jsonPath(objectName + "[0]", bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
+      bodyMatcher.jsonPath(objectName + "[0]", bodyMatcher.byRegex(BasicTypeConstants.STRING_REGEX));
     }
-    return RandomStringUtils.random(5, true, true);
+    return Pair.of(RandomStringUtils.random(5, true, true), bodyMatcher.matchers().get(0));
   }
 
   private void processQueryParameters(final QueryParameters queryParameters, final List<Parameter> parameters, final PathItem pathItem) {
@@ -708,24 +811,35 @@ public final class OpenApiContractConverter {
     return openAPI;
   }
 
-  private List<Body> processComposedSchema(final BodyMatchers bodyMatchers, final ComposedSchema composedSchema) {
-    final List<Body> result = new ArrayList<>();
+  private List<Pair<Body, BodyMatchers>> processComposedSchema(final ComposedSchema composedSchema) {
+    final List<Pair<Body, BodyMatchers>> result = new LinkedList<>();
     if (Objects.nonNull(composedSchema.getAllOf())) {
-      final List<Body> tempBody = new ArrayList<>();
+      final List<Pair<Body, BodyMatchers>> tempBody = new LinkedList<>();
       for (Schema<?> schema : composedSchema.getAllOf()) {
-        tempBody.addAll(processBodyAndMatchers(schema, bodyMatchers));
+        tempBody.addAll(processBodyAndMatchers(schema));
       }
-      result.add(new Body(tempBody));
+      result.add(unify(tempBody));
     } else if (Objects.nonNull(composedSchema.getOneOf())) {
       for (var oneSchema : composedSchema.getOneOf()) {
-        result.addAll(processBodyAndMatchers(oneSchema, bodyMatchers));
+        result.addAll(processBodyAndMatchers(oneSchema));
       }
     } else if (Objects.nonNull(composedSchema.getAnyOf())) {
       for (var anySchema : combineSchema(composedSchema.getAnyOf())) {
-        result.addAll(processBodyAndMatchers(anySchema, bodyMatchers));
+        result.addAll(processBodyAndMatchers(anySchema));
       }
     }
     return result;
+  }
+
+  private Pair<Body, BodyMatchers> unify(final List<Pair<Body, BodyMatchers>> tempBody) {
+    Body body = new Body(Collections.emptyMap());
+    final BodyMatchers bodyMatchers = new BodyMatchers();
+    for (var data : tempBody) {
+      body = combineProperties(body, data.getLeft());
+      bodyMatchers.matchers().addAll(data.getRight().matchers());
+    }
+
+    return Pair.of(body, bodyMatchers);
   }
 
   private List<Schema<?>> combineSchema(final List<Schema> anyOfThis) {
