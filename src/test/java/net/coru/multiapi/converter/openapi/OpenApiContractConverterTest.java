@@ -7,6 +7,7 @@
 package net.coru.multiapi.converter.openapi;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,9 +15,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import net.coru.multiapi.converter.MultiApiContractConverter;
 import org.junit.jupiter.api.Assertions;
@@ -292,10 +293,6 @@ class OpenApiContractConverterTest {
                         OpenApiContractConverterTestFixtures.NEW_GAME_ID);
   }
 
-  private Consumer<Object> validateKeys(final String... keys) {
-    return map -> ((Map)map).keySet().containsAll(List.of(keys));
-  }
-
   @Test
   @DisplayName("OpenApi: Check that BasicSchemas are being processed okay")
   void testBasicSchema() {
@@ -372,6 +369,40 @@ class OpenApiContractConverterTest {
       .containsValues(1, OpenApiContractConverterTestFixtures.HANGMAN);
   }
 
+  @Test
+  @DisplayName("OpenApi: Check that Schema Examples are being processed okay")
+  void testSchemaMultiExamples() {
+    final File file = new File(OpenApiContractConverterTestFixtures.OPENAPI_TEST_SCHEMA_MULTI_EXAMPLES_YML);
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    List<Contract> contractList = new ArrayList<>(contracts);
+    assertThat(contractList).hasSize(5);
+    Contract contract = contractList.get(0);
+    QueryParameters queryParameters = contract.getRequest().getUrlPath().getQueryParameters();
+    QueryParameter parameter = queryParameters.getParameters().get(0);
+    assertThat(parameter.getName()).isEqualTo(OpenApiContractConverterTestFixtures.GAME_ID);
+    MatchingStrategy matchingStrategy = (MatchingStrategy) parameter.getServerValue();
+    assertThat(matchingStrategy.getType().toString()).hasToString("EQUAL_TO");
+    assertThat(matchingStrategy.getServerValue()).isEqualTo(1);
+    assertThat(matchingStrategy.getClientValue()).isEqualTo(1);
+     Map serverValueMap = (Map) contract.getResponse().getBody().getServerValue();
+    assertThat(serverValueMap)
+      .containsOnlyKeys(OpenApiContractConverterTestFixtures.ROOMS, OpenApiContractConverterTestFixtures.GAME_NAME)
+      .containsValues(1, OpenApiContractConverterTestFixtures.HANGMAN);
+
+    contract = contractList.get(2);
+    queryParameters = contract.getRequest().getUrlPath().getQueryParameters();
+    parameter = queryParameters.getParameters().get(0);
+    assertThat(parameter.getName()).isEqualTo(OpenApiContractConverterTestFixtures.GAME_ID);
+    matchingStrategy = (MatchingStrategy) parameter.getServerValue();
+    assertThat(matchingStrategy.getType().toString()).hasToString("EQUAL_TO");
+    assertThat(matchingStrategy.getServerValue()).isEqualTo(1);
+    assertThat(matchingStrategy.getClientValue()).isEqualTo(1);
+    ObjectNode example = (ObjectNode) contract.getResponse().getBody().getServerValue();
+    assertThatObject(example)
+                 .extracting(ex -> ex.at("/" + OpenApiContractConverterTestFixtures.ROOMS).asText(),
+                             ex -> ex.at("/" + OpenApiContractConverterTestFixtures.GAME_NAME).asText())
+                 .containsExactly("2", OpenApiContractConverterTestFixtures.ROCKSCISSOR);
+  }
   @Test
   @DisplayName("OpenApi: Check that Refs inside arrays are being processed okay")
   void testRefsInsideArrays() {

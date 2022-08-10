@@ -58,9 +58,9 @@ import org.springframework.cloud.contract.spec.internal.UrlPath;
 @Slf4j
 public final class OpenApiContractConverter {
 
+  private static final Map<String, Example> EXAMPLES_MAP = new LinkedHashMap<>();
   private final Map<String, Schema> componentsMap = new LinkedHashMap<>();
 
-  private final Map<String, Example> examplesMap = new LinkedHashMap<>();
 
   private static Pair<Body, BodyMatchers> getBodyFomMap(final String property, final Map<String, Object> bodyProperties, final BodyMatchers bodyMatchers) {
     final Body body;
@@ -152,7 +152,7 @@ public final class OpenApiContractConverter {
         componentsMap.putAll(openApi.getComponents().getSchemas());
       }
       if (Objects.nonNull(openApi.getComponents().getExamples())) {
-        examplesMap.putAll(openApi.getComponents().getExamples());
+        EXAMPLES_MAP.putAll(openApi.getComponents().getExamples());
       }
     }
   }
@@ -190,26 +190,7 @@ public final class OpenApiContractConverter {
     if (Objects.nonNull(apiResponse)) {
       if (Objects.nonNull(apiResponse.getContent())) {
         for (Entry<String, MediaType> content : apiResponse.getContent().entrySet()) {
-          final MediaType mediaType = content.getValue();
-          final Headers headers = new Headers();
-          headers.contentType(content.getKey());
-          headers.accept();
-          final var bodyList = processResponseBody(mediaType.getSchema());
-          if (Objects.nonNull(mediaType.getExample())) {
-            bodyList.add(buildFromExample(mediaType.getExample()));
-          } else if (Objects.nonNull(mediaType.getExamples())) {
-            mediaType.getExamples().forEach((key, example) -> bodyList.add(buildFromExample(example)));
-          }
-          for (var body : bodyList) {
-            final var response = new Response();
-            final var responseBodyMatcher = new ResponseBodyMatchers();
-            responseBodyMatcher.matchers().addAll(body.getRight().matchers());
-            response.status(solveStatus(name));
-            response.setHeaders(headers);
-            response.setBody(body.getLeft());
-            response.setBodyMatchers(responseBodyMatcher);
-            responseList.add(response);
-          }
+          responseList.addAll(processContent(name, content));
         }
       } else {
         final var response = new Response();
@@ -221,8 +202,45 @@ public final class OpenApiContractConverter {
     return responseList;
   }
 
-  private static Pair<Body, BodyMatchers> buildFromExample(final Object mediaType) {
-    return Pair.of(new Body(mediaType), new BodyMatchers());
+  private List<Response> processContent(final String name, final Entry<String, MediaType> content) {
+    final List<Response> responseList = new LinkedList<>();
+    final MediaType mediaType = content.getValue();
+    final Headers headers = new Headers();
+    headers.contentType(content.getKey());
+    headers.accept();
+    final var bodyList = processResponseBody(mediaType.getSchema());
+    if (Objects.nonNull(mediaType.getExample())) {
+      bodyList.add(buildFromExample(mediaType.getExample()));
+    } else if (Objects.nonNull(mediaType.getExamples())) {
+      mediaType.getExamples().forEach((key, example) -> bodyList.add(buildFromExample(example)));
+    }
+    for (var body : bodyList) {
+      final var response = new Response();
+      final var responseBodyMatcher = new ResponseBodyMatchers();
+      responseBodyMatcher.matchers().addAll(body.getRight().matchers());
+      response.status(solveStatus(name));
+      response.setHeaders(headers);
+      response.setBody(body.getLeft());
+      response.setBodyMatchers(responseBodyMatcher);
+      responseList.add(response);
+    }
+    return responseList;
+  }
+
+  private static Pair<Body, BodyMatchers> buildFromExample(final Object example) {
+    Body body;
+    if (example instanceof Example) {
+      var castedExample = (Example) example;
+      if (Objects.nonNull(castedExample.get$ref())) {
+        var referedExample = getExampleFromComponent(OpenApiContractConverterUtils.mapRefName(castedExample));
+        body = new Body(referedExample.getValue());
+      } else {
+        body = new Body(((Example) example).getValue());
+      }
+    } else {
+      body = new Body(example);
+    }
+    return Pair.of(body, new BodyMatchers());
   }
 
   private Integer solveStatus(String name) {
@@ -324,31 +342,35 @@ public final class OpenApiContractConverter {
     if (existSchemaWithPropertiesInComponent(ref)) {
       final Map<String, Schema> properties = getSchemaFromComponent(ref).getProperties();
       for (Entry<String, Schema> property : properties.entrySet()) {
-        if (property.getValue() instanceof ComposedSchema) {
-          bodyList = applyBodyToList(bodyList, property.getKey(), processComposedSchema((ComposedSchema) property.getValue()));
-        } else if (Objects.nonNull(property.getValue().get$ref())) {
-          final String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
-          final Schema<?> subSchema = getSchemaFromComponent(subRef);
-          if (Objects.nonNull(subSchema.getProperties())) {
-            bodyList = applyMapToBodyList(bodyList, property.getKey(), processComplexBodyAndMatchers(property.getKey(), subSchema.getProperties()));
-          } else if (((ArraySchema) subSchema).getItems() instanceof ComposedSchema) {
-            final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
-            bodyList = applyBodyToList(bodyList, property.getKey(), processComposedSchema((ComposedSchema) arraySchema));
-          } else {
-            final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
-            bodyList = this.applyObjectToBodyList(bodyList, ref, writeBodyMatcher(null, ref, arraySchema, arraySchema.getType()));
-          }
-        } else {
-          if (Objects.nonNull(property.getValue().getEnum())) {
-            bodyList = this.applyObjectToBodyList(bodyList, property.getKey(), writeBodyMatcher(null, property.getKey(), property.getValue(), BasicTypeConstants.ENUM));
-          } else {
-            bodyList = this.applyObjectToBodyList(bodyList, property.getKey(), writeBodyMatcher(null, property.getKey(), property.getValue(), property.getValue().getType()));
-          }
-        }
+        bodyList = createBodyForProperty(ref, bodyList, property);
       }
     } else {
       final Schema arraySchema = getSchemaFromComponent(ref);
       bodyList = this.applyObjectToBodyList(bodyList, null, writeBodyMatcher(null, "[0]", arraySchema, arraySchema.getType()));
+    }
+    return bodyList;
+  }
+
+  private List<Pair<Body, BodyMatchers>> createBodyForProperty(final String ref, final List<Pair<Body, BodyMatchers>> propertyBodyList, final Entry<String, Schema> property) {
+    List<Pair<Body, BodyMatchers>> bodyList;
+    if (property.getValue() instanceof ComposedSchema) {
+      bodyList = applyBodyToList(propertyBodyList, property.getKey(), processComposedSchema((ComposedSchema) property.getValue()));
+    } else if (Objects.nonNull(property.getValue().get$ref())) {
+      final String subRef = OpenApiContractConverterUtils.mapRefName(property.getValue());
+      final Schema<?> subSchema = getSchemaFromComponent(subRef);
+      if (Objects.nonNull(subSchema.getProperties())) {
+        bodyList = applyMapToBodyList(propertyBodyList, property.getKey(), processComplexBodyAndMatchers(property.getKey(), subSchema.getProperties()));
+      } else if (((ArraySchema) subSchema).getItems() instanceof ComposedSchema) {
+        final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
+        bodyList = applyBodyToList(propertyBodyList, property.getKey(), processComposedSchema((ComposedSchema) arraySchema));
+      } else {
+        final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
+        bodyList = this.applyObjectToBodyList(propertyBodyList, ref, writeBodyMatcher(null, ref, arraySchema, arraySchema.getType()));
+      }
+    } else if (Objects.nonNull(property.getValue().getEnum())) {
+      bodyList = this.applyObjectToBodyList(propertyBodyList, property.getKey(), writeBodyMatcher(null, property.getKey(), property.getValue(), BasicTypeConstants.ENUM));
+    } else {
+      bodyList = this.applyObjectToBodyList(propertyBodyList, property.getKey(), writeBodyMatcher(null, property.getKey(), property.getValue(), property.getValue().getType()));
     }
     return bodyList;
   }
@@ -921,7 +943,7 @@ public final class OpenApiContractConverter {
     return componentsMap.get(ref);
   }
 
-  private Example getExampleFromComponent(final String ref) {
-    return examplesMap.get(ref);
+  private static Example getExampleFromComponent(final String ref) {
+    return EXAMPLES_MAP.get(ref);
   }
 }

@@ -12,11 +12,11 @@ public final class OpenApiContractConverterTestFixtures {
 
   static final String PRICE = "price";
 
-  static final String SIMILAR_GAMES = "SimilarGames";
-
   static final String OPENAPI_TEST_REF_INSIDE_ARRAYS_YML = "src/test/resources/openapi/testRefInsideArrays.yml";
 
    static final String HANGMAN = "hangman";
+
+   static final String ROCKSCISSOR = "rockscissor";
 
    static final String ROOMS = "rooms";
 
@@ -79,6 +79,8 @@ public final class OpenApiContractConverterTestFixtures {
    static final String OPENAPI_TEST_EXAMPLES_YML = "src/test/resources/openapi/testExamples.yml";
 
    static final String OPENAPI_TEST_SCHEMA_EXAMPLES_YML = "src/test/resources/openapi/testExamplesGlobal.yml";
+
+   static final String OPENAPI_TEST_SCHEMA_MULTI_EXAMPLES_YML = "src/test/resources/openapi/testMultiExamplesGlobal.yml";
 
    static final String NAME = "name";
 

@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -35,6 +36,16 @@ public final class OpenApiContractConverterUtils {
     }
     if (Objects.nonNull(schema.get$ref())) {
       final String[] wholeRef = schema.get$ref().split("/");
+      refName = wholeRef[wholeRef.length - 1];
+
+    }
+    return refName;
+  }
+
+  public static String mapRefName(final Example example) {
+    String refName = "";
+    if (Objects.nonNull(example.get$ref())) {
+      final String[] wholeRef = example.get$ref().split("/");
       refName = wholeRef[wholeRef.length - 1];
 
     }
