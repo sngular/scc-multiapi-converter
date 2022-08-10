@@ -664,7 +664,7 @@ public final class OpenApiContractConverter {
     if (Objects.nonNull(arraySchema.get$ref())) {
       final String ref = OpenApiContractConverterUtils.mapRefName(arraySchema);
       final Map<String, Schema> subObject = getSchemaFromComponent(ref).getProperties();
-      var generatedObject = processComplexBodyAndMatchers(objectName, subObject);
+      var generatedObject = processComplexBodyAndMatchers("[0]", subObject);
       propertyList.add(generatedObject.getLeft());
       bodyMatchers.matchers().addAll(generatedObject.getRight().matchers());
     } else {
