@@ -282,7 +282,6 @@ class OpenApiContractConverterTest {
     Contract contract = contractList.get(0);
     assertThat(contract).isNotNull();
     assertThat(contract.getResponse()).isNotNull();
-    List<String> assertKeys = new ArrayList<>();
     Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
     assertThat(bodyServerValueMap)
       .hasSize(5)
