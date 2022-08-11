@@ -40,6 +40,8 @@ public final class BasicTypeConstants {
 
   public static final String ARRAY = "array";
 
+  public static final String MAP = "map";
+
   public static final String ENUM = "enum";
 
   public static final String CHANNELS = "channels";
@@ -51,10 +53,6 @@ public final class BasicTypeConstants {
   public static final String REF = "$ref";
 
   public static final String PROPERTIES = "properties";
-
-  public static final String SCHEMA = "schema";
-
-  public static final String SCHEMAS = "schemas";
 
   public static final String FORMAT = "format";
 
@@ -80,8 +78,7 @@ public final class BasicTypeConstants {
 
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
-  public static final Set<String> BASIC_OBJECT_TYPE = Set.of(NUMBER, STRING, BOOLEAN, INTEGER
-  );
+  public static final Set<String> BASIC_OBJECT_TYPE = Set.of(NUMBER, STRING, BOOLEAN, INTEGER);
 
   private BasicTypeConstants() {
 

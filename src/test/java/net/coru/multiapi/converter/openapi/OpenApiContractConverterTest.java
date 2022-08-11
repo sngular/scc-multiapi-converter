@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import net.coru.multiapi.converter.MultiApiContractConverter;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import org.springframework.cloud.contract.spec.internal.MatchingStrategy;
 import org.springframework.cloud.contract.spec.internal.MatchingType;
 import org.springframework.cloud.contract.spec.internal.QueryParameter;
 import org.springframework.cloud.contract.spec.internal.QueryParameters;
+import org.springframework.cloud.contract.spec.internal.Request;
 import org.springframework.cloud.contract.spec.internal.Response;
 import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 
@@ -436,6 +438,26 @@ class OpenApiContractConverterTest {
         .hasSize(5)
         .containsKeys(OpenApiContractConverterTestFixtures.OPENAPI_TEXT_EXTERNAL_REF_KEYS);
     assertThat(contract).isNotNull();
+  }
+
+  @Test
+  @DisplayName("OpenApi: Check that Refs inside arrays are being processed okay")
+  void testMapsSupport() {
+    final File file = new File(OpenApiContractConverterTestFixtures.OPENAPI_TEST_SCHEMA_MAPS_YML);
+    Collection<Contract> contracts = multiApiContractConverter.convertFrom(file);
+    List<Contract> contractList = new ArrayList<>(contracts);
+    assertThat(contractList).hasSize(2);
+    Contract contract = contractList.get(0);
+    Request request = contract.getRequest();
+    final Map<String, Object> bodyServerValueMap = (Map<String, Object>) request.getBody().getServerValue();
+    assertThat(bodyServerValueMap)
+        .isNotNull()
+        .hasSize(2)
+        .containsKeys("options", "movement")
+      .extractingByKey("options")
+      .isInstanceOf(Map.class)
+      .asInstanceOf(InstanceOfAssertFactories.MAP)
+      .hasSize(1);
   }
 
 }

@@ -72,7 +72,7 @@ public final class OpenApiContractConverter {
     return Pair.of(body, bodyMatchers);
   }
 
-  private static Pair<Body, BodyMatchers> getBody(final String property, final Pair<Object, BodyMatchers> bodyValue) {
+  private static Pair<Body, BodyMatchers> getBodyMatcher(final String property, final Pair<Object, BodyMatchers> bodyValue) {
     final Body body;
     if (Objects.nonNull(property)) {
       body = new Body(Map.of(property, bodyValue.getLeft()));
@@ -82,7 +82,7 @@ public final class OpenApiContractConverter {
     return Pair.of(body, bodyValue.getRight());
   }
 
-  private static Pair<Body, BodyMatchers> getBody(final String property, final List<Pair<Body, BodyMatchers>> bodyValue) {
+  private static Pair<Body, BodyMatchers> getBodyMatcher(final String property, final List<Pair<Body, BodyMatchers>> bodyValue) {
     final Body body;
     final List<Body> bodies = new LinkedList<>();
     final BodyMatchers bodyMatchers = new BodyMatchers();
@@ -381,7 +381,7 @@ public final class OpenApiContractConverter {
       final List<Pair<Body, BodyMatchers>> valueBodyList) {
     final var bodyList = new LinkedList<Pair<Body, BodyMatchers>>();
     if (originalBodyList.isEmpty()) {
-      bodyList.add(getBody(property, valueBodyList));
+      bodyList.add(getBodyMatcher(property, valueBodyList));
     } else {
       for (var orgBody : originalBodyList) {
         for (var bodyValue : valueBodyList) {
@@ -396,7 +396,7 @@ public final class OpenApiContractConverter {
       final Pair<Object, BodyMatchers> bodyValue) {
     final var bodyList = new LinkedList<Pair<Body, BodyMatchers>>();
     if (originalBodyList.isEmpty()) {
-      bodyList.add(getBody(property, bodyValue));
+      bodyList.add(getBodyMatcher(property, bodyValue));
     } else {
       for (var orgBody : originalBodyList) {
         bodyList.add(combineProperties(orgBody, property, Pair.of(new Body(bodyValue.getLeft()), bodyValue.getRight())));
@@ -526,7 +526,10 @@ public final class OpenApiContractConverter {
           result = processArrayBodyMatcher(property, fieldName, arraySchema);
           break;
         case BasicTypeConstants.ENUM:
-          result = processEnum(mapKey, Objects.nonNull(property) ? property.getValue() : schema);
+          result = processEnumBodyMatcher(mapKey, Objects.nonNull(property) ? property.getValue() : schema);
+          break;
+        case BasicTypeConstants.MAP:
+          result = processMapBodyMatcher(schema);
           break;
         default:
           bodyMatchers.jsonPath(mapKey, bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX));
@@ -557,9 +560,12 @@ public final class OpenApiContractConverter {
     if (Objects.nonNull(ref)) {
       final Map<String, Schema> subPropertiesWithRef = getSchemaFromComponent(subRef).getProperties();
       result = processComplexBodyAndMatchers(fieldName, subPropertiesWithRef);
-    } else {
+    } else if (Objects.nonNull(internalRef.getProperties())) {
       final Map<String, Schema> subProperties = internalRef.getProperties();
       result = processComplexBodyAndMatchers(fieldName, subProperties);
+    } else {
+      final Schema subProperties = (Schema) internalRef.getAdditionalProperties();
+      result = writeBodyMatcher(null, fieldName, subProperties, BasicTypeConstants.MAP);
     }
     return result;
   }
@@ -602,7 +608,7 @@ public final class OpenApiContractConverter {
     return Pair.of(result, bodyMatchers);
   }
 
-  private Pair<Object, BodyMatchers> processEnum(final String enumName, final Schema property) {
+  private Pair<Object, BodyMatchers> processEnumBodyMatcher(final String enumName, final Schema property) {
     String regex = "";
     final BodyMatchers bodyMatchers = new BodyMatchers();
     final Iterator<?> enumObjects = property.getEnum().iterator();
@@ -616,6 +622,12 @@ public final class OpenApiContractConverter {
     }
     bodyMatchers.jsonPath(enumName, bodyMatchers.byRegex(regex));
     return Pair.of(property.getEnum().get(BasicTypeConstants.RANDOM.nextInt(property.getEnum().size())), bodyMatchers);
+  }
+
+  private Pair<Object, BodyMatchers> processMapBodyMatcher(final Schema schema) {
+    final var value = writeBodyMatcher(null, "[0][0]", schema, schema.getType());
+    final var bodyMatcher = getBodyMatcher(RandomStringUtils.random(5, true, true), value);
+    return Pair.of(bodyMatcher.getLeft(), bodyMatcher.getRight());
   }
 
   private Pair<Object, BodyMatchers> processComplexBodyAndMatchers(final String objectName, final Map<String, Schema> properties) {
