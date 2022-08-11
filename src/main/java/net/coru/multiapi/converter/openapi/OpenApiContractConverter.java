@@ -62,7 +62,7 @@ public final class OpenApiContractConverter {
   private final Map<String, Schema> componentsMap = new LinkedHashMap<>();
 
 
-  private static Pair<Body, BodyMatchers> getBodyFomMap(final String property, final Map<String, Object> bodyProperties, final BodyMatchers bodyMatchers) {
+  private static Pair<Body, BodyMatchers> getBodyFromMap(final String property, final Map<String, Object> bodyProperties, final BodyMatchers bodyMatchers) {
     final Body body;
     if (Objects.nonNull(property)) {
       body = new Body(Map.of(property, bodyProperties));
@@ -410,7 +410,7 @@ public final class OpenApiContractConverter {
     final var bodyList = new LinkedList<Pair<Body, BodyMatchers>>();
     if (originalBodyList.isEmpty()) {
       if (valueBodyMap.getLeft() instanceof Map) {
-        bodyList.add(getBodyFomMap(property, (Map<String, Object>) valueBodyMap.getLeft(), valueBodyMap.getRight()));
+        bodyList.add(getBodyFromMap(property, (Map<String, Object>) valueBodyMap.getLeft(), valueBodyMap.getRight()));
       }
     } else {
       for (var orgBody : originalBodyList) {
