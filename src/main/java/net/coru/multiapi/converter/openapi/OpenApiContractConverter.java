@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import io.swagger.parser.OpenAPIParser;
@@ -166,15 +167,20 @@ public final class OpenApiContractConverter {
       final var responseList = processResponse(apiResponse.getKey(), apiResponse.getValue());
       for (var request : requestList) {
         for (var response : responseList) {
-          contracts.add(createContract(contractName, contractDescription, request, response));
+          createContract(contractName, contractDescription, request, response).accept(contracts::add);
         }
       }
     }
   }
 
-  private Contract createContract(final String contractName, final String contractDescription, final Request request, final Response response) {
+  private Consumer<Consumer<Contract>> createContract(final String contractName, final String contractDescription, final Request request, final Response response) {
+    final var counter = new AtomicInteger(0);
+    return consumer -> consumer.accept(createContract(contractName, contractDescription, request, response, counter));
+  }
+
+  private static Contract createContract(final String contractName, final String contractDescription, final Request request, final Response response, final AtomicInteger counter) {
     final Contract contract = new Contract();
-    contract.setName(contractName);
+    contract.setName(contractName + "_" + counter.getAndIncrement());
     contract.setDescription(contractDescription);
     if (Objects.nonNull(response)) {
       contract.setResponse(response);
