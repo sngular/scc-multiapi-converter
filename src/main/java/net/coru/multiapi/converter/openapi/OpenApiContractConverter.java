@@ -166,16 +166,12 @@ public final class OpenApiContractConverter {
       final var requestList = processRequest(pathItem, operation, name.name());
       final var responseList = processResponse(apiResponse.getKey(), apiResponse.getValue());
       for (var request : requestList) {
+        final var counter = new AtomicInteger(0);
         for (var response : responseList) {
-          createContract(contractName, contractDescription, request, response).accept(contracts::add);
+          contracts.add(createContract(contractName, contractDescription, request, response, counter));
         }
       }
     }
-  }
-
-  private Consumer<Consumer<Contract>> createContract(final String contractName, final String contractDescription, final Request request, final Response response) {
-    final var counter = new AtomicInteger(0);
-    return consumer -> consumer.accept(createContract(contractName, contractDescription, request, response, counter));
   }
 
   private static Contract createContract(final String contractName, final String contractDescription, final Request request, final Response response, final AtomicInteger counter) {
