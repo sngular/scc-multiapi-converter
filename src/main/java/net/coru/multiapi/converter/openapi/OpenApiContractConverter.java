@@ -83,6 +83,21 @@ public final class OpenApiContractConverter {
     return Pair.of(body, bodyValue.getRight());
   }
 
+  private static Pair<Body, BodyMatchers> getMapBodyMatcher(final String property, final Pair<Object, BodyMatchers> bodyValue) {
+    final Body body;
+    if (Objects.nonNull(property)) {
+      body = new Body(Map.of(property, bodyValue.getLeft()));
+    } else {
+      body = new Body(bodyValue.getLeft());
+    }
+    var bodyMatchers = bodyValue.getRight();
+    final var updateMatchers = new BodyMatchers();
+    for (var matcher : bodyMatchers.matchers()) {
+      updateMatchers.jsonPath(property + "." + matcher.path(), updateMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
+    }
+    return Pair.of(body, bodyValue.getRight());
+  }
+
   private static Pair<Body, BodyMatchers> getBodyMatcher(final String property, final List<Pair<Body, BodyMatchers>> bodyValue) {
     final Body body;
     final List<Body> bodies = new LinkedList<>();
@@ -629,7 +644,7 @@ public final class OpenApiContractConverter {
   private Pair<Object, BodyMatchers> processMapBodyMatcher(final Schema schema, final String fieldName) {
     final var mapKey = RandomStringUtils.random(5, true, true);
     final var value = writeBodyMatcher(null, mapKey, schema, schema.getType());
-    var bodyMatcher = getBodyMatcher(fieldName + "." + mapKey, value);
+    var bodyMatcher = getBodyMatcher(mapKey, value);
     bodyMatcher = getBodyMatcher(fieldName, List.of(bodyMatcher));
     return Pair.of(bodyMatcher.getLeft(), bodyMatcher.getRight());
   }
