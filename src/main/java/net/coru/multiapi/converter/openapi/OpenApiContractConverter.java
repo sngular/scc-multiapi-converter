@@ -531,7 +531,7 @@ public final class OpenApiContractConverter {
           result = processEnumBodyMatcher(mapKey, Objects.nonNull(property) ? property.getValue() : schema);
           break;
         case BasicTypeConstants.MAP:
-          result = processMapBodyMatcher(schema);
+          result = processMapBodyMatcher(schema, fieldName);
           break;
         default:
           bodyMatchers.jsonPath(mapKey, bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX));
@@ -626,8 +626,8 @@ public final class OpenApiContractConverter {
     return Pair.of(property.getEnum().get(BasicTypeConstants.RANDOM.nextInt(property.getEnum().size())), bodyMatchers);
   }
 
-  private Pair<Object, BodyMatchers> processMapBodyMatcher(final Schema schema) {
-    final var value = writeBodyMatcher(null, "[0][0]", schema, schema.getType());
+  private Pair<Object, BodyMatchers> processMapBodyMatcher(final Schema schema, final String fieldName) {
+    final var value = writeBodyMatcher(null, fieldName + "[0][0]", schema, schema.getType());
     final var bodyMatcher = getBodyMatcher(RandomStringUtils.random(5, true, true), value);
     return Pair.of(bodyMatcher.getLeft(), bodyMatcher.getRight());
   }
