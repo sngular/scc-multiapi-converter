@@ -89,7 +89,7 @@ public final class OpenApiContractConverter {
     for (var matcher : bodyMatchers.matchers()) {
       updateMatchers.jsonPath(property + "." + matcher.path(), updateMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
     }
-    return Pair.of(new Body(Map.of(property, Map.of(mapKey, bodyValue.getKey()))), updateMatchers);
+    return Pair.of(new Body(Map.of(mapKey, bodyValue.getKey())), updateMatchers);
   }
 
   private static Pair<Body, BodyMatchers> getBodyMatcher(final String property, final List<Pair<Body, BodyMatchers>> bodyValue) {
