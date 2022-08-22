@@ -629,7 +629,8 @@ public final class OpenApiContractConverter {
   private Pair<Object, BodyMatchers> processMapBodyMatcher(final Schema schema, final String fieldName) {
     final var mapKey = RandomStringUtils.random(5, true, true);
     final var value = writeBodyMatcher(null, mapKey, schema, schema.getType());
-    final var bodyMatcher = getBodyMatcher(RandomStringUtils.random(5, true, true), value);
+    var bodyMatcher = getBodyMatcher(mapKey, value);
+    bodyMatcher = getBodyMatcher(fieldName, List.of(bodyMatcher));
     return Pair.of(bodyMatcher.getLeft(), bodyMatcher.getRight());
   }
 
