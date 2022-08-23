@@ -60,8 +60,8 @@ import org.springframework.cloud.contract.spec.internal.UrlPath;
 public final class OpenApiContractConverter {
 
   private static final Map<String, Example> EXAMPLES_MAP = new LinkedHashMap<>();
-  private final Map<String, Schema> componentsMap = new LinkedHashMap<>();
 
+  private final Map<String, Schema> componentsMap = new LinkedHashMap<>();
 
   private static Pair<Body, BodyMatchers> getBodyFromMap(final String property, final Map<String, Object> bodyProperties, final BodyMatchers bodyMatchers) {
     final Body body;
@@ -139,7 +139,7 @@ public final class OpenApiContractConverter {
     for (Entry<String, PathItem> pathItem : openApi.getPaths().entrySet()) {
       extractPathItem(pathItem.getValue())
           .forEach(converterPathItem ->
-                   processContract(contracts, pathItem, converterPathItem.getOperation(), converterPathItem.getOperationType()));
+                       processContract(contracts, pathItem, converterPathItem.getOperation(), converterPathItem.getOperationType()));
     }
     return contracts;
   }
@@ -388,7 +388,8 @@ public final class OpenApiContractConverter {
     return bodyList;
   }
 
-  private List<Pair<Body, BodyMatchers>> applyBodyToList(final List<Pair<Body, BodyMatchers>> originalBodyList, final String property,
+  private List<Pair<Body, BodyMatchers>> applyBodyToList(
+      final List<Pair<Body, BodyMatchers>> originalBodyList, final String property,
       final List<Pair<Body, BodyMatchers>> valueBodyList) {
     final var bodyList = new LinkedList<Pair<Body, BodyMatchers>>();
     if (originalBodyList.isEmpty()) {
@@ -403,7 +404,8 @@ public final class OpenApiContractConverter {
     return bodyList;
   }
 
-  private List<Pair<Body, BodyMatchers>> applyObjectToBodyList(final List<Pair<Body, BodyMatchers>> originalBodyList, final String property,
+  private List<Pair<Body, BodyMatchers>> applyObjectToBodyList(
+      final List<Pair<Body, BodyMatchers>> originalBodyList, final String property,
       final Pair<Object, BodyMatchers> bodyValue) {
     final var bodyList = new LinkedList<Pair<Body, BodyMatchers>>();
     if (originalBodyList.isEmpty()) {
@@ -416,7 +418,8 @@ public final class OpenApiContractConverter {
     return bodyList;
   }
 
-  private List<Pair<Body, BodyMatchers>> applyMapToBodyList(final List<Pair<Body, BodyMatchers>> originalBodyList, final String property,
+  private List<Pair<Body, BodyMatchers>> applyMapToBodyList(
+      final List<Pair<Body, BodyMatchers>> originalBodyList, final String property,
       final Pair<Object, BodyMatchers> valueBodyMap) {
     final var bodyList = new LinkedList<Pair<Body, BodyMatchers>>();
     if (originalBodyList.isEmpty()) {
@@ -436,9 +439,9 @@ public final class OpenApiContractConverter {
     final var orgMatchers = orgBodyMatcher.getRight();
     orgMatchers.matchers().addAll(bodyValue.getRight().matchers());
     return Pair.of(
-      new Body(new DslProperty(addProperty(orgBody.getClientValue(), property, bodyValue.getLeft().getClientValue()), addProperty(orgBody.getServerValue(), property,
-                                                                                                                                  bodyValue.getLeft().getServerValue()))),
-      orgMatchers);
+        new Body(new DslProperty(addProperty(orgBody.getClientValue(), property, bodyValue.getLeft().getClientValue()), addProperty(orgBody.getServerValue(), property,
+                                                                                                                                    bodyValue.getLeft().getServerValue()))),
+        orgMatchers);
   }
 
   private Body combineProperties(final Body orgBody, final Body newBody) {
@@ -951,9 +954,54 @@ public final class OpenApiContractConverter {
   private Map<String, Schema> cloneProperties(final Map<String, Schema> properties) {
     final var propertiesMap = new LinkedHashMap<String, Schema>();
     if (Objects.nonNull(properties)) {
-      properties.forEach((key, property) -> propertiesMap.put(key, cloneSchema(property)));
+      properties.forEach((key, property) -> {
+        if ("array".equalsIgnoreCase(property.getType())) {
+          propertiesMap.put(key, cloneArraySchema((ArraySchema) property));
+        } else {
+          propertiesMap.put(key, cloneSchema(property));
+
+        }
+      });
     }
     return propertiesMap;
+  }
+
+  private Schema cloneArraySchema(final ArraySchema origSchema) {
+    final var schema = new ArraySchema();
+    schema.setDefault(origSchema.getDefault());
+    schema.setDeprecated(origSchema.getDeprecated());
+    schema.setDescription(origSchema.getDescription());
+    schema.setDiscriminator(origSchema.getDiscriminator());
+    schema.setEnum(origSchema.getEnum());
+    schema.setExample(origSchema.getExample());
+    schema.setExclusiveMaximum(origSchema.getExclusiveMaximum());
+    schema.setExclusiveMinimum(origSchema.getExclusiveMinimum());
+    schema.setExtensions(origSchema.getExtensions());
+    schema.setExternalDocs(origSchema.getExternalDocs());
+    schema.setFormat(origSchema.getFormat());
+    schema.setMaximum(origSchema.getMaximum());
+    schema.setMaxItems(origSchema.getMaxItems());
+    schema.setMaxLength(origSchema.getMaxLength());
+    schema.setMaxProperties(origSchema.getMaxProperties());
+    schema.setMinimum(origSchema.getMinimum());
+    schema.setMinItems(origSchema.getMinItems());
+    schema.setMinLength(origSchema.getMinLength());
+    schema.setMinProperties(origSchema.getMinProperties());
+    schema.setMultipleOf(origSchema.getMultipleOf());
+    schema.setName(origSchema.getName());
+    schema.setNot(origSchema.getNot());
+    schema.setNullable(origSchema.getNullable());
+    schema.setPattern(origSchema.getPattern());
+    schema.setProperties(cloneProperties(origSchema.getProperties()));
+    schema.setReadOnly(origSchema.getReadOnly());
+    schema.setRequired(origSchema.getRequired());
+    schema.setTitle(origSchema.getTitle());
+    schema.setType(origSchema.getType());
+    schema.setItems(origSchema.getItems());
+    schema.setUniqueItems(origSchema.getUniqueItems());
+    schema.setWriteOnly(origSchema.getWriteOnly());
+    schema.xml(origSchema.getXml());
+    return schema;
   }
 
   private Schema solveReferenced(final Schema schema) {

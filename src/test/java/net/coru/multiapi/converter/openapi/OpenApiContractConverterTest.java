@@ -13,6 +13,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -458,6 +459,38 @@ class OpenApiContractConverterTest {
       .isInstanceOf(Map.class)
       .asInstanceOf(InstanceOfAssertFactories.MAP)
       .hasSize(1);
+  }
+
+  @Test
+  @DisplayName("OpenApi: Check that Refs inside arrays are being processed okay")
+  void testAnyOfWithArraysInside() {
+    final File file = new File(OpenApiContractConverterTestFixtures.OPENAPI_ANY_OF_WITH_ARRAYS);
+    Contract[] contractList = multiApiContractConverter.convertFrom(file).toArray(new Contract[3]);
+    assertThat(contractList).hasSize(3);
+    Contract contract = contractList[0];
+    assertThat(contract).isNotNull();
+    assertThat(contract.getResponse()).isNotNull();
+    Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
+    assertThat(bodyServerValueMap).containsOnlyKeys(OpenApiContractConverterTestFixtures.ID, OpenApiContractConverterTestFixtures.NAME);
+
+    contract = contractList[1];
+    assertThat(contract).isNotNull();
+    assertThat(contract.getResponse()).isNotNull();
+    bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
+    assertThat(bodyServerValueMap)
+        .containsOnlyKeys(OpenApiContractConverterTestFixtures.ROOMS, OpenApiContractConverterTestFixtures.GAME_NAME, OpenApiContractConverterTestFixtures.PLAYERS);
+    assertThat(bodyServerValueMap.get("players")).isInstanceOf(LinkedList.class);
+    contract = contractList[2];
+    assertThat(contract).isNotNull();
+    assertThat(contract.getResponse()).isNotNull();
+    bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
+    assertThat(bodyServerValueMap)
+        .containsOnlyKeys(OpenApiContractConverterTestFixtures.ID,
+                          OpenApiContractConverterTestFixtures.NAME,
+                          OpenApiContractConverterTestFixtures.ROOMS,
+                          OpenApiContractConverterTestFixtures.GAME_NAME,
+                          OpenApiContractConverterTestFixtures.PLAYERS);
+    assertThat(bodyServerValueMap.get("players")).isInstanceOf(LinkedList.class);
   }
 
 }
