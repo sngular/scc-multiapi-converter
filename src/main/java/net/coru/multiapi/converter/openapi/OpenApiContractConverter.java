@@ -29,6 +29,7 @@ import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
+import io.swagger.v3.oas.models.media.MapSchema;
 import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
@@ -914,6 +915,43 @@ public final class OpenApiContractConverter {
     return finalList;
   }
 
+  private Schema<?> cloneMapSchema(final MapSchema origSchema) {
+    final var schema = new MapSchema();
+    schema.setDefault(origSchema.getDefault());
+    schema.setDeprecated(origSchema.getDeprecated());
+    schema.setDescription(origSchema.getDescription());
+    schema.setDiscriminator(origSchema.getDiscriminator());
+    schema.setEnum(origSchema.getEnum());
+    schema.setExample(origSchema.getExample());
+    schema.setExclusiveMaximum(origSchema.getExclusiveMaximum());
+    schema.setExclusiveMinimum(origSchema.getExclusiveMinimum());
+    schema.setExtensions(origSchema.getExtensions());
+    schema.setExternalDocs(origSchema.getExternalDocs());
+    schema.setFormat(origSchema.getFormat());
+    schema.setMaximum(origSchema.getMaximum());
+    schema.setMaxItems(origSchema.getMaxItems());
+    schema.setMaxLength(origSchema.getMaxLength());
+    schema.setMaxProperties(origSchema.getMaxProperties());
+    schema.setMinimum(origSchema.getMinimum());
+    schema.setMinItems(origSchema.getMinItems());
+    schema.setMinLength(origSchema.getMinLength());
+    schema.setMinProperties(origSchema.getMinProperties());
+    schema.setMultipleOf(origSchema.getMultipleOf());
+    schema.setName(origSchema.getName());
+    schema.setNot(origSchema.getNot());
+    schema.setNullable(origSchema.getNullable());
+    schema.setPattern(origSchema.getPattern());
+    schema.setAdditionalProperties(origSchema.getAdditionalProperties());
+    schema.setReadOnly(origSchema.getReadOnly());
+    schema.setRequired(origSchema.getRequired());
+    schema.setTitle(origSchema.getTitle());
+    schema.setType(origSchema.getType());
+    schema.setUniqueItems(origSchema.getUniqueItems());
+    schema.setWriteOnly(origSchema.getWriteOnly());
+    schema.xml(origSchema.getXml());
+    return schema;
+  }
+
   private Schema cloneSchema(final Schema origSchema) {
     final var schema = new Schema();
     schema.setDefault(origSchema.getDefault());
@@ -957,9 +995,10 @@ public final class OpenApiContractConverter {
       properties.forEach((key, property) -> {
         if ("array".equalsIgnoreCase(property.getType())) {
           propertiesMap.put(key, cloneArraySchema((ArraySchema) property));
+        } else if (Objects.nonNull(property.getAdditionalProperties())) {
+          propertiesMap.put(key, cloneMapSchema((MapSchema) property));
         } else {
           propertiesMap.put(key, cloneSchema(property));
-
         }
       });
     }
@@ -992,7 +1031,6 @@ public final class OpenApiContractConverter {
     schema.setNot(origSchema.getNot());
     schema.setNullable(origSchema.getNullable());
     schema.setPattern(origSchema.getPattern());
-    schema.setProperties(cloneProperties(origSchema.getProperties()));
     schema.setReadOnly(origSchema.getReadOnly());
     schema.setRequired(origSchema.getRequired());
     schema.setTitle(origSchema.getTitle());

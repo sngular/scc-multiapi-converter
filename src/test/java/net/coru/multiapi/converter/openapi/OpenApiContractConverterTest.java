@@ -462,7 +462,7 @@ class OpenApiContractConverterTest {
   }
 
   @Test
-  @DisplayName("OpenApi: Check that Refs inside arrays are being processed okay")
+  @DisplayName("OpenApi: Check that AnyOfs with Arrays inside are processed correctly")
   void testAnyOfWithArraysInside() {
     final File file = new File(OpenApiContractConverterTestFixtures.OPENAPI_ANY_OF_WITH_ARRAYS);
     Contract[] contractList = multiApiContractConverter.convertFrom(file).toArray(new Contract[3]);
@@ -472,7 +472,6 @@ class OpenApiContractConverterTest {
     assertThat(contract.getResponse()).isNotNull();
     Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
     assertThat(bodyServerValueMap).containsOnlyKeys(OpenApiContractConverterTestFixtures.ID, OpenApiContractConverterTestFixtures.NAME);
-
     contract = contractList[1];
     assertThat(contract).isNotNull();
     assertThat(contract.getResponse()).isNotNull();
@@ -491,6 +490,37 @@ class OpenApiContractConverterTest {
                           OpenApiContractConverterTestFixtures.GAME_NAME,
                           OpenApiContractConverterTestFixtures.PLAYERS);
     assertThat(bodyServerValueMap.get("players")).isInstanceOf(LinkedList.class);
+  }
+
+  @Test
+  @DisplayName("OpenApi: Check that Refs inside arrays are being processed okay")
+  void testAnyOfWithMapsInside() {
+    final File file = new File(OpenApiContractConverterTestFixtures.OPENAPI_ANY_OF_WITH_MAPS);
+    Contract[] contractList = multiApiContractConverter.convertFrom(file).toArray(new Contract[3]);
+    assertThat(contractList).hasSize(3);
+    Contract contract = contractList[0];
+    assertThat(contract).isNotNull();
+    assertThat(contract.getResponse()).isNotNull();
+    Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
+    assertThat(bodyServerValueMap).containsOnlyKeys(OpenApiContractConverterTestFixtures.ID, OpenApiContractConverterTestFixtures.NAME);
+    contract = contractList[1];
+    assertThat(contract).isNotNull();
+    assertThat(contract.getResponse()).isNotNull();
+    bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
+    assertThat(bodyServerValueMap)
+        .containsOnlyKeys(OpenApiContractConverterTestFixtures.ROOMS, OpenApiContractConverterTestFixtures.GAME_NAME, OpenApiContractConverterTestFixtures.PLAYERS);
+    assertThat(bodyServerValueMap.get("players")).isInstanceOf(Body.class);
+    contract = contractList[2];
+    assertThat(contract).isNotNull();
+    assertThat(contract.getResponse()).isNotNull();
+    bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
+    assertThat(bodyServerValueMap)
+        .containsOnlyKeys(OpenApiContractConverterTestFixtures.ID,
+                          OpenApiContractConverterTestFixtures.NAME,
+                          OpenApiContractConverterTestFixtures.ROOMS,
+                          OpenApiContractConverterTestFixtures.GAME_NAME,
+                          OpenApiContractConverterTestFixtures.PLAYERS);
+    assertThat(bodyServerValueMap.get("players")).isInstanceOf(Body.class);
   }
 
 }

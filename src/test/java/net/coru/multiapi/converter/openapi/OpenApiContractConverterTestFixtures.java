@@ -88,6 +88,8 @@ public final class OpenApiContractConverterTestFixtures {
 
   static final String OPENAPI_ANY_OF_WITH_ARRAYS = "src/test/resources/openapi/testAnyOfWithArrays.yml";
 
+  static final String OPENAPI_ANY_OF_WITH_MAPS = "src/test/resources/openapi/testAnyOfWithMaps.yml";
+
   static final String NAME = "name";
 
   static final String CONTENT_TYPE = "Content-Type";
