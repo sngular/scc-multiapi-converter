@@ -1,0 +1,88 @@
+---
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Corunet Challenge Game Server
+  license:
+    name: MIT
+servers:
+- url: http://localhost:8080/v1
+paths:
+  /games/{gameId}/{roomId}:
+    post:
+      summary: Play a specific game
+      operationId: playGameById
+      tags:
+      - games
+      parameters:
+      - name: gameId
+        in: path
+        required: true
+        description: The id of the game to play
+        schema:
+          type: integer
+          format: int32
+      - name: roomId
+        in: path
+        required: true
+        description: The id of the room to play into
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Movement"
+      responses:
+        '200':
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GamePlayResult"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Movement:
+      type: object
+      required:
+      - movement
+      - options
+      properties:
+        movement:
+          type: string
+        options:
+          additionalProperties:
+            type: string
+    GamePlayResult:
+      type: object
+      required:
+      - movement
+      - info
+      - result
+      properties:
+        movement:
+          type: string
+        info:
+          type: string
+        result:
+          type: string
+    Error:
+      type: object
+      required:
+      - code
+      - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

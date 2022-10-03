@@ -10,14 +10,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import net.coru.multiapi.converter.utils.BasicTypeConstants;
+import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.cloud.contract.spec.internal.Body;
+import org.springframework.cloud.contract.spec.internal.BodyMatchers;
 import org.springframework.cloud.contract.spec.internal.MatchingStrategy;
 import org.springframework.cloud.contract.spec.internal.MatchingStrategy.Type;
 import org.springframework.cloud.contract.spec.internal.QueryParameters;
-import org.springframework.cloud.contract.spec.internal.Request;
 import org.springframework.cloud.contract.spec.internal.Response;
 
 public final class OpenApiContractConverterUtils {
@@ -39,53 +42,46 @@ public final class OpenApiContractConverterUtils {
     return refName;
   }
 
-  public static void processBasicResponseTypeBody(final Response response, final Schema schema) {
-    if (Objects.nonNull(schema.getExample())) {
-      response.body(schema.getExample());
-    } else {
-      switch (schema.getType()) {
-        case BasicTypeConstants.STRING:
-          response.body(response.anyAlphaNumeric());
-          break;
-        case BasicTypeConstants.INTEGER:
-          processIntegerFormat(response, schema);
-          break;
-        case BasicTypeConstants.NUMBER:
-          processNumberFormat(response, schema);
-          break;
-        case BasicTypeConstants.BOOLEAN:
-          response.body(response.anyBoolean());
-          break;
-        default:
-          response.body("Error");
-          break;
-      }
+  public static String mapRefName(final Example example) {
+    String refName = "";
+    if (Objects.nonNull(example.get$ref())) {
+      final String[] wholeRef = example.get$ref().split("/");
+      refName = wholeRef[wholeRef.length - 1];
+
     }
+    return refName;
   }
 
-  public static void processBasicRequestTypeBody(final Request request, final Schema schema) {
-
+  public static Pair<Body, BodyMatchers> processBasicTypeBody(final Schema schema) {
+    final Body body;
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     if (Objects.nonNull(schema.getExample())) {
-      request.body(schema.getExample());
+      body = new Body(schema.getExample());
     } else {
       switch (schema.getType()) {
         case BasicTypeConstants.STRING:
-          request.body(request.anyAlphaNumeric());
+          body = new Body(new Response().anyAlphaNumeric());
+          bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX);
           break;
         case BasicTypeConstants.INTEGER:
-          processIntegerFormat(request, schema);
+          body = new Body(processIntegerFormat(schema));
+          bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX);
           break;
         case BasicTypeConstants.NUMBER:
-          processNumberFormat(request, schema);
+          body = new Body(processNumberFormat(schema));
+          bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX);
           break;
         case BasicTypeConstants.BOOLEAN:
-          request.body(request.anyBoolean());
+          body = new Body(new Response().anyBoolean());
+          bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX);
           break;
         default:
-          request.body("Error");
+          body = new Body("Error");
+          bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX);
           break;
       }
     }
+    return Pair.of(body, bodyMatchers);
   }
 
   public static void processBasicQueryParameterTypeBody(final QueryParameters queryParameters, final Parameter parameter) {
@@ -119,8 +115,8 @@ public final class OpenApiContractConverterUtils {
     response.body(processNumberFormat(schema.getFormat(), schema.getName()));
   }
 
-  public static void processNumberFormat(final Request request, final Schema schema) {
-    request.body(processNumberFormat(schema.getFormat(), schema.getName()));
+  public static Map<String, Object> processNumberFormat(final Schema schema) {
+    return processNumberFormat(schema.getFormat(), schema.getName());
   }
 
   public static void processNumberFormat(final QueryParameters queryParameters, final Parameter parameter) {
@@ -143,8 +139,8 @@ public final class OpenApiContractConverterUtils {
     response.body(processIntegerFormat(schema.getFormat(), schema.getName()));
   }
 
-  public static void processIntegerFormat(final Request request, final Schema schema) {
-    request.body(processIntegerFormat(schema.getFormat(), schema.getName()));
+  public static Map<String, Object> processIntegerFormat(final Schema schema) {
+    return processIntegerFormat(schema.getFormat(), schema.getName());
   }
 
   public static void processIntegerFormat(final QueryParameters queryParameters, final Parameter parameter) {
