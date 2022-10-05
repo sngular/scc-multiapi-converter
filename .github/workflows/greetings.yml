@@ -5,9 +5,9 @@ on: [ pull_request, issues ]
 jobs:
   greeting:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
     - uses: actions/first-interaction@v1
+      continue-on-error: true
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         issue-message: "Thank you for collaborating with the project by giving us feedback!!"
