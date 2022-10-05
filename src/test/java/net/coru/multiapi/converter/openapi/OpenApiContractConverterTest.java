@@ -205,6 +205,7 @@ class OpenApiContractConverterTest {
     assertThat(contract).isNotNull();
     assertThat(contract.getRequest()).isNotNull();
     assertThat(contract.getResponse()).isNotNull();
+    assertThat(contract.getResponse().getBodyMatchers()).isNotNull();
     Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
     assertThat(bodyServerValueMap)
         .containsKey("player");

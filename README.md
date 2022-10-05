@@ -35,7 +35,7 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
     <dependency>
       <groupId>net.coru</groupId>
       <artifactId>scc-multiapi-converter</artifactId>
-      <version>2.7.1</version>
+      <version>3.0.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
