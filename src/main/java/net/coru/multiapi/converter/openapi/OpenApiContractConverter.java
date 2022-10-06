@@ -668,7 +668,7 @@ public final class OpenApiContractConverter {
       } else {
         final String type;
         type = getPropertyType(property);
-        final var prop = writeBodyMatcher(property, newObjectName, null, type);
+        final var prop = writeBodyMatcher(property, newObjectName, property.getValue(), type);
         propertyMap.put(property.getKey(), prop.getLeft());
         bodyMatchers.matchers().addAll(prop.getRight().matchers());
       }
