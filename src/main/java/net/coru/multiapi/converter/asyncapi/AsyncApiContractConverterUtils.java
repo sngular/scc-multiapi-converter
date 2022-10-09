@@ -16,7 +16,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import net.coru.multiapi.converter.exception.ElementNotFoundException;
 import net.coru.multiapi.converter.exception.MultiApiContractConverterException;
 import net.coru.multiapi.converter.utils.BasicTypeConstants;
+import net.coru.multiapi.converter.utils.RandomGenerator;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.RandomUtils;
 import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 
 public final class AsyncApiContractConverterUtils {
@@ -27,7 +29,11 @@ public final class AsyncApiContractConverterUtils {
       final ResponseBodyMatchers responseBodyMatchers, final JsonNode properties, final String operationType, final Map<String, Object> messageBody, final String property,
       final String path, final String enumType) {
     if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-      messageBody.put(property, processEnumTypes(properties.get(property).get(BasicTypeConstants.EXAMPLE), enumType));
+      if (properties.get(property).has(BasicTypeConstants.EXAMPLE)) {
+        messageBody.put(property, processEnumTypes(properties.get(property).get(BasicTypeConstants.EXAMPLE), enumType));
+      } else {
+        messageBody.put(property, processEnumTypes(properties.get(property), enumType));
+      }
     } else {
       final var enumList = properties.get(property).get(BasicTypeConstants.ENUM);
       responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(getEnumRegex(enumType, properties, property)));
@@ -61,10 +67,14 @@ public final class AsyncApiContractConverterUtils {
       final ResponseBodyMatchers responseBodyMatchers, final JsonNode properties, final String operationType, final Map<String, Object> messageBody, final String property,
       final String path) {
     if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-      messageBody.put(property, Float.parseFloat(properties.get(property).get(BasicTypeConstants.EXAMPLE).asText()));
+      if (properties.get(property).has(BasicTypeConstants.EXAMPLE)) {
+        messageBody.put(property, Float.parseFloat(properties.get(property).get(BasicTypeConstants.EXAMPLE).asText()));
+      } else {
+        messageBody.put(property, RandomUtils.nextFloat());
+      }
     } else {
       responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX));
-      messageBody.put(property, Math.abs(BasicTypeConstants.RANDOM.nextFloat()));
+      messageBody.put(property, RandomUtils.nextFloat());
     }
   }
 
@@ -72,10 +82,14 @@ public final class AsyncApiContractConverterUtils {
       final ResponseBodyMatchers responseBodyMatchers, final JsonNode properties, final String operationType, final Map<String, Object> messageBody, final String property,
       final String path) {
     if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-      messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asInt());
+      if (properties.get(property).has(BasicTypeConstants.EXAMPLE)) {
+        messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asInt());
+      } else {
+        messageBody.put(property, RandomUtils.nextInt());
+      }
     } else {
       responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.INT_REGEX));
-      messageBody.put(property, BasicTypeConstants.RANDOM.nextInt());
+      messageBody.put(property, RandomUtils.nextInt());
     }
   }
 
@@ -83,7 +97,11 @@ public final class AsyncApiContractConverterUtils {
       final ResponseBodyMatchers responseBodyMatchers, final JsonNode properties, final String operationType, final Map<String, Object> messageBody, final String property,
       final String path) {
     if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-      messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asText());
+      if (properties.get(property).has(BasicTypeConstants.EXAMPLE)) {
+        messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asText());
+      } else {
+        messageBody.put(property, RandomStringUtils.random(5, true, false));
+      }
     } else {
       responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
       messageBody.put(property, RandomStringUtils.random(5, true, false));
@@ -236,6 +254,54 @@ public final class AsyncApiContractConverterUtils {
     }
   }
 
+  public static void processArrayDateType(
+      final ResponseBodyMatchers responseBodyMatchers, final String path, final String operationType, final List<Object> arrayValues, final JsonNode internalProperties)
+      throws JsonProcessingException {
+    if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+      final var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
+      for (int i = 0; i < arrayNode.size(); i++) {
+        arrayValues.add(arrayNode.get(i).asText());
+      }
+    } else {
+      arrayValues.add(RandomStringUtils.random(5, true, false));
+      if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
+        responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.DATE_REGEX));
+      }
+    }
+  }
+
+  public static void processArrayDateTimeType(
+      final ResponseBodyMatchers responseBodyMatchers, final String path, final String operationType, final List<Object> arrayValues, final JsonNode internalProperties)
+      throws JsonProcessingException {
+    if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+      final var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
+      for (int i = 0; i < arrayNode.size(); i++) {
+        arrayValues.add(arrayNode.get(i).asText());
+      }
+    } else {
+      arrayValues.add(RandomStringUtils.random(5, true, false));
+      if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
+        responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.DATE_TIME_REGEX));
+      }
+    }
+  }
+
+  public static void processArrayTimeType(
+      final ResponseBodyMatchers responseBodyMatchers, final String path, final String operationType, final List<Object> arrayValues, final JsonNode internalProperties)
+      throws JsonProcessingException {
+    if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+      final var arrayNode = BasicTypeConstants.OBJECT_MAPPER.readTree(internalProperties.toString()).get(BasicTypeConstants.EXAMPLE);
+      for (int i = 0; i < arrayNode.size(); i++) {
+        arrayValues.add(arrayNode.get(i).asText());
+      }
+    } else {
+      arrayValues.add(RandomStringUtils.random(5, true, false));
+      if (isNotRegexIncluded(responseBodyMatchers, path + "[0]")) {
+        responseBodyMatchers.jsonPath(path + "[0]", responseBodyMatchers.byRegex(BasicTypeConstants.TIME_REGEX));
+      }
+    }
+  }
+
   public static boolean isNotRegexIncluded(final ResponseBodyMatchers responseBodyMatchers, final String property) {
     var isIncluded = false;
 
@@ -295,6 +361,48 @@ public final class AsyncApiContractConverterUtils {
   public static void checkIfReferenceWithProperties(final JsonNode jsonNode) {
     if (jsonNode.size() > 1 && Objects.nonNull(jsonNode.get(BasicTypeConstants.REF))) {
       throw new MultiApiContractConverterException("If reference exists no other additional properties are allowed");
+    }
+  }
+
+  public static void processDatePropertyType(final ResponseBodyMatchers responseBodyMatchers, final JsonNode properties, final String operationType,
+      final Map<String, Object> messageBody, final String property, final String path) {
+    if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+      if (properties.get(property).has(BasicTypeConstants.EXAMPLE)) {
+        messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asText());
+      } else {
+        messageBody.put(property, RandomGenerator.randomEnumValue(properties.get(property)));
+      }
+    } else {
+      responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.DATE_REGEX));
+      messageBody.put(property, RandomGenerator.getRandomDate());
+    }
+  }
+
+  public static void processDateTimePropertyType(final ResponseBodyMatchers responseBodyMatchers, final JsonNode properties, final String operationType,
+      final Map<String, Object> messageBody, final String property, final String path) {
+    if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+      if (properties.get(property).has(BasicTypeConstants.EXAMPLE)) {
+        messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asText());
+      } else {
+        messageBody.put(property, RandomGenerator.getRandomDateTime());
+      }
+    } else {
+      responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.DATE_TIME_REGEX));
+      messageBody.put(property, RandomStringUtils.random(5, true, false));
+    }
+  }
+
+  public static void processTimePropertyType(final ResponseBodyMatchers responseBodyMatchers, final JsonNode properties, final String operationType,
+      final Map<String, Object> messageBody, final String property, final String path) {
+    if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
+      if (properties.get(property).has(BasicTypeConstants.EXAMPLE)) {
+        messageBody.put(property, properties.get(property).get(BasicTypeConstants.EXAMPLE).asText());
+      } else {
+        messageBody.put(property, RandomGenerator.getRandomTime());
+      }
+    } else {
+      responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.TIME_REGEX));
+      messageBody.put(property, RandomStringUtils.random(5, true, false));
     }
   }
 }
