@@ -82,6 +82,8 @@ public final class OpenApiContractConverterTestFixtures {
 
   static final String OPENAPI_TEST_SCHEMA_EXAMPLES_YML = "src/test/resources/openapi/testExamplesGlobal.yml";
 
+  static final String OPENAPI_TEST_GENERATE_TESTS_YML = "src/test/resourcer/openapi/testGenerateTest.yml";
+
   static final String OPENAPI_TEST_SCHEMA_MULTI_EXAMPLES_YML = "src/test/resources/openapi/testMultiExamplesGlobal.yml";
 
   static final String OPENAPI_TEST_SCHEMA_MAPS_YML = "src/test/resources/openapi/testSupportMaps.yml";
