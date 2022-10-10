@@ -30,7 +30,7 @@ public final class MultiApiContractConverter implements ContractConverter<Collec
   @Override
   public boolean isAccepted(final File file) {
     final String name = file.getName();
-    boolean isAccepted = name.endsWith(".yml") || name.endsWith(".yaml");
+    boolean isAccepted = name.endsWith(".yml") || name.endsWith(".yaml") || name.endsWith(".json");
     if (isAccepted) {
       try {
         final JsonNode node;

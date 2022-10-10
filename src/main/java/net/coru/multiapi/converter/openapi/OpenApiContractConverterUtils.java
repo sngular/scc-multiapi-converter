@@ -9,6 +9,7 @@ package net.coru.multiapi.converter.openapi;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
@@ -16,11 +17,13 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import net.coru.multiapi.converter.utils.BasicTypeConstants;
 import org.apache.commons.lang3.tuple.Pair;
+import org.codehaus.plexus.util.StringUtils;
 import org.springframework.cloud.contract.spec.internal.Body;
 import org.springframework.cloud.contract.spec.internal.BodyMatchers;
 import org.springframework.cloud.contract.spec.internal.MatchingStrategy;
 import org.springframework.cloud.contract.spec.internal.MatchingStrategy.Type;
 import org.springframework.cloud.contract.spec.internal.QueryParameters;
+import org.springframework.cloud.contract.spec.internal.RegexProperty;
 import org.springframework.cloud.contract.spec.internal.Response;
 
 public final class OpenApiContractConverterUtils {
@@ -93,7 +96,11 @@ public final class OpenApiContractConverterUtils {
       final String type = parameter.getSchema().getType();
       switch (type) {
         case BasicTypeConstants.STRING:
-          queryParameters.parameter(parameter.getName(), BasicTypeConstants.STRING_REGEX);
+          if (StringUtils.isEmpty(parameter.getSchema().getFormat())) {
+            queryParameters.parameter(parameter.getName(), BasicTypeConstants.STRING_REGEX);
+          } else {
+            queryParameters.parameter(parameter.getName(), new RegexProperty(Pattern.compile(parameter.getSchema().getFormat())).asString());
+          }
           break;
         case BasicTypeConstants.INTEGER:
           OpenApiContractConverterUtils.processIntegerFormat(queryParameters, parameter);
@@ -109,10 +116,6 @@ public final class OpenApiContractConverterUtils {
           break;
       }
     }
-  }
-
-  public static void processNumberFormat(final Response response, final Schema schema) {
-    response.body(processNumberFormat(schema.getFormat(), schema.getName()));
   }
 
   public static Map<String, Object> processNumberFormat(final Schema schema) {
@@ -133,10 +136,6 @@ public final class OpenApiContractConverterUtils {
       parameter.put(name, BasicTypeConstants.INT_REGEX);
     }
     return parameter;
-  }
-
-  public static void processIntegerFormat(final Response response, final Schema schema) {
-    response.body(processIntegerFormat(schema.getFormat(), schema.getName()));
   }
 
   public static Map<String, Object> processIntegerFormat(final Schema schema) {
