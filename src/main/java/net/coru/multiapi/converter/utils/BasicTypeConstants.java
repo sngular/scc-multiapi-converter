@@ -26,6 +26,8 @@ public final class BasicTypeConstants {
 
   public static final String INTEGER = "integer";
 
+  public static final String LONG = "long";
+
   public static final String INT_64 = "int64";
 
   public static final String NUMBER = "number";
@@ -64,6 +66,12 @@ public final class BasicTypeConstants {
 
   public static final String PAYLOAD = "payload";
 
+  public static final String DATE = "date";
+
+  public static final String DATE_TIME = "date-time";
+
+  public static final String TIME = "time";
+
   public static final RegexProperty STRING_REGEX = RegexPatterns.alphaNumeric();
 
   public static final RegexProperty INT_REGEX = RegexPatterns.positiveInt();
@@ -71,6 +79,14 @@ public final class BasicTypeConstants {
   public static final RegexProperty DECIMAL_REGEX = RegexPatterns.number();
 
   public static final RegexProperty BOOLEAN_REGEX = RegexPatterns.anyBoolean();
+
+  public static final RegexProperty DATE_REGEX = RegexPatterns.isoDate();
+
+  public static final RegexProperty DATE_TIME_REGEX = RegexPatterns.isoDateTime();
+
+  public static final RegexProperty TIME_REGEX = RegexPatterns.isoTime();
+
+  public static final RegexProperty DATE_TIME_OFFSET_REGEX = RegexPatterns.iso8601WithOffset();
 
   public static final String DEFAULT_REGEX = ".*";
 

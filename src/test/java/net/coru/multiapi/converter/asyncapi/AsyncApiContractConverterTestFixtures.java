@@ -12,21 +12,21 @@ import java.util.Map;
 
 public class AsyncApiContractConverterTestFixtures {
 
-  protected final static String EVENT_API_FILE = "src/test/resources/asyncapi/event-api.yml";
+  protected final static String EVENT_API_FILE = "/asyncapi/event-api.yml";
 
-  protected final static String TEST_BASIC_TYPES_FILE = "src/test/resources/asyncapi/testBasicTypes.yml";
+  protected final static String TEST_BASIC_TYPES_FILE = "/asyncapi/testBasicTypes.yml";
 
-  protected final static String TEST_COMPLEX_OBJECTS_FILE = "src/test/resources/asyncapi/testComplexObjects.yml";
+  protected final static String TEST_COMPLEX_OBJECTS_FILE = "/asyncapi/testComplexObjects.yml";
 
-  protected final static String TEST_ARRAYS_FILE = "src/test/resources/asyncapi/testArrays.yml";
+  protected final static String TEST_ARRAYS_FILE = "/asyncapi/testArrays.yml";
 
-  protected final static String TEST_ARRAYS_REF_FILE = "src/test/resources/asyncapi/testArraysWithRef.yml";
+  protected final static String TEST_ARRAYS_REF_FILE = "/asyncapi/testArraysWithRef.yml";
 
-  protected final static String TEST_ENUMS_FILE = "src/test/resources/asyncapi/testEnums.yml";
+  protected final static String TEST_ENUMS_FILE = "/asyncapi/testEnums.yml";
 
-  protected final static String TEST_EXTERNAL_FILE = "src/test/resources/asyncapi/testExternalFiles.yml";
+  protected final static String TEST_EXTERNAL_FILE = "/asyncapi/testExternalFiles.yml";
 
-  protected final static String TEST_EXTERNAL_FILE_MULTIPLE_SCHEMAS = "src/test/resources/asyncapi/testExternalFilesWithMultipleSchemas.yml";
+  protected final static String TEST_EXTERNAL_FILE_MULTIPLE_SCHEMAS = "/asyncapi/testExternalFilesWithMultipleSchemas.yml";
 
   protected final static String PUBLISH_NAME = "publishOperation";
 
