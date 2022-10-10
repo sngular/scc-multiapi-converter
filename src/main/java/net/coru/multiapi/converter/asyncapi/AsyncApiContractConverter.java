@@ -94,12 +94,6 @@ public final class AsyncApiContractConverter {
     input.messageBody(bodyProcessed);
     input.messageHeaders(headers -> headers.accept("application/json"));
     contract.setInput(input);
-
-    final OutputMessage outputMessage = new OutputMessage();
-    outputMessage.headers(headers -> headers.accept("application/json"));
-    outputMessage.sentTo(topicName);
-    outputMessage.body(bodyProcessed);
-    contract.setOutputMessage(outputMessage);
   }
 
   private Map<String, Object> processMessage(
