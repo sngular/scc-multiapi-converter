@@ -105,10 +105,10 @@ public final class AsyncApiContractConverterUtils {
         messageBody.put(property, RandomStringUtils.random(5, true, false));
       }
     } else {
-      if (!properties.get(property).has("format")) {
+      if (!properties.get(property).has("pattern")) {
         responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
       } else {
-        responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(new RegexProperty(Pattern.compile(properties.get(property).get("format").asText())).asString()));
+        responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(new RegexProperty(Pattern.compile(properties.get(property).get("pattern").asText())).asString()));
       }
       messageBody.put(property, RandomStringUtils.random(5, true, false));
     }
@@ -315,9 +315,9 @@ public final class AsyncApiContractConverterUtils {
 
   public static String getType(final JsonNode node) {
     final String type;
-    if (node.get(BasicTypeConstants.FORMAT) != null) {
+    if (node.has(BasicTypeConstants.FORMAT)) {
       type = node.get(BasicTypeConstants.FORMAT).asText();
-    } else if (node.get(BasicTypeConstants.TYPE) != null) {
+    } else if (node.has(BasicTypeConstants.TYPE)) {
       type = node.get(BasicTypeConstants.TYPE).asText();
     } else {
       type = node.get(node.fieldNames().next()).get(BasicTypeConstants.TYPE).asText();

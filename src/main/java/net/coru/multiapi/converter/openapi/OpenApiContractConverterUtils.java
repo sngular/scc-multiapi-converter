@@ -96,7 +96,7 @@ public final class OpenApiContractConverterUtils {
       final String type = parameter.getSchema().getType();
       switch (type) {
         case BasicTypeConstants.STRING:
-          if (StringUtils.isEmpty(parameter.getSchema().getFormat())) {
+          if (StringUtils.isEmpty(parameter.getSchema().getPattern())) {
             queryParameters.parameter(parameter.getName(), BasicTypeConstants.STRING_REGEX);
           } else {
             queryParameters.parameter(parameter.getName(), new RegexProperty(Pattern.compile(parameter.getSchema().getFormat())).asString());

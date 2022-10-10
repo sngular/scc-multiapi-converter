@@ -62,7 +62,7 @@ public final class AsyncApiContractConverter {
 
         final String topicName = topicIterator.next();
         if (operationType.equals(BasicTypeConstants.SUBSCRIBE)) {
-          processSubscribeOperation(contract, bodyProcessed, topicName);
+          processSubscribeOperation(contract, bodyProcessed, topicName, operationId);
         } else if (operationType.equals(BasicTypeConstants.PUBLISH)) {
           processPublishOperation(contract, operationId, responseBodyMatchers, bodyProcessed, topicName);
         }
@@ -88,11 +88,12 @@ public final class AsyncApiContractConverter {
     contract.setOutputMessage(outputMessage);
   }
 
-  private void processSubscribeOperation(final Contract contract, final Map<String, Object> bodyProcessed, final String topicName) {
+  private void processSubscribeOperation(final Contract contract, final Map<String, Object> bodyProcessed, final String topicName, final String operationId) {
     final Input input = new Input();
     input.messageFrom(topicName);
     input.messageBody(bodyProcessed);
     input.messageHeaders(headers -> headers.accept("application/json"));
+    input.assertThat(operationId + "Validation()");
     contract.setInput(input);
   }
 
