@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,6 +20,7 @@ import net.coru.multiapi.converter.utils.BasicTypeConstants;
 import net.coru.multiapi.converter.utils.RandomGenerator;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.springframework.cloud.contract.spec.internal.RegexProperty;
 import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
 
 public final class AsyncApiContractConverterUtils {
@@ -103,7 +105,11 @@ public final class AsyncApiContractConverterUtils {
         messageBody.put(property, RandomStringUtils.random(5, true, false));
       }
     } else {
-      responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
+      if (!properties.get(property).has("pattern")) {
+        responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX));
+      } else {
+        responseBodyMatchers.jsonPath(path, responseBodyMatchers.byRegex(new RegexProperty(Pattern.compile(properties.get(property).get("pattern").asText())).asString()));
+      }
       messageBody.put(property, RandomStringUtils.random(5, true, false));
     }
   }
@@ -309,9 +315,9 @@ public final class AsyncApiContractConverterUtils {
 
   public static String getType(final JsonNode node) {
     final String type;
-    if (node.get(BasicTypeConstants.FORMAT) != null) {
+    if (node.has(BasicTypeConstants.FORMAT)) {
       type = node.get(BasicTypeConstants.FORMAT).asText();
-    } else if (node.get(BasicTypeConstants.TYPE) != null) {
+    } else if (node.has(BasicTypeConstants.TYPE)) {
       type = node.get(BasicTypeConstants.TYPE).asText();
     } else {
       type = node.get(node.fieldNames().next()).get(BasicTypeConstants.TYPE).asText();
