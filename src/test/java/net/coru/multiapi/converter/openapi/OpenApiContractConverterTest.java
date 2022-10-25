@@ -188,7 +188,7 @@ class OpenApiContractConverterTest {
     assertThat(lastNameMap).containsKey(openApiContractConverterTestFixtures.LASTNAME);
     assertThat(lastNameMap.get(openApiContractConverterTestFixtures.LASTNAME)).isInstanceOf(String.class);
     final List<ArrayList<String>> addressSubList = (ArrayList<ArrayList<String>>) bodyServerValueMap.get(openApiContractConverterTestFixtures.ADDRESS);
-    assertThat(addressSubList.get(0)).isInstanceOf(ArrayList.class);
+    assertThat(addressSubList.get(0)).isInstanceOf(List.class);
     assertThat(addressSubList.get(0).get(0)).isInstanceOf(String.class);
   }
 

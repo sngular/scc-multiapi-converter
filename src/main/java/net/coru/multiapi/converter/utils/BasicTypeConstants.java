@@ -38,6 +38,8 @@ public final class BasicTypeConstants {
 
   public static final String OBJECT = "object";
 
+  public static final String GENERIC = "generic";
+
   public static final String ARRAY = "array";
 
   public static final String ENUM = "enum";
