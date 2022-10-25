@@ -21,7 +21,7 @@ import org.springframework.cloud.contract.spec.Contract;
 import org.springframework.cloud.contract.spec.ContractConverter;
 
 @Slf4j
-public class MultiApiContractConverter implements ContractConverter<Collection<Contract>> {
+public final class MultiApiContractConverter implements ContractConverter<Collection<Contract>> {
 
   private static final OpenApiContractConverter OPEN_API_CONTRACT_CONVERTER = new OpenApiContractConverter();
 
@@ -30,13 +30,13 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
   @Override
   public boolean isAccepted(final File file) {
     final String name = file.getName();
-    boolean isAccepted = name.endsWith(".yml") || name.endsWith(".yaml");
+    boolean isAccepted = name.endsWith(".yml") || name.endsWith(".yaml") || name.endsWith(".json");
     if (isAccepted) {
       try {
         final JsonNode node;
         node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
-        isAccepted = (node != null && node.size() > 0 && (Objects.nonNull(node.get(BasicTypeConstants.ASYNCAPI)) || Objects.nonNull(node.get(BasicTypeConstants.OPENAPI))));
-      } catch (IOException e) {
+        isAccepted = node != null && node.size() > 0 && (Objects.nonNull(node.get(BasicTypeConstants.ASYNCAPI)) || Objects.nonNull(node.get(BasicTypeConstants.OPENAPI)));
+      } catch (final IOException e) {
         isAccepted = false;
       }
     }
@@ -47,7 +47,7 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
   public Collection<Contract> convertFrom(final File file) {
 
     Collection<Contract> contracts = null;
-    JsonNode node;
+    final JsonNode node;
     if (isAccepted(file)) {
       try {
         node = BasicTypeConstants.OBJECT_MAPPER.readTree(file);
@@ -60,7 +60,7 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
         } else {
           throw new MultiApiContractConverterException("Yaml file is not correct");
         }
-      } catch (IOException e) {
+      } catch (final IOException e) {
         throw new MultiApiContractConverterException(e);
       }
     }
@@ -68,5 +68,7 @@ public class MultiApiContractConverter implements ContractConverter<Collection<C
   }
 
   @Override
-  public Collection<Contract> convertTo(final Collection<Contract> contract) {return contract;}
+  public Collection<Contract> convertTo(final Collection<Contract> contract) {
+    return contract;
+  }
 }

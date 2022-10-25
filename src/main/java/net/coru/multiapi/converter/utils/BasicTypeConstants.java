@@ -26,6 +26,8 @@ public final class BasicTypeConstants {
 
   public static final String INTEGER = "integer";
 
+  public static final String LONG = "long";
+
   public static final String INT_64 = "int64";
 
   public static final String NUMBER = "number";
@@ -42,6 +44,8 @@ public final class BasicTypeConstants {
 
   public static final String ARRAY = "array";
 
+  public static final String MAP = "map";
+
   public static final String ENUM = "enum";
 
   public static final String CHANNELS = "channels";
@@ -54,10 +58,6 @@ public final class BasicTypeConstants {
 
   public static final String PROPERTIES = "properties";
 
-  public static final String SCHEMA = "schema";
-
-  public static final String SCHEMAS = "schemas";
-
   public static final String FORMAT = "format";
 
   public static final String EXAMPLE = "example";
@@ -68,6 +68,12 @@ public final class BasicTypeConstants {
 
   public static final String PAYLOAD = "payload";
 
+  public static final String DATE = "date";
+
+  public static final String DATE_TIME = "date-time";
+
+  public static final String TIME = "time";
+
   public static final RegexProperty STRING_REGEX = RegexPatterns.alphaNumeric();
 
   public static final RegexProperty INT_REGEX = RegexPatterns.positiveInt();
@@ -76,14 +82,21 @@ public final class BasicTypeConstants {
 
   public static final RegexProperty BOOLEAN_REGEX = RegexPatterns.anyBoolean();
 
+  public static final RegexProperty DATE_REGEX = RegexPatterns.isoDate();
+
+  public static final RegexProperty DATE_TIME_REGEX = RegexPatterns.isoDateTime();
+
+  public static final RegexProperty TIME_REGEX = RegexPatterns.isoTime();
+
+  public static final RegexProperty DATE_TIME_OFFSET_REGEX = RegexPatterns.iso8601WithOffset();
+
   public static final String DEFAULT_REGEX = ".*";
 
   public static final Random RANDOM = new Random();
 
   public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(new YAMLFactory());
 
-  public static final Set<String> BASIC_OBJECT_TYPE = Set.of(NUMBER, STRING, BOOLEAN, INTEGER
-  );
+  public static final Set<String> BASIC_OBJECT_TYPE = Set.of(NUMBER, STRING, BOOLEAN, INTEGER);
 
   private BasicTypeConstants() {
 

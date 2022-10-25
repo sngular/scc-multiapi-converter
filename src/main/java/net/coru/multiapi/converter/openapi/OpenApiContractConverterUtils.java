@@ -6,12 +6,24 @@
 
 package net.coru.multiapi.converter.openapi;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
-import net.coru.multiapi.converter.utils.BasicTypeConstants;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
-import org.springframework.cloud.contract.spec.internal.Request;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import net.coru.multiapi.converter.utils.BasicTypeConstants;
+import org.apache.commons.lang3.tuple.Pair;
+import org.codehaus.plexus.util.StringUtils;
+import org.springframework.cloud.contract.spec.internal.Body;
+import org.springframework.cloud.contract.spec.internal.BodyMatchers;
+import org.springframework.cloud.contract.spec.internal.MatchingStrategy;
+import org.springframework.cloud.contract.spec.internal.MatchingStrategy.Type;
+import org.springframework.cloud.contract.spec.internal.QueryParameters;
+import org.springframework.cloud.contract.spec.internal.RegexProperty;
 import org.springframework.cloud.contract.spec.internal.Response;
 
 public final class OpenApiContractConverterUtils {
@@ -33,72 +45,115 @@ public final class OpenApiContractConverterUtils {
     return refName;
   }
 
-  public static void processBasicResponseTypeBody(final Response response, Schema schema) {
+  public static String mapRefName(final Example example) {
+    String refName = "";
+    if (Objects.nonNull(example.get$ref())) {
+      final String[] wholeRef = example.get$ref().split("/");
+      refName = wholeRef[wholeRef.length - 1];
+
+    }
+    return refName;
+  }
+
+  public static Pair<Body, BodyMatchers> processBasicTypeBody(final Schema schema) {
+    final Body body;
+    final BodyMatchers bodyMatchers = new BodyMatchers();
     if (Objects.nonNull(schema.getExample())) {
-      response.body(schema.getExample());
+      body = new Body(schema.getExample());
     } else {
       switch (schema.getType()) {
         case BasicTypeConstants.STRING:
-          response.body(response.anyAlphaNumeric());
+          body = new Body(new Response().anyAlphaNumeric());
+          bodyMatchers.byRegex(BasicTypeConstants.STRING_REGEX);
           break;
         case BasicTypeConstants.INTEGER:
-          if (BasicTypeConstants.INT_32.equalsIgnoreCase(schema.getFormat()) || !Objects.nonNull(schema.getFormat())) {
-            response.body(response.anyPositiveInt());
-          } else if (BasicTypeConstants.INT_64.equalsIgnoreCase(schema.getFormat())) {
-            response.body(response.anyNumber());
-          }
+          body = new Body(processIntegerFormat(schema));
+          bodyMatchers.byRegex(BasicTypeConstants.INT_REGEX);
           break;
         case BasicTypeConstants.NUMBER:
-          if (BasicTypeConstants.FLOAT.equalsIgnoreCase(schema.getFormat())) {
-            response.body(response.anyNumber());
-          } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(schema.getFormat())) {
-            response.body(response.anyDouble());
-          } else if (schema.getFormat().isEmpty()) {
-            response.body(response.anyPositiveInt());
-          }
+          body = new Body(processNumberFormat(schema));
+          bodyMatchers.byRegex(BasicTypeConstants.DECIMAL_REGEX);
           break;
         case BasicTypeConstants.BOOLEAN:
-          response.body(response.anyBoolean());
+          body = new Body(new Response().anyBoolean());
+          bodyMatchers.byRegex(BasicTypeConstants.BOOLEAN_REGEX);
           break;
         default:
-          response.body("Error");
+          body = new Body("Error");
+          bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX);
+          break;
+      }
+    }
+    return Pair.of(body, bodyMatchers);
+  }
+
+  public static void processBasicQueryParameterTypeBody(final QueryParameters queryParameters, final Parameter parameter) {
+    if (Objects.nonNull(parameter.getExample())) {
+      queryParameters.parameter(parameter.getName(), new MatchingStrategy(parameter.getExample(), Type.EQUAL_TO));
+    } else if (Objects.nonNull(parameter.getSchema().getExample())) {
+      queryParameters.parameter(parameter.getName(), new MatchingStrategy(parameter.getSchema().getExample(), Type.EQUAL_TO));
+    } else {
+      final String type = parameter.getSchema().getType();
+      switch (type) {
+        case BasicTypeConstants.STRING:
+          if (StringUtils.isEmpty(parameter.getSchema().getPattern())) {
+            queryParameters.parameter(parameter.getName(), BasicTypeConstants.STRING_REGEX);
+          } else {
+            queryParameters.parameter(parameter.getName(), new RegexProperty(Pattern.compile(parameter.getSchema().getFormat())).asString());
+          }
+          break;
+        case BasicTypeConstants.INTEGER:
+          OpenApiContractConverterUtils.processIntegerFormat(queryParameters, parameter);
+          break;
+        case BasicTypeConstants.NUMBER:
+          OpenApiContractConverterUtils.processNumberFormat(queryParameters, parameter);
+          break;
+        case BasicTypeConstants.BOOLEAN:
+          queryParameters.parameter(parameter.getName(), BasicTypeConstants.BOOLEAN_REGEX);
+          break;
+        default:
+          queryParameters.parameter(parameter.getName(), BasicTypeConstants.DEFAULT_REGEX);
           break;
       }
     }
   }
 
-  public static void processBasicRequestTypeBody(final Request request, Schema schema) {
-
-    if (Objects.nonNull(schema.getExample())) {
-      request.body(schema.getExample());
-    } else {
-      switch (schema.getType()) {
-        case BasicTypeConstants.STRING:
-          request.body(request.anyAlphaNumeric());
-          break;
-        case BasicTypeConstants.INTEGER:
-          if (BasicTypeConstants.INT_32.equalsIgnoreCase(schema.getFormat()) || !Objects.nonNull(schema.getFormat())) {
-            request.body(request.anyPositiveInt());
-          } else if (BasicTypeConstants.INT_64.equalsIgnoreCase(schema.getFormat())) {
-            request.body(request.anyNumber());
-          }
-          break;
-        case BasicTypeConstants.NUMBER:
-          if (BasicTypeConstants.FLOAT.equalsIgnoreCase(schema.getFormat())) {
-            request.body(request.anyNumber());
-          } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(schema.getFormat())) {
-            request.body(request.anyDouble());
-          } else if (schema.getFormat().isEmpty()) {
-            request.body(request.anyPositiveInt());
-          }
-          break;
-        case BasicTypeConstants.BOOLEAN:
-          request.body(request.anyBoolean());
-          break;
-        default:
-          request.body("Error");
-          break;
-      }
-    }
+  public static Map<String, Object> processNumberFormat(final Schema schema) {
+    return processNumberFormat(schema.getFormat(), schema.getName());
   }
+
+  public static void processNumberFormat(final QueryParameters queryParameters, final Parameter parameter) {
+    queryParameters.parameter(processNumberFormat(parameter.getSchema().getFormat(), parameter.getName()));
+  }
+
+  private static Map<String, Object> processNumberFormat(final String format, final String name) {
+    final Map<String, Object> parameter = new HashMap<>();
+    if (BasicTypeConstants.FLOAT.equalsIgnoreCase(format)) {
+      parameter.put(name, BasicTypeConstants.INT_REGEX);
+    } else if (BasicTypeConstants.DOUBLE.equalsIgnoreCase(format)) {
+      parameter.put(name, BasicTypeConstants.DECIMAL_REGEX);
+    } else {
+      parameter.put(name, BasicTypeConstants.INT_REGEX);
+    }
+    return parameter;
+  }
+
+  public static Map<String, Object> processIntegerFormat(final Schema schema) {
+    return processIntegerFormat(schema.getFormat(), schema.getName());
+  }
+
+  public static void processIntegerFormat(final QueryParameters queryParameters, final Parameter parameter) {
+    queryParameters.parameter(processIntegerFormat(parameter.getSchema().getFormat(), parameter.getName()));
+  }
+
+  private static Map<String, Object> processIntegerFormat(final String format, final String name) {
+    final Map<String, Object> parameter = new HashMap<>();
+    if (BasicTypeConstants.INT_32.equalsIgnoreCase(format) || !Objects.nonNull(format)) {
+      parameter.put(name, BasicTypeConstants.INT_REGEX);
+    } else if (BasicTypeConstants.INT_64.equalsIgnoreCase(format)) {
+      parameter.put(name, BasicTypeConstants.DECIMAL_REGEX);
+    }
+    return parameter;
+  }
+
 }

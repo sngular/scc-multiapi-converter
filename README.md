@@ -35,7 +35,7 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
     <dependency>
       <groupId>net.coru</groupId>
       <artifactId>scc-multiapi-converter</artifactId>
-      <version>2.6.1</version>
+      <version>3.0.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -61,7 +61,7 @@ This plugin supports most of the OpenApi/Swagger and AsyncApi, but there are a c
 - Using **OpenApi/AsyncApi´s example label** in the parameters/schemas will check in our contracts that the response is equal to the example
 value instead of using a Regex.
 - **OpenApi**: Since 2.4.0 version, we support the definition of parameters in both Path and Operation object, but you can only define it 
-in one of them. If you specify them in both objects it will trigger an Exception.
+in one of them. ❗❗❗️ We use the Option resolver from OpenApi which will override the Operation parameters if you have a parameter defined in the Path.
 - Please be aware that writing an example must be the same type as indicated in the file, otherwise your contract will break.
 
 This is an easy example of a small YAML for OpenApi that will work with our plugin:
@@ -114,8 +114,10 @@ components:
       properties:
         firstname:
           type: string
+          example: John
         lastname:
           type: string
+          example: Doe
 tags:
 - name: games
   description: Test description for SCC MultiApi Plugin.
@@ -176,7 +178,6 @@ Currently, this plugin has some limitations that will be addressed in the future
 
 **OpenApi implementation**:
 
-- This plugin allows the use of AllOfs and AnyOfs in the Response section. However, OpenApi does not support AllOfs in this section and AnyOf usage might not work depending on the OpenApi version you are using.
 - Some OpenApi functionalities are not implemented yet, such as creating example objects, instead you must use the example tag in every property of the object.
 - Due to the OpenApi Parser code, when you use a $ref that points to an external file, there are some limitations when using $ref again in that same file.
 
