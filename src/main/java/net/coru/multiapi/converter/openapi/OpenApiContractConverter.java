@@ -210,6 +210,7 @@ public final class OpenApiContractConverter {
         final var response = new Response();
         response.body(response.anyAlphaNumeric());
         response.setBodyMatchers(new ResponseBodyMatchers());
+        response.status(solveStatus(name));
         responseList.add(response);
       }
     }
