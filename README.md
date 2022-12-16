@@ -28,12 +28,12 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
   <version>3.0.0</version>
   <extensions>true</extensions>
   <configuration>
-    <packageWithBaseClasses>com.corunet.challenge.gameserver.baseclasses</packageWithBaseClasses>
+    <packageWithBaseClasses>com.sngular.challenge.gameserver.baseclasses</packageWithBaseClasses>
     <contractsDirectory>${project.basedir}/src/main/resources/api</contractsDirectory>
   </configuration>
   <dependencies>
     <dependency>
-      <groupId>net.coru</groupId>
+      <groupId>com.sngular</groupId>
       <artifactId>scc-multiapi-converter</artifactId>
       <version>3.0.1</version>
       <scope>compile</scope>
