@@ -11,4 +11,4 @@ components:
       properties:
         companyName:
           type: string
-          example: Corunet
+          example: Sngular

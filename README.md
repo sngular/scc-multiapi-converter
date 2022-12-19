@@ -71,12 +71,12 @@ This is an easy example of a small YAML for OpenApi that will work with our plug
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Corunet Challenge Game Server
+  title: Sngular Challenge Game Server
   description: Test File for SCC MultiApi Plugin.
   contact:
-    name: Corunet
-    url: coru.net
-    email: info@coru.net
+    name: Sngular
+    url: sngular.com
+    email: os3@sngular.com
   license:
     name: MPL 2.0
 servers:
@@ -132,9 +132,9 @@ info:
   version: 1.0.0
   description: Order management Service
   contact:
-    name: Corunet
+    name: Sngular
     url: http://www.asyncapi.org/support
-    email: info@coru.net
+    email: os3@sngular.com
     license:
       name: MPL 2.0
 channels:

@@ -56,7 +56,7 @@ public class AsyncApiContractConverterTestFixtures {
 
   protected final static String NAME = "name";
 
-  protected final static String CORUNET = "Corunet";
+  protected final static String SNGULAR = "Sngular";
 
   protected final static String PERSON_NAME = "Carlos";
 

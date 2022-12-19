@@ -116,7 +116,7 @@ class AsyncApiContractConverterTest {
       if (i == 0) {
         assertThat(enumName).isInstanceOf(String.class).isIn(asyncApiContractConverterTestFixtures.ENUM_VALUES);
       } else {
-        assertThat(enumName).isEqualTo(asyncApiContractConverterTestFixtures.CORUNET);
+        assertThat(enumName).isEqualTo(asyncApiContractConverterTestFixtures.SNGULAR);
       }
     }
   }
@@ -148,7 +148,7 @@ class AsyncApiContractConverterTest {
         assertThat(nameValue.get(asyncApiContractConverterTestFixtures.REFERENCE_NAME)).isNotNull().isInstanceOf(Integer.class);
         assertThat(addressValue.get(asyncApiContractConverterTestFixtures.STREET)).isNotNull().isInstanceOf(String.class);
       } else {
-        assertThat(nameValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
+        assertThat(nameValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.SNGULAR);
         assertThat(nameValue).containsEntry(asyncApiContractConverterTestFixtures.REFERENCE_NAME, 3324);
         assertThat(addressValue).containsEntry(asyncApiContractConverterTestFixtures.STREET, asyncApiContractConverterTestFixtures.STREET_VALUE);
       }
@@ -185,7 +185,7 @@ class AsyncApiContractConverterTest {
         assertThat(nameValue.get(asyncApiContractConverterTestFixtures.COMPANY_NAME)).isNotNull().isInstanceOf(String.class);
       } else {
         assertThat(amountListValue).isEqualTo(asyncApiContractConverterTestFixtures.DOUBLE_ARRAY_VALUES);
-        assertThat(nameValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
+        assertThat(nameValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.SNGULAR);
       }
     }
   }
@@ -254,7 +254,7 @@ class AsyncApiContractConverterTest {
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.FLOAT_TYPE, 3.5f);
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.FLOAT_TYPE_2, 2.9f);
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.DOUBLE_TYPE, 100.55);
-        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.STRING_TYPE, asyncApiContractConverterTestFixtures.CORUNET);
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.STRING_TYPE, asyncApiContractConverterTestFixtures.SNGULAR);
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.BOOLEAN_TYPE, true);
       }
     }
@@ -285,7 +285,7 @@ class AsyncApiContractConverterTest {
         assertThat(orderValue.get(asyncApiContractConverterTestFixtures.IS_SENT)).isNotNull().isInstanceOf(Boolean.class);
         assertThat(amount).isNotNull().isInstanceOf(ArrayList.class);
       } else {
-        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.SNGULAR);
         assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.IS_SENT, true);
         assertThat(amount).isEqualTo(asyncApiContractConverterTestFixtures.INT_ARRAY_VALUES);
       }
@@ -317,7 +317,7 @@ class AsyncApiContractConverterTest {
       if (i == 0) {
         assertThat(orderValue.get(asyncApiContractConverterTestFixtures.COMPANY_NAME)).isNotNull().isInstanceOf(String.class);
       } else {
-        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.CORUNET);
+        assertThat(orderValue).containsEntry(asyncApiContractConverterTestFixtures.COMPANY_NAME, asyncApiContractConverterTestFixtures.SNGULAR);
       }
     }
   }

@@ -9,12 +9,12 @@
   <version>3.3.0</version>
   <name>SCC-MultiApi-Converter</name>
   <description>Generates Spring Cloud Contracts based on an OpenApi and AsyncApi document</description>
-  <url>https://github.com/corunet/scc-multiapi-converter</url>
+  <url>https://github.com/sngular/scc-multiapi-converter</url>
 
   <licenses>
     <license>
       <name>Mozilla Public License 2.0</name>
-      <url>https://github.com/corunet/scc-multiapi-converter/blob/main/LICENSE</url>
+      <url>https://github.com/sngular/scc-multiapi-converter/blob/main/LICENSE</url>
       <distribution>repo</distribution>
       <comments></comments>
     </license>
@@ -37,7 +37,6 @@
       <name>Jose Enrique Garcia Maciñeiras</name>
       <email>joseenrique.garcia@sngular.com</email>
       <organization>Sngular</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
         <role>Principal Engineer</role>
         <role>Team Leader</role>
@@ -49,7 +48,6 @@
       <name>Cesar Munoz Gomez</name>
       <email>cesar.munoz@sngular.com</email>
       <organization>Sngular</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
         <role>Developer</role>
       </roles>
@@ -60,7 +58,6 @@
       <name>Pablo José López Rivadulla</name>
       <email>pablo.lopezr@sngular.com</email>
       <organization>Sngular</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
         <role>Developer</role>
       </roles>
@@ -71,7 +68,6 @@
       <name>Fernando Campos Tato</name>
       <email>fernando.campos@sngular.com</email>
       <organization>Sngular</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
         <role>Developer</role>
       </roles>
@@ -82,7 +78,6 @@
       <name>Javier Mejuto Vázquez</name>
       <email>javier.mejuto@sngular.com</email>
       <organization>Sngular</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
         <role>Junior Developer</role>
       </roles>
@@ -93,7 +88,6 @@
       <name>Miguel Cabezas Puerto</name>
       <email>miguel.cabezas@sngular.com</email>
       <organization>Sngular</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
         <role>Junior Developer</role>
       </roles>
@@ -104,7 +98,6 @@
       <name>Diana Gómez García</name>
       <email>diana.gomez@sngular.com</email>
       <organization>Sngular</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
       <roles>
         <role>Junior Developer</role>
       </roles>
@@ -318,26 +311,26 @@
           <autoReleaseAfterClose>true</autoReleaseAfterClose>
         </configuration>
       </plugin>
-<!--      <plugin>-->
-<!--        <groupId>org.apache.maven.plugins</groupId>-->
-<!--        <artifactId>maven-gpg-plugin</artifactId>-->
-<!--        <version>3.0.1</version>-->
-<!--        <executions>-->
-<!--          <execution>-->
-<!--            <id>sign-artifacts</id>-->
-<!--            <goals>-->
-<!--              <goal>sign</goal>-->
-<!--            </goals>-->
-<!--            <phase>verify</phase>-->
-<!--            <configuration>-->
-<!--              <gpgArguments>-->
-<!--                <arg>&#45;&#45;pinentry-mode</arg>-->
-<!--                <arg>loopback</arg>-->
-<!--              </gpgArguments>-->
-<!--            </configuration>-->
-<!--          </execution>-->
-<!--        </executions>-->
-<!--      </plugin>-->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>3.0.1</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+            <phase>verify</phase>
+            <configuration>
+              <gpgArguments>
+                <arg>--pinentry-mode</arg>
+                <arg>loopback</arg>
+              </gpgArguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
