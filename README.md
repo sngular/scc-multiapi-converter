@@ -1,6 +1,14 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/0d331d782ff849f1bdf6d71f60203eff)](https://www.codacy.com/gh/corunet/scc-multiapi-converter/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=corunet/scc-multiapi-converter&amp;utm_campaign=Badge_Grade)
 [![Maven Central](https://img.shields.io/maven-central/v/net.coru/scc-multiapi-converter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22net.coru%22%20AND%20a:%22scc-multiapi-converter%22)
+
+
 # SCC Verifier MultiApi Converter
+
+## ❗❗We have moved
+We have migrated to a new domain: https://github.com/sngular/scc-multiapi-converter.  
+This is the only change, you can find it and keep it using it as usual from there.
+
+
 
 ## 📜 Summary
 
@@ -28,12 +36,12 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
   <version>3.0.0</version>
   <extensions>true</extensions>
   <configuration>
-    <packageWithBaseClasses>com.corunet.challenge.gameserver.baseclasses</packageWithBaseClasses>
+    <packageWithBaseClasses>com.sngular.challenge.gameserver.baseclasses</packageWithBaseClasses>
     <contractsDirectory>${project.basedir}/src/main/resources/api</contractsDirectory>
   </configuration>
   <dependencies>
     <dependency>
-      <groupId>net.coru</groupId>
+      <groupId>com.sngular</groupId>
       <artifactId>scc-multiapi-converter</artifactId>
       <version>3.0.1</version>
       <scope>compile</scope>
@@ -71,12 +79,12 @@ This is an easy example of a small YAML for OpenApi that will work with our plug
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Corunet Challenge Game Server
+  title: Sngular Challenge Game Server
   description: Test File for SCC MultiApi Plugin.
   contact:
-    name: Corunet
-    url: coru.net
-    email: info@coru.net
+    name: Sngular
+    url: sngular.com
+    email: os3@sngular.com
   license:
     name: MPL 2.0
 servers:
@@ -132,9 +140,9 @@ info:
   version: 1.0.0
   description: Order management Service
   contact:
-    name: Corunet
+    name: Sngular
     url: http://www.asyncapi.org/support
-    email: info@coru.net
+    email: os3@sngular.com
     license:
       name: MPL 2.0
 channels:

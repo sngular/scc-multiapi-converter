@@ -5,7 +5,7 @@ components:
       properties:
         companyName:
           type: string
-          example: Corunet
+          example: Sngular
         isSent:
           type: boolean
           example: true

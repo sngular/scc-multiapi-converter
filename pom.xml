@@ -4,17 +4,17 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>net.coru</groupId>
+  <groupId>com.sngular</groupId>
   <artifactId>scc-multiapi-converter</artifactId>
-  <version>3.3.0</version>
+  <version>3.4.0</version>
   <name>SCC-MultiApi-Converter</name>
   <description>Generates Spring Cloud Contracts based on an OpenApi and AsyncApi document</description>
-  <url>https://github.com/corunet/scc-multiapi-converter</url>
+  <url>https://github.com/sngular/scc-multiapi-converter</url>
 
   <licenses>
     <license>
       <name>Mozilla Public License 2.0</name>
-      <url>https://github.com/corunet/scc-multiapi-converter/blob/main/LICENSE</url>
+      <url>https://github.com/sngular/scc-multiapi-converter/blob/main/LICENSE</url>
       <distribution>repo</distribution>
       <comments></comments>
     </license>
@@ -36,8 +36,7 @@
       <id>jegarcia</id>
       <name>Jose Enrique Garcia Maciñeiras</name>
       <email>joseenrique.garcia@sngular.com</email>
-      <organization>Corunet</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
+      <organization>Sngular</organization>
       <roles>
         <role>Principal Engineer</role>
         <role>Team Leader</role>
@@ -48,8 +47,7 @@
       <id>cmunozgomez</id>
       <name>Cesar Munoz Gomez</name>
       <email>cesar.munoz@sngular.com</email>
-      <organization>Corunet</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
+      <organization>Sngular</organization>
       <roles>
         <role>Developer</role>
       </roles>
@@ -59,8 +57,7 @@
       <id>Rivarsal</id>
       <name>Pablo José López Rivadulla</name>
       <email>pablo.lopezr@sngular.com</email>
-      <organization>Corunet</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
+      <organization>Sngular</organization>
       <roles>
         <role>Developer</role>
       </roles>
@@ -70,8 +67,7 @@
       <id>fcampostato</id>
       <name>Fernando Campos Tato</name>
       <email>fernando.campos@sngular.com</email>
-      <organization>Corunet</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
+      <organization>Sngular</organization>
       <roles>
         <role>Developer</role>
       </roles>
@@ -81,8 +77,7 @@
       <id>jmejutovazquez</id>
       <name>Javier Mejuto Vázquez</name>
       <email>javier.mejuto@sngular.com</email>
-      <organization>Corunet</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
+      <organization>Sngular</organization>
       <roles>
         <role>Junior Developer</role>
       </roles>
@@ -92,8 +87,17 @@
       <id>mcabezasp</id>
       <name>Miguel Cabezas Puerto</name>
       <email>miguel.cabezas@sngular.com</email>
-      <organization>Corunet</organization>
-      <organizationUrl>https://corunet.github.io/</organizationUrl>
+      <organization>Sngular</organization>
+      <roles>
+        <role>Junior Developer</role>
+      </roles>
+      <timezone>Europe/Madrid</timezone>
+    </developer>
+    <developer>
+      <id>dianaGomezGar</id>
+      <name>Diana Gómez García</name>
+      <email>diana.gomez@sngular.com</email>
+      <organization>Sngular</organization>
       <roles>
         <role>Junior Developer</role>
       </roles>
@@ -102,9 +106,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git@github.com:corunet/scc-multiapi-converter.git</connection>
-    <developerConnection>scm:git:git@github.com:corunet/scc-multiapi-converter.git</developerConnection>
-    <url>scm:git:git@github.com:corunet/scc-multiapi-converter.git</url>
+    <connection>scm:git:git@github.com:sngular/scc-multiapi-converter.git</connection>
+    <developerConnection>scm:git:git@github.com:sngular/scc-multiapi-converter.git</developerConnection>
+    <url>scm:git:git@github.com:sngular/scc-multiapi-converter.git</url>
   </scm>
 
   <distributionManagement>

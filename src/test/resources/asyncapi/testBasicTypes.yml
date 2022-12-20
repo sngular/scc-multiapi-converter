@@ -4,9 +4,9 @@ info:
   version: 1.0.0
   description: Order management Service
   contact:
-    name: Corunet
+    name: Sngular
     url: http://www.asyncapi.org/support
-    email: info@coru.net
+    email: os3@sngular.com
   license:
     name: MIT
 servers:
@@ -81,7 +81,7 @@ components:
           example: 100.55
         stringType:
           type: string
-          example: Corunet
+          example: Sngular
         booleanType:
           type: boolean
           example: true
