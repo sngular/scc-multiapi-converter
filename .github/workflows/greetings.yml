@@ -1,6 +1,6 @@
 name: Greetings
 
-on: [ pull_request, issues ]
+on: [pull_request, issues]
 
 jobs:
   greeting:
@@ -10,5 +10,5 @@ jobs:
       continue-on-error: true
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        issue-message: "Thank you for collaborating with the project by giving us feedback!!"
-        pr-message: "Thank you for collaborating with the project to help us to improve!! We hope the plugin is useful to you. Cheers!"
+        issue-message: "Thank you for collaborating with the project by giving us feedback!"
+        pr-message: "Thank you for collaborating with the project to help us to improve! We hope the plugin is useful to you. Cheers!"
