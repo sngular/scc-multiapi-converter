@@ -524,4 +524,24 @@ class OpenApiContractConverterTest {
     assertThat(bodyServerValueMap.get("players")).isInstanceOf(Body.class);
   }
 
+  @Test
+  @DisplayName("OpenApi: Check that no duplicate function names are created")
+  void testDuplicateIds() {
+    final File file = new File(OpenApiContractConverterTestFixtures.OPENAPI_DUPLICATE_IDS);
+    Contract[] contractList = multiApiContractConverter.convertFrom(file).toArray(new Contract[4]);
+    assertThat(contractList).hasSize(8);
+    Contract contract = contractList[0];
+    assertThat(contract).isNotNull();
+    assertThat(contract.getResponse()).isNotNull();
+    Map<String, Object> bodyServerValueMap = (Map<String, Object>) contract.getResponse().getBody().getServerValue();
+    assertThat(bodyServerValueMap)
+            .containsOnlyKeys(OpenApiContractConverterTestFixtures.KEYSET);
+    contract = contractList[1];
+    assertThat(contract).isNotNull();
+    assertThat(contract.getResponse()).isNotNull();
+    final var responseValue = (ObjectNode) contract.getResponse().getBody().getServerValue();
+    assertThat(responseValue).isNotEmpty();
+
+  }
+
 }

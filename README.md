@@ -36,7 +36,7 @@ After you have these installed, you need to add the Spring Cloud Contract Maven 
     <dependency>
       <groupId>com.sngular</groupId>
       <artifactId>scc-multiapi-converter</artifactId>
-      <version>3.0.1</version>
+      <version>3.4.1</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

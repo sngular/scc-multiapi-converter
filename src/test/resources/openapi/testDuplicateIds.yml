@@ -1,0 +1,264 @@
+openapi: 3.0.3
+info:
+  title: intermediary fraud checker for multiple teleop
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/v1
+
+
+paths:
+
+  /verification/match:
+    post:
+      tags:
+        - verification
+
+      summary: corroborate customer data
+
+      operationId: match
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+
+            schema:
+              $ref: '#/components/schemas/MatchRequestBody'
+
+            examples:
+              MatchRequestBodyExample:
+                value:
+                  phoneNumber: '+34629255833'
+                  idDocument: 66666666q
+                  name: Federica Sanchez Arjona
+                  giventName: Federica
+                  familyName: Sanchez Arjona
+                  nameKanaHankaku: federica
+                  nameKanaZenkaku: Ｆｅｄｅｒｉｃａ
+                  middleNames: Sanchez
+                  familyNameAtBirth: YYYY
+                  address: Tokyo-to Chiyoda-ku Iidabashi 3-10-10
+                  streetName: Nicolas Salmeron
+                  streetNumber: 4
+                  postalCode: 1028460
+                  region: Tokyo
+                  locality: ZZZZ
+                  country: Japan
+                  houseNumberExtension: VVVV
+                  birthdate: '1978-08-22'
+                  email: abc@example.com
+                  gender: male
+
+      responses:
+        '200':
+          description: OK
+
+          content:
+            application/json:
+
+              schema:
+                $ref: '#/components/schemas/MatchResponse'
+              example:
+                Match200Example:
+                  value:
+                    phoneNumberMatch: true
+                    idDocumentMatch: true
+                    nameMatch: true
+                    giventNameMatch: null
+                    familyNameMatch: null
+                    nameKanaHankakuMatch: true
+                    nameKanaZenkakuMatch: false
+                    middleNamesMatch: true
+                    familyNameAtBirthMatch: false
+                    addressMatch: true
+                    streetNameMatch: true
+                    streetNumberMatch: true
+                    postalCodeMatch: true
+                    regionMatch: true
+                    localityMatch: null
+                    countryMatch: true
+                    houseNumberExtensionMatch: null
+                    birthdateMatch: false
+                    emailMatch: false
+                    genderMatch: false
+
+
+        '201':
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+
+  schemas:
+
+    MatchRequestBody:
+      type: object
+      description: Payload to validate the customer data.
+
+      properties:
+        phoneNumber:
+          type: string
+          pattern: '^[+][0-9]{1,4}?[0-9]{9}$'
+          description: A public identifier addressing a telephone subscription. In mobile networks it corresponds to the MSISDN (Mobile Station International Subscriber Directory Number). In order to be globally unique it has to be formatted in international format, according to E.164 standard, optionally prefixed with '+'.
+
+
+        idDocument:
+          type: string
+          description: Id number associated to the id_document. The value may also contain letters.
+
+        name:
+          type: string
+          description: Full name of the customer.
+
+        givenName:
+          type: string
+          description: First name/given name of the customer. It may include a compound first name or a second/middle name.
+
+        familyName:
+          type: string
+          description: Surname/family name of the customer. It may include a compound last name or an additional last name.
+
+        nameKanaHankaku:
+          type: string
+          description: Reading of the full name of the customer in full-width Kana format.
+
+        nameKanaZenkaku:
+          type: string
+          description: Reading of the full name of the customer in half-width Kana format.
+
+        middleNames:
+          type: string
+          description: Middle names of the customer
+
+        familyNameAtBirth:
+          type: string
+          description: Family name at birth of the customer
+
+        address:
+          type: string
+          description: Address of the customer
+
+        streetName:
+          type: string
+          description: Name of the street or other street type. It should not include street type
+
+        streetNumber:
+          type: integer
+          minimum: 0
+          description: Generally a number identifying a specific property on the `street_name`, but it may be a range of numbers (10-12) or include some letter (10b)
+
+        postalCode:
+          type: integer
+          minimum: 0
+          description: Zip code or postal code
+
+        region:
+          type: string
+          description: Regin/prefecture of the customer's address
+
+        locality:
+          type: string
+          description: Locality of the customer's address
+
+        country:
+          type: string
+          description: Country of the customer's address
+
+        houseNumberExtension:
+          type: string
+          description: House number extension of the customer's address
+
+        birthdate:
+          type: string
+          pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+          description: The birthdate of the customer, in ISO 8601 calendar date format.
+
+        email:
+          type: string
+          pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+[.][a-zA-Z]{2,}$'
+          description: Email address of the customer.
+
+        gender:
+          type: string
+          description: Gender of the customer.
+
+    MatchResponse:
+      type: object
+      properties:
+
+        phoneNumber:
+          type: boolean
+
+        idDocument:
+          type: boolean
+
+        name:
+          type: boolean
+
+        givenName:
+          type: boolean
+
+        familyName:
+          type: boolean
+
+        nameKanaHankaku:
+          type: boolean
+
+        nameKanaZenkaku:
+          type: boolean
+
+        middleNames:
+          type: boolean
+
+        familyNameAtBirth:
+          type: boolean
+
+        address:
+          type: boolean
+
+        streetName:
+          type: boolean
+
+        streetNumber:
+          type: boolean
+
+        postalCode:
+          type: boolean
+
+        region:
+          type: boolean
+
+        locality:
+          type: boolean
+
+        country:
+          type: boolean
+
+        houseNumberExtension:
+          type: boolean
+
+        birthdate:
+          type: boolean
+
+        email:
+          type: boolean
+
+        gender:
+          type: boolean
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

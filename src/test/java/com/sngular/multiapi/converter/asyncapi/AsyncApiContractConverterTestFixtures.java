@@ -6,6 +6,8 @@
 
 package com.sngular.multiapi.converter.asyncapi;
 
+import org.springframework.cloud.contract.spec.internal.DslProperty;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +32,13 @@ public class AsyncApiContractConverterTestFixtures {
 
   protected final static String PUBLISH_NAME = "publishOperation";
 
-  protected final static String TRIGGERED_BY = "publishOperation()";
+  protected final static String TRIGGERED_BY = "publishOperationSend()";
 
   protected final static String PUBLISH_SEND_TO = "orderCreated";
 
   protected final static String SUBSCRIBE_NAME = "subscribeOperation";
 
-  protected final static String MESSAGE_FROM = "createOrder";
+  protected final static DslProperty<String> MESSAGE_FROM = new DslProperty<>("createOrder", "createOrder");
 
   protected final static String INT_ARRAY_BODY_MATCHER = "order.intArray[0]";
 
@@ -94,13 +96,12 @@ public class AsyncApiContractConverterTestFixtures {
 
   final static String[] ENUM_VALUES = {"Corunet", "Sngular"};
 
-  protected final Map<String, Object> createOrder() {
+  protected final DslProperty<?> createOrder() {
     Map<String, Object> order = new HashMap<>();
     Map<String, Object> array = new HashMap<>();
     array.put(INT_ARRAY, INT_ARRAY_VALUES);
     order.put(ORDER, array);
-
-    return order;
+    return new DslProperty<>(order, order);
   }
 
 }
