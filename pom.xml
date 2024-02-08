@@ -6,7 +6,7 @@
 
   <groupId>com.sngular</groupId>
   <artifactId>scc-multiapi-converter</artifactId>
-  <version>3.4.0</version>
+  <version>3.4.1</version>
   <name>SCC-MultiApi-Converter</name>
   <description>Generates Spring Cloud Contracts based on an OpenApi and AsyncApi document</description>
   <url>https://github.com/sngular/scc-multiapi-converter</url>
