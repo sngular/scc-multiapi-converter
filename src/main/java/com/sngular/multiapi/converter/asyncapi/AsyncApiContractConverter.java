@@ -77,7 +77,7 @@ public final class AsyncApiContractConverter {
   private void processPublishOperation(
       final Contract contract, final String operationId, final ResponseBodyMatchers responseBodyMatchers, final Map<String, Object> bodyProcessed, final String topicName) {
     final Input input = new Input();
-    input.triggeredBy(operationId + "()");
+    input.triggeredBy(operationId + "Send()");
     contract.setInput(input);
 
     final OutputMessage outputMessage = new OutputMessage();
@@ -90,11 +90,14 @@ public final class AsyncApiContractConverter {
 
   private void processSubscribeOperation(final Contract contract, final Map<String, Object> bodyProcessed, final String topicName, final String operationId) {
     final Input input = new Input();
-    input.messageFrom(topicName);
-    input.messageBody(bodyProcessed);
-    input.messageHeaders(headers -> headers.accept("application/json"));
-    input.assertThat(operationId + "Validation()");
+    input.triggeredBy(operationId + "Send()");
     contract.setInput(input);
+    final OutputMessage outputMessage = new OutputMessage();
+    outputMessage.sentTo(topicName);
+    outputMessage.body(bodyProcessed);
+    outputMessage.headers(headers -> headers.accept("application/json"));
+    outputMessage.assertThat(operationId + "Validation()");
+    contract.setOutputMessage(outputMessage);
   }
 
   private Map<String, Object> processMessage(
@@ -451,7 +454,7 @@ public final class AsyncApiContractConverter {
 
     for (int i = 0; i < properties.size(); i++) {
       var type = AsyncApiContractConverterUtils.getType(properties.get(i));
-      if (type.equals("")) {
+      if (type.isEmpty()) {
         type = properties.get(i).get(BasicTypeConstants.TYPE).get(BasicTypeConstants.TYPE).asText();
       }
       final String fieldName = properties.get(i).get(BasicTypeConstants.NAME).asText();
@@ -508,7 +511,7 @@ public final class AsyncApiContractConverter {
         case BasicTypeConstants.ENUM:
           final var symbols = (ArrayNode) properties.get(i).get("type").get("symbols");
           final var symbol = symbols.get(BasicTypeConstants.RANDOM.nextInt(symbols.size())).textValue();
-          responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex("^(" + joinValues(symbols, "|") + ")$"));
+          responseBodyMatchers.jsonPath("$." + path, responseBodyMatchers.byRegex("^(" + joinValues(symbols) + ")$"));
           messageBody.put(fieldName, symbol);
           break;
         case BasicTypeConstants.FLOAT:
@@ -529,13 +532,13 @@ public final class AsyncApiContractConverter {
     return new MutablePair<>(result, messageBody);
   }
 
-  private String joinValues(final ArrayNode symbols, final String splitter) {
+  private String joinValues(final ArrayNode symbols) {
     final var iterator = symbols.elements();
     final var builder = new StringBuilder();
     while (iterator.hasNext()) {
       builder.append(iterator.next().textValue());
       if (iterator.hasNext()) {
-        builder.append(splitter);
+        builder.append("|");
       }
     }
     return builder.toString();
@@ -554,6 +557,7 @@ public final class AsyncApiContractConverter {
     } catch (final IOException e) {
       log.error("Error", e);
     }
-    return fillObjectPropertiesFromAvro(responseBodyMatchers, (ArrayNode) fileTree.get("fields"), "");
+      assert fileTree != null;
+      return fillObjectPropertiesFromAvro(responseBodyMatchers, (ArrayNode) fileTree.get("fields"), "");
   }
 }
