@@ -7,57 +7,33 @@
 
 package com.sngular.multiapi.converter.openapi;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-
 import com.sngular.multiapi.converter.exception.MultiApiContractConverterException;
 import com.sngular.multiapi.converter.openapi.model.ConverterPathItem;
 import com.sngular.multiapi.converter.openapi.model.OperationType;
+import com.sngular.multiapi.converter.utils.BasicTypeConstants;
 import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.examples.Example;
-import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
-import io.swagger.v3.oas.models.media.MapSchema;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.exception.ReadContentException;
 import lombok.extern.slf4j.Slf4j;
-import com.sngular.multiapi.converter.utils.BasicTypeConstants;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.cloud.contract.spec.Contract;
-import org.springframework.cloud.contract.spec.internal.Body;
-import org.springframework.cloud.contract.spec.internal.BodyMatcher;
-import org.springframework.cloud.contract.spec.internal.BodyMatchers;
-import org.springframework.cloud.contract.spec.internal.DslProperty;
-import org.springframework.cloud.contract.spec.internal.Headers;
-import org.springframework.cloud.contract.spec.internal.QueryParameters;
-import org.springframework.cloud.contract.spec.internal.Request;
-import org.springframework.cloud.contract.spec.internal.Response;
-import org.springframework.cloud.contract.spec.internal.ResponseBodyMatchers;
-import org.springframework.cloud.contract.spec.internal.Url;
-import org.springframework.cloud.contract.spec.internal.UrlPath;
+import org.springframework.cloud.contract.spec.internal.*;
+
+import java.io.File;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 @Slf4j
 public final class OpenApiContractConverter {
@@ -142,7 +118,7 @@ public final class OpenApiContractConverter {
     for (Entry<String, PathItem> pathItem : openApi.getPaths().entrySet()) {
       extractPathItem(pathItem.getValue())
           .forEach(converterPathItem ->
-                       processContract(contracts, pathItem, converterPathItem.getOperation(), converterPathItem.getOperationType()));
+              processContract(contracts, pathItem, converterPathItem.getOperation(), converterPathItem.getOperationType()));
     }
     return contracts;
   }
@@ -177,8 +153,8 @@ public final class OpenApiContractConverter {
       final String contractDescription = pathItem.getValue().getSummary();
       final var requestList = processRequest(pathItem, operation, name.name());
       final var responseList = processResponse(apiResponse.getKey(), apiResponse.getValue());
+      final var counter = new AtomicInteger(0);
       for (var request : requestList) {
-        final var counter = new AtomicInteger(0);
         for (var response : responseList) {
           contracts.add(createContract(contractName, contractDescription, request, response, counter));
         }
@@ -306,11 +282,10 @@ public final class OpenApiContractConverter {
   private List<Request> processRequestContent(final Operation operation) {
     final List<Request> requestList = new LinkedList<>();
     for (Entry<String, MediaType> content : operation.getRequestBody().getContent().entrySet()) {
-      final List<Pair<Body, BodyMatchers>> bodyMap;
       final MediaType mediaType = content.getValue();
       final Headers headers = new Headers();
       headers.header("Content-Type", content.getKey());
-      bodyMap = processRequestBody(mediaType.getSchema());
+      final List<Pair<Body, BodyMatchers>> bodyMap = new ArrayList<>(processRequestBody(mediaType.getSchema()));
       if (Objects.nonNull(mediaType.getExample())) {
         bodyMap.add(buildFromExample(mediaType.getExample()));
       } else if (Objects.nonNull(mediaType.getExamples())) {
@@ -446,7 +421,7 @@ public final class OpenApiContractConverter {
     orgMatchers.matchers().addAll(bodyValue.getRight().matchers());
     return Pair.of(
         new Body(new DslProperty(addProperty(orgBody.getClientValue(), property, bodyValue.getLeft().getClientValue()), addProperty(orgBody.getServerValue(), property,
-                                                                                                                                    bodyValue.getLeft().getServerValue()))),
+            bodyValue.getLeft().getServerValue()))),
         orgMatchers);
   }
 
@@ -590,7 +565,7 @@ public final class OpenApiContractConverter {
   }
 
   private static Object getSafeExample(final Entry<String, Schema> property, final Schema schema) {
-    final var propertyExample =  Objects.nonNull(property) ? property.getValue().getExample() : null;
+    final var propertyExample = Objects.nonNull(property) ? property.getValue().getExample() : null;
     final var schemaExample = Objects.nonNull(schema) ? schema.getExample() : null;
 
     return ObjectUtils.defaultIfNull(propertyExample, schemaExample);
@@ -631,7 +606,7 @@ public final class OpenApiContractConverter {
     } else if (Objects.nonNull(internalRef.getProperties())) {
       final Map<String, Schema> subProperties = internalRef.getProperties();
       result = processComplexBodyAndMatchers(fieldName, subProperties);
-    } else if (Objects.nonNull(internalRef.getAdditionalProperties())){
+    } else if (Objects.nonNull(internalRef.getAdditionalProperties())) {
       final Schema subProperties = (Schema) internalRef.getAdditionalProperties();
       result = writeBodyMatcher(null, fieldName, subProperties, BasicTypeConstants.MAP);
     } else {
@@ -717,7 +692,7 @@ public final class OpenApiContractConverter {
           propertyMap.put(property.getKey(), processedBody.getLeft());
           bodyMatchers.matchers().addAll(processedBody.getRight().matchers());
         } else {
-          final var subProperties = ((ArraySchema) getSchemaFromComponent(ref)).getItems();
+          final var subProperties = (getSchemaFromComponent(ref)).getItems();
           final Pair<List<Object>, BodyMatchers> processedArray = processArray(subProperties, objectName);
           propertyMap.put(property.getKey(), processedArray.getLeft());
           bodyMatchers.matchers().addAll(processedArray.getRight().matchers());
@@ -742,7 +717,7 @@ public final class OpenApiContractConverter {
     final String ref = OpenApiContractConverterUtils.mapRefName(schema);
     referencedSchema = getSchemaFromComponent(ref);
     if (!existSchemaWithPropertiesInComponent(ref)) {
-      referencedSchema = ((ArraySchema) referencedSchema).getItems();
+      referencedSchema = (referencedSchema).getItems();
     }
     return referencedSchema;
   }
@@ -775,7 +750,7 @@ public final class OpenApiContractConverter {
         case BasicTypeConstants.ARRAY:
           if (arraySchema instanceof ArraySchema) {
             final var calculatedValue = processArrayArray((ArraySchema) arraySchema, objectName);
-            if (Objects.nonNull(((ArraySchema) arraySchema).getItems().getType())) {
+            if (Objects.nonNull((arraySchema).getItems().getType())) {
               tempValue = calculatedValue;
             } else {
               tempValue = Pair.of(calculatedValue.getLeft().get(0), calculatedValue.getRight());
@@ -808,7 +783,7 @@ public final class OpenApiContractConverter {
   }
 
   private Pair<Object, BodyMatchers> processObjectArray(final Schema<?> arraySchema, final String objectName) {
-    final HashMap<String, Schema> subObject = (HashMap<String, Schema>) arraySchema.getProperties();
+    final Map<String, Schema> subObject = arraySchema.getProperties();
     final Pair<Object, BodyMatchers> result;
     if (Objects.nonNull(subObject)) {
       result = processComplexBodyAndMatchers(objectName, subObject);
@@ -989,6 +964,7 @@ public final class OpenApiContractConverter {
     bodyMatchers.matchers().addAll(matchers.matchers());
     return Pair.of(newBody, bodyMatchers);
   }
+
   private List<Schema<?>> combineSchema(final List<Schema> anyOfThis) {
     final List<Schema<?>> finalList = new LinkedList<>();
     if (!anyOfThis.isEmpty()) {

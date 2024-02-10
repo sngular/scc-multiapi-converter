@@ -50,7 +50,7 @@ class AsyncApiContractConverterTest {
 
     Contract subscribeContract = contractList.get(1);
     assertThat(subscribeContract.getInput()).isNotNull();
-    assertThat(subscribeContract.getOutputMessage()).isNull();
+    assertThat(subscribeContract.getOutputMessage()).isNotNull();
     assertThat(subscribeContract.getName()).isInstanceOf(String.class).isEqualTo(asyncApiContractConverterTestFixtures.SUBSCRIBE_NAME);
     assertThat(subscribeContract.getLabel()).isEqualTo(asyncApiContractConverterTestFixtures.SUBSCRIBE_NAME);
   }
@@ -59,15 +59,14 @@ class AsyncApiContractConverterTest {
   @DisplayName("AsyncApi: Check if Input is being processed okay")
   void testInput() {
     var contractList = getContracts(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
-    Map<String, Object> order = asyncApiContractConverterTestFixtures.createOrder();
 
     Contract publishContract = contractList.get(0);
     assertThat(publishContract.getInput().getTriggeredBy().getExecutionCommand()).isEqualTo(asyncApiContractConverterTestFixtures.TRIGGERED_BY);
 
     Contract subscribeContract = contractList.get(1);
-    assertThat(subscribeContract.getInput().getMessageFrom().getClientValue()).isEqualTo(asyncApiContractConverterTestFixtures.MESSAGE_FROM);
-    assertThat(subscribeContract.getInput().getMessageBody().getClientValue()).isNotNull().isEqualTo(order);
-    Header inputHeader = subscribeContract.getInput().getMessageHeaders().getEntries().stream().iterator().next();
+    assertThat(subscribeContract.getOutputMessage().getSentTo()).isEqualTo(asyncApiContractConverterTestFixtures.MESSAGE_FROM);
+    assertThat(subscribeContract.getOutputMessage().getBody()).isNotNull().isEqualTo(asyncApiContractConverterTestFixtures.createOrder());
+    Header inputHeader = subscribeContract.getOutputMessage().getHeaders().getEntries().stream().iterator().next();
     assertThat(inputHeader.getName()).isEqualTo(asyncApiContractConverterTestFixtures.HEADER_NAME);
     assertThat(inputHeader.getClientValue()).isEqualTo(asyncApiContractConverterTestFixtures.HEADER_VALUE);
   }
@@ -76,7 +75,6 @@ class AsyncApiContractConverterTest {
   @DisplayName("AsyncApi: Check if OutputMessage is being processed okay")
   void testOutputMessage() {
     var contractList = getContracts(asyncApiContractConverterTestFixtures.EVENT_API_FILE);
-    Map<String, Object> order = asyncApiContractConverterTestFixtures.createOrder();
 
     Contract publishContract = contractList.get(0);
     assertThat(publishContract.getOutputMessage().getSentTo().getClientValue()).isEqualTo(asyncApiContractConverterTestFixtures.PUBLISH_SEND_TO);
@@ -89,11 +87,11 @@ class AsyncApiContractConverterTest {
     assertThat(publishContract.getOutputMessage().getBodyMatchers().matchers().get(0).path()).isEqualTo(asyncApiContractConverterTestFixtures.INT_ARRAY_BODY_MATCHER);
 
     Contract subscribeContract = contractList.get(1);
-    assertThat(subscribeContract.getInput().getMessageFrom().getClientValue()).isEqualTo(asyncApiContractConverterTestFixtures.MESSAGE_FROM);
-    Header outputHeader = subscribeContract.getInput().getMessageHeaders().getEntries().iterator().next();
+    assertThat(subscribeContract.getOutputMessage().getSentTo()).isEqualTo(asyncApiContractConverterTestFixtures.MESSAGE_FROM);
+    Header outputHeader = subscribeContract.getOutputMessage().getHeaders().getEntries().iterator().next();
     assertThat(outputHeader.getName()).isEqualTo(asyncApiContractConverterTestFixtures.HEADER_NAME);
     assertThat(outputHeader.getClientValue()).isEqualTo(asyncApiContractConverterTestFixtures.HEADER_VALUE);
-    assertThat(subscribeContract.getInput().getMessageBody().getClientValue()).isNotNull().isEqualTo(order);
+    assertThat(subscribeContract.getOutputMessage().getBody()).isNotNull().isEqualTo(asyncApiContractConverterTestFixtures.createOrder());
   }
 
   @Test
@@ -105,11 +103,9 @@ class AsyncApiContractConverterTest {
       Contract contract = contractList.get(i);
       Map<String, Object> bodyValue;
 
-      if (Objects.nonNull(contract.getOutputMessage())) {
-        bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
-      } else {
-        bodyValue = (Map<String, Object>) contract.getInput().getMessageBody().getClientValue();
-      }
+
+      bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+
       Map<String, Object> orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
       String enumName = (String) orderValue.get(asyncApiContractConverterTestFixtures.NAME);
 
@@ -131,11 +127,8 @@ class AsyncApiContractConverterTest {
 
       Map<String, Object> bodyValue;
 
-      if (Objects.nonNull(contract.getOutputMessage())) {
-        bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
-      } else {
-        bodyValue = (Map<String, Object>) contract.getInput().getMessageBody().getClientValue();
-      }
+      bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+
       assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
       Map<String, Object> orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
       assertThat(orderValue.get(asyncApiContractConverterTestFixtures.NAME)).isNotNull();
@@ -165,11 +158,9 @@ class AsyncApiContractConverterTest {
 
       Map<String, Object> bodyValue;
 
-      if (Objects.nonNull(contract.getOutputMessage())) {
-        bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
-      } else {
-        bodyValue = (Map<String, Object>) contract.getInput().getMessageBody().getClientValue();
-      }
+
+      bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+
       assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
       Map<String, Object> orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
       assertThat(orderValue.get(asyncApiContractConverterTestFixtures.NAME)).isNotNull();
@@ -201,11 +192,8 @@ class AsyncApiContractConverterTest {
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
 
-      if (Objects.nonNull(contract.getOutputMessage())) {
-        bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
-      } else {
-         bodyValue = (Map<String, Object>) contract.getInput().getMessageBody().getClientValue();
-      }
+      bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+
       assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
       orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
       assertThat(orderValue.get(asyncApiContractConverterTestFixtures.EMPLOYEES)).isNotNull();
@@ -233,11 +221,9 @@ class AsyncApiContractConverterTest {
     for (int i = 0; i < contractList.size(); i++) {
       Contract contract = contractList.get(i);
 
-      if (Objects.nonNull(contract.getOutputMessage())) {
-        bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
-      } else {
-        bodyValue = (Map<String, Object>) contract.getInput().getMessageBody().getClientValue();
-      }
+
+      bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+
       assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
       orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
       if (i == 0) {
@@ -271,11 +257,9 @@ class AsyncApiContractConverterTest {
       Map<String, Object> bodyValue;
       Map<String, Object> orderValue;
       List<Integer> amount;
-      if (Objects.nonNull(contract.getOutputMessage())) {
-        bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
-      } else {
-        bodyValue = (Map<String, Object>) contract.getInput().getMessageBody().getClientValue();
-      }
+
+      bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+
       assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDER)).isNotNull();
       orderValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDER);
       amount = (ArrayList<Integer>) orderValue.get(asyncApiContractConverterTestFixtures.AMOUNT);
@@ -302,11 +286,9 @@ class AsyncApiContractConverterTest {
 
       Map<String, Object> bodyValue;
 
-      if (Objects.nonNull(contract.getOutputMessage())) {
-        bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
-      } else {
-        bodyValue = (Map<String, Object>) contract.getInput().getMessageBody().getClientValue();
-      }
+
+      bodyValue = (Map<String, Object>) contract.getOutputMessage().getBody().getClientValue();
+
       assertThat(bodyValue.get(asyncApiContractConverterTestFixtures.ORDERS)).isNotNull();
       Map<String, Object> ordersValue = (Map<String, Object>) bodyValue.get(asyncApiContractConverterTestFixtures.ORDERS);
       assertThat(ordersValue.get(asyncApiContractConverterTestFixtures.ORDER_LINE)).isNotNull();
