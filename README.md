@@ -1,4 +1,4 @@
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/0d331d782ff849f1bdf6d71f60203eff)](https://www.codacy.com/gh/corunet/scc-multiapi-converter/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=corunet/scc-multiapi-converter&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/931bef8587a147c3b20adc2f39408200)](https://app.codacy.com/gh/sngular/scc-multiapi-converter/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Maven Central](https://img.shields.io/maven-central/v/net.coru/scc-multiapi-converter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22net.coru%22%20AND%20a:%22scc-multiapi-converter%22)
 
 

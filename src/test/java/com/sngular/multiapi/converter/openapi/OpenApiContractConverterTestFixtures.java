@@ -1,9 +1,13 @@
 package com.sngular.multiapi.converter.openapi;
 
 import java.util.List;
+import java.util.Set;
 
 public final class OpenApiContractConverterTestFixtures {
 
+  public static final Set<String> KEYSET = Set.of("country", "address", "birthdate", "nameKanaHankaku", "gender",
+          "streetNumber", "nameKanaZenkaku", "idDocument", "givenName", "postalCode", "locality", "middleNames",
+          "familyNameAtBirth", "houseNumberExtension", "streetName", "phoneNumber", "familyName", "name", "region", "email");
   static final String PLAYERS = "players";
 
   static final String[] OPENAPI_TEXT_EXTERNAL_REF_KEYS = {"schemaRegistryName", "topic", "kafkaName", "schemaName", "repetitions"};
@@ -91,6 +95,8 @@ public final class OpenApiContractConverterTestFixtures {
   static final String OPENAPI_ANY_OF_WITH_ARRAYS = "src/test/resources/openapi/testAnyOfWithArrays.yml";
 
   static final String OPENAPI_ANY_OF_WITH_MAPS = "src/test/resources/openapi/testAnyOfWithMaps.yml";
+
+  static final String OPENAPI_DUPLICATE_IDS = "src/test/resources/openapi/testDuplicateIds.yml";
 
   static final String NAME = "name";
 
