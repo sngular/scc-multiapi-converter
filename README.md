@@ -1,8 +1,7 @@
+# SCC Verifier MultiApi Converter
+
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/931bef8587a147c3b20adc2f39408200)](https://app.codacy.com/gh/sngular/scc-multiapi-converter/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 [![Maven Central](https://img.shields.io/maven-central/v/net.coru/scc-multiapi-converter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22net.coru%22%20AND%20a:%22scc-multiapi-converter%22)
-
-
-# SCC Verifier MultiApi Converter
 
 ## 📜 Summary
 
