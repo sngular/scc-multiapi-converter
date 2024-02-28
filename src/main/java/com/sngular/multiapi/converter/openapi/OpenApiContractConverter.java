@@ -355,12 +355,11 @@ public final class OpenApiContractConverter {
       final Schema<?> subSchema = getSchemaFromComponent(subRef);
       if (Objects.nonNull(subSchema.getProperties())) {
         bodyList = applyMapToBodyList(propertyBodyList, property.getKey(), processComplexBodyAndMatchers(property.getKey(), subSchema.getProperties()));
-      } else if (subSchema.getItems() instanceof ComposedSchema) {
-        final Schema<?> arraySchema = subSchema.getItems();
+      } else if (subSchema instanceof ArraySchema && ((ArraySchema) subSchema).getItems() instanceof ComposedSchema) {
+        final Schema<?> arraySchema = ((ArraySchema) subSchema).getItems();
         bodyList = applyBodyToList(propertyBodyList, property.getKey(), processComposedSchema((ComposedSchema) arraySchema));
       } else {
-        final Schema<?> arraySchema = subSchema.getItems();
-        bodyList = this.applyObjectToBodyList(propertyBodyList, ref, writeBodyMatcher(null, ref, arraySchema, arraySchema.getType()));
+        bodyList = this.applyObjectToBodyList(propertyBodyList, ref, writeBodyMatcher(null, ref, subSchema, subSchema.getType()));
       }
     } else if (Objects.nonNull(property.getValue().getEnum())) {
       bodyList = this.applyObjectToBodyList(propertyBodyList, property.getKey(), writeBodyMatcher(null, property.getKey(), property.getValue(), BasicTypeConstants.ENUM));
