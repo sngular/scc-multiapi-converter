@@ -553,7 +553,7 @@ public final class OpenApiContractConverter {
           result = processMapBodyMatcher(schema, fieldName);
           break;
         case BasicTypeConstants.GENERIC:
-          result = processEmptyObject(fieldName);
+          result = processEmptyObject(fieldName, schema);
           break;
         default:
           bodyMatchers.jsonPath(mapKey, bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX));
@@ -581,7 +581,7 @@ public final class OpenApiContractConverter {
         result = processArray(arraySchema, fieldName);
       }
     } else {
-      result = processEmptyObject(property.getKey());
+      result = processEmptyObject(property.getKey(), property.getValue());
     }
     return (Pair<Object, BodyMatchers>) result;
   }
@@ -799,10 +799,20 @@ public final class OpenApiContractConverter {
     return Pair.of(Collections.emptyList(), matcher);
   }
 
-  private Pair<Object, BodyMatchers> processEmptyObject(final String objectName) {
-    var matcher = new BodyMatchers();
+  private Pair<Object, BodyMatchers> processEmptyObject(final String objectName, final Schema schema) {
+    final BodyMatchers matcher = new BodyMatchers();
+    if (Objects.nonNull(schema) && Objects.nonNull(schema.getProperties())) {
+      final Map<String, Object> bodyMap = new HashMap<>();
+      final Map<String, Schema> properties = schema.getProperties();
+      for (Entry<String, Schema> property : properties.entrySet()) {
+        final var result = writeBodyMatcher(property, objectName + "." + property.getKey(), property.getValue(), property.getValue().getType());
+        bodyMap.put(property.getKey(), result.getLeft());
+        matcher.matchers().addAll(result.getRight().matchers());
+      }
+      return Pair.of(bodyMap, matcher);
+    }
     matcher.jsonPath(objectName, new BodyMatchers().byRegex(BasicTypeConstants.DEFAULT_REGEX));
-    return Pair.of(Collections.emptyList(), matcher);
+    return Pair.of(Collections.emptyMap(), matcher);
   }
 
   private Pair<List<Object>, BodyMatchers> processArrayArray(final ArraySchema arraySchema, final String objectName) {

@@ -1,0 +1,8 @@
+{
+  "id": "feature_spring-boot-4-x-jackson-3-gradle-plugin-support_20260910_28fc",
+  "type": "feature",
+  "status": "pending",
+  "created_at": "2026-09-10T21:15:43.233Z",
+  "updated_at": "2026-09-10T21:17:00.087Z",
+  "description": "Support Spring Boot 4.x (Spring Framework 7.x) with Jackson 3.x migration and add Gradle plugin with configuration properties"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "feature_major-version-bump-scc-5-x-jackson-3-spring-boot-4_20260910_25a8",
+  "type": "feature",
+  "status": "in_progress",
+  "created_at": "2026-09-10T11:32:10.667Z",
+  "updated_at": "2026-09-10T11:34:40.286Z",
+  "description": "Update all dependencies to latest stable and migrate to Spring Cloud Contract 5.x, Jackson 3, openapi-generator 7.x, and WireMock 3.x. This is a breaking major version (v4.0.0) for consumers."
+}
