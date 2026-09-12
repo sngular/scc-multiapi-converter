@@ -11,7 +11,6 @@ import com.sngular.multiapi.converter.exception.MultiApiContractConverterExcepti
 import com.sngular.multiapi.converter.openapi.model.ConverterPathItem;
 import com.sngular.multiapi.converter.openapi.model.OperationType;
 import com.sngular.multiapi.converter.utils.BasicTypeConstants;
-import io.swagger.parser.OpenAPIParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -19,6 +18,7 @@ import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.v3.parser.exception.ReadContentException;
@@ -553,7 +553,7 @@ public final class OpenApiContractConverter {
           result = processMapBodyMatcher(schema, fieldName);
           break;
         case BasicTypeConstants.GENERIC:
-          result = processEmptyObject(fieldName);
+          result = processEmptyObject(fieldName, schema);
           break;
         default:
           bodyMatchers.jsonPath(mapKey, bodyMatchers.byRegex(BasicTypeConstants.DEFAULT_REGEX));
@@ -577,12 +577,12 @@ public final class OpenApiContractConverter {
     if (Objects.nonNull(arraySchema)) {
       if (Objects.nonNull(arraySchema.getExample())) {
         result = Pair.of(arraySchema.getExample(), new BodyMatchers());
-      } else {
-        result = processArray(arraySchema, fieldName);
-      }
-    } else {
-      result = processEmptyObject(property.getKey());
+} else {
+      result = processArray(arraySchema, fieldName);
     }
+  } else {
+    result = processEmptyObject(property.getKey(), property.getValue());
+  }
     return (Pair<Object, BodyMatchers>) result;
   }
 
@@ -799,10 +799,20 @@ public final class OpenApiContractConverter {
     return Pair.of(Collections.emptyList(), matcher);
   }
 
-  private Pair<Object, BodyMatchers> processEmptyObject(final String objectName) {
-    var matcher = new BodyMatchers();
+private Pair<Object, BodyMatchers> processEmptyObject(final String objectName, final Schema schema) {
+    final BodyMatchers matcher = new BodyMatchers();
+    if (Objects.nonNull(schema) && Objects.nonNull(schema.getProperties())) {
+      final Map<String, Object> bodyMap = new HashMap<>();
+      final Map<String, Schema> properties = schema.getProperties();
+      for (Entry<String, Schema> property : properties.entrySet()) {
+        final var result = writeBodyMatcher(property, objectName + "." + property.getKey(), property.getValue(), property.getValue().getType());
+        bodyMap.put(property.getKey(), result.getLeft());
+        matcher.matchers().addAll(result.getRight().matchers());
+      }
+      return Pair.of(bodyMap, matcher);
+    }
     matcher.jsonPath(objectName, new BodyMatchers().byRegex(BasicTypeConstants.DEFAULT_REGEX));
-    return Pair.of(Collections.emptyList(), matcher);
+    return Pair.of(Collections.emptyMap(), matcher);
   }
 
   private Pair<List<Object>, BodyMatchers> processArrayArray(final ArraySchema arraySchema, final String objectName) {
@@ -915,7 +925,7 @@ public final class OpenApiContractConverter {
     final ParseOptions options = new ParseOptions();
     options.setResolve(true);
     try {
-      final SwaggerParseResult result = new OpenAPIParser().readLocation(file.getPath(), null, options);
+      final SwaggerParseResult result = new OpenAPIV3Parser().readLocation(file.getPath(), null, options);
       openAPI = result.getOpenAPI();
     } catch (final ReadContentException e) {
       throw new MultiApiContractConverterException("Code generation failed when parser the .yaml file ");

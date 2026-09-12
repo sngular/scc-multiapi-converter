@@ -6,7 +6,7 @@
 
   <groupId>com.sngular</groupId>
   <artifactId>scc-multiapi-converter</artifactId>
-  <version>3.4.1</version>
+  <version>4.1.0-SNAPSHOT</version>
   <name>SCC-MultiApi-Converter</name>
   <description>Generates Spring Cloud Contracts based on an OpenApi and AsyncApi document</description>
   <url>https://github.com/sngular/scc-multiapi-converter</url>
@@ -23,13 +23,28 @@
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <maven-plugin-plugin.version>3.6.0</maven-plugin-plugin.version>
-    <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-    <maven-javadoc-plugin.version>3.3.2</maven-javadoc-plugin.version>
 
-    <maven-surefire-plugin.version>2.19.1</maven-surefire-plugin.version>
+    <spring-cloud-contract.version>5.0.3</spring-cloud-contract.version>
+    <jackson.version>3.1.6</jackson.version>
+    <swagger-parser.version>2.1.48</swagger-parser.version>
+    <swagger-models.version>2.2.55</swagger-models.version>
+    <commons-lang3.version>3.20.0</commons-lang3.version>
+    <logback.version>1.6.3</logback.version>
+    <lombok.version>1.18.48</lombok.version>
+    <maven-api.version>3.9.16</maven-api.version>
+    <maven-plugin-annotations.version>3.16.0</maven-plugin-annotations.version>
+
+    <junit-jupiter.version>5.14.4</junit-jupiter.version>
+    <assertj.version>3.27.7</assertj.version>
+
+    <maven-plugin-plugin.version>3.15.0</maven-plugin-plugin.version>
+    <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+    <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+    <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
+    <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+    <checkstyle.version>10.26.1</checkstyle.version>
     <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
-    <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+    <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
   </properties>
   <developers>
     <developer>
@@ -122,59 +137,95 @@
     </snapshotRepository>
   </distributionManagement>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>tools.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>2.18.2</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.12.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-collections4</artifactId>
-      <version>4.4</version>
+      <version>${commons-lang3.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-contract-verifier</artifactId>
-      <version>4.0.3</version>
+      <version>${spring-cloud-contract.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jayway.jsonpath</groupId>
-      <artifactId>json-path</artifactId>
-      <version>2.9.0</version>
+      <groupId>io.swagger.parser.v3</groupId>
+      <artifactId>swagger-parser-v3</artifactId>
+      <version>${swagger-parser.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.github.tomakehurst</groupId>
-      <artifactId>wiremock-jre8-standalone</artifactId>
-      <version>2.35.1</version>
+      <groupId>io.swagger.core.v3</groupId>
+      <artifactId>swagger-models</artifactId>
+      <version>${swagger-models.version}</version>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.4.12</version>
+      <version>${logback.version}</version>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-core</artifactId>
-      <version>1.4.12</version>
+      <version>${logback.version}</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-build-api</artifactId>
       <version>1.2.0</version>
     </dependency>
+    <dependency>
+      <groupId>tools.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tools.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>3.9.1</version>
+      <version>${maven-api.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.8.1</version>
+      <version>${maven-plugin-annotations.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -182,62 +233,36 @@
       <artifactId>maven-project</artifactId>
       <version>2.2.1</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.dataformat</groupId>
-      <artifactId>jackson-dataformat-yaml</artifactId>
-      <version>2.15.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.15.2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.26</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.codehaus.plexus</groupId>
+          <artifactId>plexus-container-default</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-core</artifactId>
-      <version>3.9.3</version>
+      <version>${maven-api.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>32.0.0-jre</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openapitools</groupId>
-      <artifactId>openapi-generator</artifactId>
-      <version>6.6.0</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-codec</groupId>
-      <artifactId>commons-codec</artifactId>
-      <version>1.15</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.cloud</groupId>
       <artifactId>spring-cloud-contract-spec-java</artifactId>
-      <version>4.0.3</version>
+      <version>${spring-cloud-contract.version}</version>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>3.24.2</version>
+      <version>${assertj.version}</version>
       <scope>test</scope>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/net.javacrumbs.json-unit/json-unit-assertj -->
     <dependency>
-      <groupId>net.javacrumbs.json-unit</groupId>
-      <artifactId>json-unit-assertj</artifactId>
-      <version>3.2.4</version>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
   <build>
     <pluginManagement>
@@ -245,12 +270,12 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
-          <version>3.1.2</version>
+          <version>${maven-checkstyle-plugin.version}</version>
           <dependencies>
             <dependency>
               <groupId>com.puppycrawl.tools</groupId>
               <artifactId>checkstyle</artifactId>
-              <version>10.2</version>
+              <version>${checkstyle.version}</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -276,6 +301,21 @@
             <phase>validate</phase>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+          <release>17</release>
+          <compilerArgs>
+            <arg>--add-opens=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+            <arg>--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+            <arg>--add-opens=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+          </compilerArgs>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -330,13 +370,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>1.0.1</version>
-          </dependency>
-        </dependencies>
       </plugin>
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
@@ -352,7 +385,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-gpg-plugin</artifactId>
-        <version>3.0.1</version>
+        <version>${maven-gpg-plugin.version}</version>
         <executions>
           <execution>
             <id>sign-artifacts</id>

@@ -1,0 +1,69 @@
+/*
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  * License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'java-gradle-plugin'
+}
+
+group = 'com.sngular'
+version = '4.1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    implementation 'com.sngular:scc-multiapi-converter:4.1.0-SNAPSHOT'
+    
+    compileOnly gradleApi()
+    compileOnly 'org.springframework.cloud:spring-cloud-contract-verifier:5.0.3'
+    
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.14.4'
+    testImplementation 'org.assertj:assertj-core:3.27.7'
+    testImplementation gradleTestKit()
+}
+
+gradlePlugin {
+    plugins {
+        sccMultiApi {
+            id = 'com.sngular.multiapi.scc-multiapi-converter'
+            implementationClass = 'com.sngular.multiapi.converter.gradle.SccMultiApiConverterPlugin'
+        }
+    }
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            
+            pom {
+                name = 'SCC-MultiApi-Converter Gradle Plugin'
+                description = 'Gradle plugin for generating Spring Cloud Contracts from OpenAPI and AsyncAPI'
+                url = 'https://github.com/sngular/scc-multiapi-converter'
+                
+                licenses {
+                    license {
+                        name = 'Mozilla Public License 2.0'
+                        url = 'https://www.mozilla.org/en-US/MPL/2.0/'
+                    }
+                }
+            }
+        }
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
